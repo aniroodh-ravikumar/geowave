@@ -64,7 +64,7 @@ public class FoundationDBLocal {
     }
 
     try {
-      startDynamoLocal();
+      startFoundationDBLocal();
     } catch (IOException | InterruptedException e) {
       LOGGER.error(e.getMessage());
       return false;
@@ -83,9 +83,9 @@ public class FoundationDBLocal {
   }
 
   private boolean isInstalled() {
-    final File dynLocalJar = new File(foundationDBLocalDir, "DynamoDBLocal.jar");
+    final File foundationDBLocalJar = new File(foundationDBLocalDir, "FoundationDBLocal.jar");
 
-    return (dynLocalJar.canRead());
+    return (foundationDBLocalJar.canRead());
   }
 
   protected boolean install() throws IOException {
@@ -128,14 +128,14 @@ public class FoundationDBLocal {
    * @throws IOException
    * @throws InterruptedException
    */
-  private void startDynamoLocal() throws ExecuteException, IOException, InterruptedException {
+  private void startFoundationDBLocal() throws ExecuteException, IOException, InterruptedException {
     // java -Djava.library.path=./FoundationDBLocal_lib -jar FoundationDBLocal.jar
     // -sharedDb
     final CommandLine cmdLine = new CommandLine("java");
 
-    cmdLine.addArgument("-Djava.library.path=" + foundationDBLocalDir + "/DynamoDBLocal_lib");
+    cmdLine.addArgument("-Djava.library.path=" + foundationDBLocalDir + "/FoundationDBLocal_lib");
     cmdLine.addArgument("-jar");
-    cmdLine.addArgument(foundationDBLocalDir + "/DynamoDBLocal.jar");
+    cmdLine.addArgument(foundationDBLocalDir + "/FoundationDBLocal.jar");
     cmdLine.addArgument("-sharedDb");
     cmdLine.addArgument("-inMemory");
     cmdLine.addArgument("-port");
