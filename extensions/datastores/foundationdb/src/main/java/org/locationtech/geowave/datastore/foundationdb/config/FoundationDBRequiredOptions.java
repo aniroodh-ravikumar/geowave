@@ -16,8 +16,8 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 
 public class FoundationDBRequiredOptions extends StoreFactoryOptions {
-	@Parameter(names = "--dir", description = "The directory to read/write to.  Defaults to \"foundationdb\" in the working directory.")
-	private String dir = "foundationdb";
+	@Parameter(names = "--endpoint", description = "The endpoint to connect to(specify either endpoint/region not both) ", required = false)
+	protected String endpoint;
 
 	@ParametersDelegate
 	private FoundationDBOptions additionalOptions = new FoundationDBOptions();
@@ -40,12 +40,12 @@ public class FoundationDBRequiredOptions extends StoreFactoryOptions {
 		return additionalOptions;
 	}
 
-	public void setDirectory(final String dir) {
-		this.dir = dir;
+	public void setEndpoint(final String endpoint) {
+		this.endpoint = endpoint;
 	}
 
-	public String getDirectory() {
-		return dir;
+	public String getEndpoint() {
+		return endpoint;
 	}
 
 }
