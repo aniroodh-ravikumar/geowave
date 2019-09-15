@@ -36,5 +36,60 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 
-public class FoundationDBReader {
+public class FoundationDBReader<T> implements RowReader<T> {
+    private final CloseableIterator<T> iterator;
+
+    public FoundationDBReader(
+            final FoundationDBClient client,
+            final ReaderParams<T> readerParams,
+            final boolean async) {
+        this.iterator =
+                createIteratorForReader(client, readerParams, readerParams.getRowTransformer(), false);
+    }
+
+    public FoundationDBReader(final FoundationDBClient client, final RecordReaderParams recordReaderParams) {
+        this.iterator = createIteratorForRecordReader(client, recordReaderParams);
+    }
+
+    public FoundationDBReader(
+            final FoundationDBClient client,
+            final DataIndexReaderParams dataIndexReaderParams) {
+        this.iterator = new Wrapper(createIteratorForDataIndexReader(client, dataIndexReaderParams));
+    }
+
+    private CloseableIterator<T> createIteratorForReader(
+            final FoundationDBClient client,
+            final ReaderParams<T> readerParams,
+            final GeoWaveRowIteratorTransformer<T> rowTransformer,
+            final boolean async) {
+        return null;
+    }
+
+    private CloseableIterator<T> createIteratorForRecordReader(
+            final FoundationDBClient client,
+            final RecordReaderParams recordReaderParams) {
+        return null;
+    }
+
+    private Iterator<GeoWaveRow> createIteratorForDataIndexReader(
+            final FoundationDBClient client,
+            final DataIndexReaderParams dataIndexReaderParams) {
+        return null;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return iterator.hasNext();
+    }
+
+    @Override
+    public T next() {
+        return iterator.next();
+    }
+
+    @Override
+    public void close() {
+        iterator.close();
+    }
+
 }
