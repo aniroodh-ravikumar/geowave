@@ -14,7 +14,7 @@ import org.locationtech.geowave.core.store.GenericStoreFactory;
 import org.locationtech.geowave.core.store.StoreFactoryOptions;
 import org.locationtech.geowave.core.store.api.DataStore;
 import org.locationtech.geowave.datastore.rocksdb.RocksDBStoreFactoryFamily;
-import org.locationtech.geowave.datastore.rocksdb.config.RocksDBOptions;
+import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBOptions;
 import org.locationtech.geowave.datastore.rocksdb.util.RocksDBClientCache;
 import org.locationtech.geowave.test.annotation.GeoWaveTestStore.GeoWaveStoreType;
 import org.slf4j.Logger;
@@ -63,6 +63,6 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 
   @Override
   protected void initOptions(final StoreFactoryOptions options) {
-    ((RocksDBOptions) options).setDirectory(DEFAULT_DB_DIRECTORY);
+    ((FoundationDBOptions) options).setDirectory(DEFAULT_DB_DIRECTORY);
   }
 }
