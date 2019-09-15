@@ -65,6 +65,16 @@ public class FoundationDBReader<T> implements RowReader<T> {
         return null;
     }
 
+    private CloseableIterator<T> createIterator(
+            final FoundationDBClient client,
+            final RangeReaderParams<T> readerParams,
+            final GeoWaveRowIteratorTransformer<T> rowTransformer,
+            final Collection<SinglePartitionQueryRanges> ranges,
+            final Set<String> authorizations,
+            final boolean async) {
+        return null;
+    }
+
     private CloseableIterator<T> createIteratorForRecordReader(
             final FoundationDBClient client,
             final RecordReaderParams recordReaderParams) {
@@ -74,6 +84,34 @@ public class FoundationDBReader<T> implements RowReader<T> {
     private Iterator<GeoWaveRow> createIteratorForDataIndexReader(
             final FoundationDBClient client,
             final DataIndexReaderParams dataIndexReaderParams) {
+        return null;
+    }
+
+    private CloseableIterator<T> wrapResults(
+            final Closeable closeable,
+            final Iterator<GeoWaveRow> results,
+            final RangeReaderParams<T> params,
+            final GeoWaveRowIteratorTransformer<T> rowTransformer,
+            final Set<String> authorizations,
+            final boolean visibilityEnabled) {
+        Stream<GeoWaveRow> stream = Streams.stream(results);
+        if (visibilityEnabled) {
+            stream = stream.filter(new ClientVisibilityFilter(authorizations));
+        }
+        final Iterator<GeoWaveRow> iterator = stream.iterator();
+        return new CloseableIteratorWrapper<>(
+                closeable,
+                rowTransformer.apply(
+                        sortBySortKeyIfRequired(
+                                params,
+                                DataStoreUtils.isMergingIteratorRequired(params, visibilityEnabled)
+                                        ? new GeoWaveRowMergingIterator(iterator)
+                                        : iterator)));
+    }
+
+    private static Iterator<GeoWaveRow> sortBySortKeyIfRequired(
+            final RangeReaderParams<?> params,
+            final Iterator<GeoWaveRow> it) {
         return null;
     }
 
