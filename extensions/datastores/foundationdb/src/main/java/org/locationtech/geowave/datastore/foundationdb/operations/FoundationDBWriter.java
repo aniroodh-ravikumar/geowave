@@ -6,7 +6,7 @@ import org.locationtech.geowave.core.store.entities.GeoWaveValue;
 import org.locationtech.geowave.core.store.operations.RowWriter;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClient;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBIndexTable;
-// import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
+//import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
