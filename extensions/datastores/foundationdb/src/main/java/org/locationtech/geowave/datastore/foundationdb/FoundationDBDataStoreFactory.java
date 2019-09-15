@@ -13,7 +13,6 @@ import org.locationtech.geowave.core.store.StoreFactoryHelper;
 import org.locationtech.geowave.core.store.StoreFactoryOptions;
 import org.locationtech.geowave.core.store.api.DataStore;
 import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBRequiredOptions;
-import org.locationtech.geowave.datastore.foundationdb.operations.KuduOperations;
 
 public class FoundationDBDataStoreFactory extends BaseDataStoreFactory {
 
@@ -26,12 +25,9 @@ public class FoundationDBDataStoreFactory extends BaseDataStoreFactory {
 
   @Override
   public DataStore createStore(final StoreFactoryOptions options) {
-    if (!(options instanceof FounadtionDBRequiredOptions)) {
-      throw new AssertionError("Expected " + FounadtionDBRequiredOptions.class.getSimpleName());
+    if (!(options instanceof FoundationDBRequiredOptions)) {
+      throw new AssertionError("Expected " + FoundationDBRequiredOptions.class.getSimpleName());
     }
-    return "h"1213;aslkdn
-    return new KuduDataStore(
-        (KuduOperations) helper.createOperations(options),
-        options.getStoreOptions());
+    return new FoundationDBDataStore(null, options.getStoreOptions());
   }
 }

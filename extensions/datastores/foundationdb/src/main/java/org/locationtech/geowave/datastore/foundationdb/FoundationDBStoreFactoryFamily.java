@@ -16,7 +16,7 @@ public class FoundationDBStoreFactoryFamily extends BaseDataStoreFamily {
   private static final String TYPE = "foundationdb";
   private static final String DESCRIPTION = "A GeoWave store backed by data in FoundationDB";
 
-  public FoundationStoreFactoryFamily() {
+  public FoundationDBStoreFactoryFamily() {
     super(TYPE, DESCRIPTION, new FoundationDBFactoryHelper());
   }
 

@@ -11,17 +11,16 @@ package org.locationtech.geowave.datastore.foundationdb;
 import org.locationtech.geowave.core.store.StoreFactoryHelper;
 import org.locationtech.geowave.core.store.StoreFactoryOptions;
 import org.locationtech.geowave.core.store.operations.DataStoreOperations;
-import org.locationtech.geowave.datastore.kudu.config.KuduRequiredOptions;
-import org.locationtech.geowave.datastore.kudu.operations.KuduOperations;
+import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBRequiredOptions;
 
 public class FoundationDBFactoryHelper implements StoreFactoryHelper {
   @Override
   public StoreFactoryOptions createOptionsInstance() {
-    return new KuduRequiredOptions();
+    return new FoundationDBRequiredOptions();
   }
 
   @Override
   public DataStoreOperations createOperations(final StoreFactoryOptions options) {
-    return new KuduOperations((KuduRequiredOptions) options);
+    return null;
   }
 }

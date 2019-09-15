@@ -20,33 +20,22 @@ public class FoundationDBRequiredOptions extends StoreFactoryOptions {
       names = "--foundationDBMaster",
       required = true,
       description = "An URL for the FoundationDB master node")
-  private String foundationDBMaster;
 
   @ParametersDelegate
-  private KuduOptions additionalOptions = new KuduOptions();
+  private FoundationDBOptions additionalOptions = new FoundationDBOptions();
 
-  public KuduRequiredOptions() {}
+  public FoundationDBRequiredOptions() {}
 
-  public KuduRequiredOptions(
-      final String kuduMaster,
+  public FoundationDBRequiredOptions(
       final String gwNamespace,
-      final KuduOptions additionalOptions) {
+      final FoundationDBOptions additionalOptions) {
     super(gwNamespace);
-    this.kuduMaster = kuduMaster;
     this.additionalOptions = additionalOptions;
   }
 
   @Override
   public StoreFactoryFamilySpi getStoreFactory() {
-    return new KuduStoreFactoryFamily();
-  }
-
-  public String getKuduMaster() {
-    return kuduMaster;
-  }
-
-  public void setKuduMaster(final String kuduMaster) {
-    this.kuduMaster = kuduMaster;
+    return new FoundationDBStoreFactoryFamily();
   }
 
   @Override
