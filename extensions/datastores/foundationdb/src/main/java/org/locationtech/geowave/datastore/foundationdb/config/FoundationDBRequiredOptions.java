@@ -16,31 +16,36 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 
 public class FoundationDBRequiredOptions extends StoreFactoryOptions {
-  @Parameter(
-      names = "--foundationDBMaster",
-      required = true,
-      description = "An URL for the FoundationDB master node")
+	@Parameter(names = "--dir", description = "The directory to read/write to.  Defaults to \"foundationdb\" in the working directory.")
+	private String dir = "foundationdb";
 
-  @ParametersDelegate
-  private FoundationDBOptions additionalOptions = new FoundationDBOptions();
+	@ParametersDelegate
+	private FoundationDBOptions additionalOptions = new FoundationDBOptions();
 
-  public FoundationDBRequiredOptions() {}
+	public FoundationDBRequiredOptions() {
+	}
 
-  public FoundationDBRequiredOptions(
-      final String gwNamespace,
-      final FoundationDBOptions additionalOptions) {
-    super(gwNamespace);
-    this.additionalOptions = additionalOptions;
-  }
+	public FoundationDBRequiredOptions(final String gwNamespace, final FoundationDBOptions additionalOptions) {
+		super(gwNamespace);
+		this.additionalOptions = additionalOptions;
+	}
 
-  @Override
-  public StoreFactoryFamilySpi getStoreFactory() {
-    return new FoundationDBStoreFactoryFamily();
-  }
+	@Override
+	public StoreFactoryFamilySpi getStoreFactory() {
+		return new FoundationDBStoreFactoryFamily();
+	}
 
-  @Override
-  public DataStoreOptions getStoreOptions() {
-    return additionalOptions;
-  }
+	@Override
+	public DataStoreOptions getStoreOptions() {
+		return additionalOptions;
+	}
+
+	public void setDirectory(final String dir) {
+		this.dir = dir;
+	}
+
+	public String getDirectory() {
+		return dir;
+	}
 
 }
