@@ -6,7 +6,7 @@ import org.locationtech.geowave.core.store.entities.GeoWaveValue;
 import org.locationtech.geowave.core.store.operations.RowWriter;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClient;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBIndexTable;
-//import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
+// import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
@@ -50,19 +50,19 @@ public class FoundationDBWriter implements RowWriter {
 
   @Override
   public void write(final GeoWaveRow row) {
-    // ByteArray partitionKey;
-    // if ((row.getPartitionKey() == null) || (row.getPartitionKey().length == 0)) {
-    // partitionKey = RocksDBUtils.EMPTY_PARTITION_KEY;
-    // } else {
-    // partitionKey = new ByteArray(row.getPartitionKey());
-    // }
-    // for (final GeoWaveValue value : row.getFieldValues()) {
-    // tableCache.get(partitionKey).add(
-    // row.getSortKey(),
-    // row.getDataId(),
-    // (short) row.getNumberOfDuplicates(),
-    // value);
-    // }
+    ByteArray partitionKey = null;
+    if ((row.getPartitionKey() == null) || (row.getPartitionKey().length == 0)) {
+      // partitionKey = RocksDBUtils.EMPTY_PARTITION_KEY;
+    } else {
+      partitionKey = new ByteArray(row.getPartitionKey());
+    }
+    for (final GeoWaveValue value : row.getFieldValues()) {
+      tableCache.get(partitionKey).add(
+          row.getSortKey(),
+          row.getDataId(),
+          (short) row.getNumberOfDuplicates(),
+          value);
+    }
   }
 
   @Override
