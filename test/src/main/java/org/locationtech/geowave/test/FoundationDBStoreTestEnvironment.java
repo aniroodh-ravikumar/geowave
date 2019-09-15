@@ -34,7 +34,7 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 
 	@Override
 	public void setup() throws Exception {
-		// FoundationDB IT's rely on an external dynamo local process
+		// FoundationDB IT's rely on an external foundationdb local process
 		if (foundationDBLocal == null) {
 			foundationDBLocal = new FoundationDBLocal(null); // null uses tmp dir
 		}
@@ -66,6 +66,7 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 
 	@Override
 	protected void initOptions(final StoreFactoryOptions options) {
+		// TODO: Change port from 8000 to HOST_PORT in FoundationDBLocal
 		((FoundationDBRequiredOptions) options).setEndpoint("http://localhost:8000");
 	}
 
