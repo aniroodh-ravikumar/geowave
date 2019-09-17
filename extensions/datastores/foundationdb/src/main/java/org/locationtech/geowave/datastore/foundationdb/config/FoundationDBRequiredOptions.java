@@ -16,8 +16,6 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 
 public class FoundationDBRequiredOptions extends StoreFactoryOptions {
-	@Parameter(names = "--endpoint", description = "The endpoint to connect to(specify either endpoint/region not both) ", required = false)
-	protected String endpoint;
 
 	@ParametersDelegate
 	private FoundationDBOptions additionalOptions = new FoundationDBOptions();
@@ -38,14 +36,6 @@ public class FoundationDBRequiredOptions extends StoreFactoryOptions {
 	@Override
 	public DataStoreOptions getStoreOptions() {
 		return additionalOptions;
-	}
-
-	public void setEndpoint(final String endpoint) {
-		this.endpoint = endpoint;
-	}
-
-	public String getEndpoint() {
-		return endpoint;
 	}
 
 }

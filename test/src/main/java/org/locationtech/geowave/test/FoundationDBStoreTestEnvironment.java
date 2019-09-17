@@ -12,6 +12,7 @@ import org.locationtech.geowave.core.store.GenericStoreFactory;
 import org.locationtech.geowave.core.store.StoreFactoryOptions;
 import org.locationtech.geowave.core.store.api.DataStore;
 import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBRequiredOptions;
+import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClientCache;
 import org.locationtech.geowave.test.annotation.GeoWaveTestStore.GeoWaveStoreType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +24,6 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 			.getDataStoreFactory();
 	private static FoundationDBStoreTestEnvironment singletonInstance = null;
 
-	protected FoundationDBLocal foundationDBLocal;
-
 	public static synchronized FoundationDBStoreTestEnvironment getInstance() {
 		if (singletonInstance == null) {
 			singletonInstance = new FoundationDBStoreTestEnvironment();
@@ -34,24 +33,13 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 
 	@Override
 	public void setup() throws Exception {
-		// FoundationDB IT's rely on an external foundationdb local process
-		if (foundationDBLocal == null) {
-			foundationDBLocal = new FoundationDBLocal(null); // null uses tmp dir
-		}
 
-		// Make sure we clean up any old processes first
-		if (foundationDBLocal.isRunning()) {
-			foundationDBLocal.stop();
-		}
-
-		if (!foundationDBLocal.start()) {
-			LOGGER.error("FoundationDB emulator startup failed");
-		}
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-		foundationDBLocal.stop();
+	    // this helps clean up any outstanding native resources
+	    FoundationDBClientCache.getInstance().closeAll();
 	}
 
 	@Override
@@ -66,8 +54,6 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 
 	@Override
 	protected void initOptions(final StoreFactoryOptions options) {
-		// TODO: Change port from 8000 to HOST_PORT in FoundationDBLocal
-		((FoundationDBRequiredOptions) options).setEndpoint("http://localhost:8000");
 	}
 
 	@Override
