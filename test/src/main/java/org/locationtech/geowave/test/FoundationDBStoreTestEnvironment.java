@@ -11,8 +11,6 @@ package org.locationtech.geowave.test;
 import org.locationtech.geowave.core.store.GenericStoreFactory;
 import org.locationtech.geowave.core.store.StoreFactoryOptions;
 import org.locationtech.geowave.core.store.api.DataStore;
-import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBRequiredOptions;
-import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClientCache;
 import org.locationtech.geowave.test.annotation.GeoWaveTestStore.GeoWaveStoreType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +21,10 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 	private static final GenericStoreFactory<DataStore> STORE_FACTORY = new FoundationDBStoreTestEnvironment()
 			.getDataStoreFactory();
 	private static FoundationDBStoreTestEnvironment singletonInstance = null;
+	private static final String DEFAULT_HOST = "localhost";
+	private static final int DEFAULT_PORT = 4000;
+	
+	private FoundationDBLocal fdbLocal;
 
 	public static synchronized FoundationDBStoreTestEnvironment getInstance() {
 		if (singletonInstance == null) {
@@ -33,13 +35,21 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 
 	@Override
 	public void setup() throws Exception {
+	    if (fdbLocal == null) {
+	    	fdbLocal = new FoundationDBLocal(DEFAULT_HOST, DEFAULT_PORT);
+	    }
 
+	    // Make sure we clean up any old processes first
+	    if (fdbLocal.isRunning()) {
+	    	fdbLocal.stop();
+	    }
+	    
+	    fdbLocal.start();
 	}
 
 	@Override
 	public void tearDown() throws Exception {
-	    // this helps clean up any outstanding native resources
-	    FoundationDBClientCache.getInstance().closeAll();
+		fdbLocal.stop();
 	}
 
 	@Override
