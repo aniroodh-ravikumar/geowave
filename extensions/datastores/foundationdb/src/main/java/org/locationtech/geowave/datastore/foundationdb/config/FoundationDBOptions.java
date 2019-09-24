@@ -12,6 +12,7 @@ import org.locationtech.geowave.core.store.BaseDataStoreOptions;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 
 public class FoundationDBOptions extends BaseDataStoreOptions {
+
   @Override
   public boolean isServerSideLibraryEnabled() {
     return false;

@@ -12,10 +12,9 @@ import org.locationtech.geowave.core.store.DataStoreOptions;
 import org.locationtech.geowave.core.store.metadata.*;
 import org.locationtech.geowave.mapreduce.BaseMapReduceDataStore;
 import org.locationtech.geowave.mapreduce.MapReduceDataStoreOperations;
-import java.io.Closeable;
-import java.io.IOException;
 
-public class FoundationDBDataStore extends BaseMapReduceDataStore implements Closeable {
+public class FoundationDBDataStore extends BaseMapReduceDataStore {
+
   // TODO: implement FoundationDBOperations
   public FoundationDBDataStore(
       final MapReduceDataStoreOperations operations,
@@ -30,8 +29,4 @@ public class FoundationDBDataStore extends BaseMapReduceDataStore implements Clo
         new InternalAdapterStoreImpl(operations));
   }
 
-  @Override
-  public void close() throws IOException {
-    // TODO: implement FoundationDBOperations
-  }
 }
