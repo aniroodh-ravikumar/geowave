@@ -17,57 +17,57 @@ import org.slf4j.LoggerFactory;
 
 public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBStoreTestEnvironment.class);
-	private static final GenericStoreFactory<DataStore> STORE_FACTORY = new FoundationDBStoreTestEnvironment()
-			.getDataStoreFactory();
-	private static FoundationDBStoreTestEnvironment singletonInstance = null;
-	private static final String DEFAULT_HOST = "localhost";
-	private static final int DEFAULT_PORT = 4000;
-	
-	private FoundationDBLocal fdbLocal;
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(FoundationDBStoreTestEnvironment.class);
+  private static final GenericStoreFactory<DataStore> STORE_FACTORY =
+      new FoundationDBStoreTestEnvironment().getDataStoreFactory();
+  private static FoundationDBStoreTestEnvironment singletonInstance = null;
+  private static final String DEFAULT_HOST = "localhost";
+  private static final int DEFAULT_PORT = 4000;
 
-	public static synchronized FoundationDBStoreTestEnvironment getInstance() {
-		if (singletonInstance == null) {
-			singletonInstance = new FoundationDBStoreTestEnvironment();
-		}
-		return singletonInstance;
-	}
+  private FoundationDBLocal fdbLocal;
 
-	@Override
-	public void setup() throws Exception {
-	    if (fdbLocal == null) {
-	    	fdbLocal = new FoundationDBLocal(DEFAULT_HOST, DEFAULT_PORT);
-	    }
+  public static synchronized FoundationDBStoreTestEnvironment getInstance() {
+    if (singletonInstance == null) {
+      singletonInstance = new FoundationDBStoreTestEnvironment();
+    }
+    return singletonInstance;
+  }
 
-	    // Make sure we clean up any old processes first
-	    if (fdbLocal.isRunning()) {
-	    	fdbLocal.stop();
-	    }
-	    
-	    fdbLocal.start();
-	}
+  @Override
+  public void setup() throws Exception {
+    if (fdbLocal == null) {
+      fdbLocal = new FoundationDBLocal(DEFAULT_HOST, DEFAULT_PORT);
+    }
 
-	@Override
-	public void tearDown() throws Exception {
-		fdbLocal.stop();
-	}
+    // Make sure we clean up any old processes first
+    if (fdbLocal.isRunning()) {
+      fdbLocal.stop();
+    }
 
-	@Override
-	protected GenericStoreFactory<DataStore> getDataStoreFactory() {
-		return STORE_FACTORY;
-	}
+    fdbLocal.start();
+  }
 
-	@Override
-	protected GeoWaveStoreType getStoreType() {
-		return GeoWaveStoreType.FOUNDATIONDB;
-	}
+  @Override
+  public void tearDown() throws Exception {
+    fdbLocal.stop();
+  }
 
-	@Override
-	protected void initOptions(final StoreFactoryOptions options) {
-	}
+  @Override
+  protected GenericStoreFactory<DataStore> getDataStoreFactory() {
+    return STORE_FACTORY;
+  }
 
-	@Override
-	public TestEnvironment[] getDependentEnvironments() {
-		return new TestEnvironment[] {};
-	}
+  @Override
+  protected GeoWaveStoreType getStoreType() {
+    return GeoWaveStoreType.FOUNDATIONDB;
+  }
+
+  @Override
+  protected void initOptions(final StoreFactoryOptions options) {}
+
+  @Override
+  public TestEnvironment[] getDependentEnvironments() {
+    return new TestEnvironment[] {};
+  }
 }

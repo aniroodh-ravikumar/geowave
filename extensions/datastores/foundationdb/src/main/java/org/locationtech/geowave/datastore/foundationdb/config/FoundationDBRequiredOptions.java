@@ -17,25 +17,26 @@ import com.beust.jcommander.ParametersDelegate;
 
 public class FoundationDBRequiredOptions extends StoreFactoryOptions {
 
-	@ParametersDelegate
-	private FoundationDBOptions additionalOptions = new FoundationDBOptions();
+  @ParametersDelegate
+  private FoundationDBOptions additionalOptions = new FoundationDBOptions();
 
-	public FoundationDBRequiredOptions() {
-	}
+  public FoundationDBRequiredOptions() {}
 
-	public FoundationDBRequiredOptions(final String gwNamespace, final FoundationDBOptions additionalOptions) {
-		super(gwNamespace);
-		this.additionalOptions = additionalOptions;
-	}
+  public FoundationDBRequiredOptions(
+      final String gwNamespace,
+      final FoundationDBOptions additionalOptions) {
+    super(gwNamespace);
+    this.additionalOptions = additionalOptions;
+  }
 
-	@Override
-	public StoreFactoryFamilySpi getStoreFactory() {
-		return new FoundationDBStoreFactoryFamily();
-	}
+  @Override
+  public StoreFactoryFamilySpi getStoreFactory() {
+    return new FoundationDBStoreFactoryFamily();
+  }
 
-	@Override
-	public DataStoreOptions getStoreOptions() {
-		return additionalOptions;
-	}
+  @Override
+  public DataStoreOptions getStoreOptions() {
+    return additionalOptions;
+  }
 
 }
