@@ -4,6 +4,10 @@ import java.io.Closeable;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Map.Entry;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,7 +141,6 @@ public class FoundationDBClient implements Closeable {
     }
   }
 
-  @Override
   public void close() {}
 
 }
