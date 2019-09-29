@@ -4,6 +4,7 @@ import org.locationtech.geowave.core.store.StoreFactoryHelper;
 import org.locationtech.geowave.core.store.StoreFactoryOptions;
 import org.locationtech.geowave.core.store.operations.DataStoreOperations;
 import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBOptions;
+import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBRequiredOptions;
 import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
 
 public class FoundationDBFactoryHelper implements StoreFactoryHelper {

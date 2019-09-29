@@ -7,6 +7,7 @@ import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import org.locationtech.geowave.core.store.operations.*;
 import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBOptions;
+import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBRequiredOptions;
 import org.locationtech.geowave.mapreduce.MapReduceDataStoreOperations;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
 import java.io.Closeable;
