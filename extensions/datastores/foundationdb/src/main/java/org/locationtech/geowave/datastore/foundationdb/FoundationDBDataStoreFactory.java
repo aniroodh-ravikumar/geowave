@@ -27,12 +27,12 @@ public class FoundationDBDataStoreFactory extends BaseDataStoreFactory {
 
   @Override
   public DataStore createStore(final StoreFactoryOptions options) {
-    if (!(options instanceof FoundationDBOptions)) {
+    if (!(options instanceof FoundationDBRequiredOptions)) {
       throw new AssertionError("Expected " + FoundationDBOptions.class.getSimpleName());
     }
 
     return new FoundationDBDataStore(
         (FoundationDBOperations) helper.createOperations(options),
-        ((FoundationDBOptions) options).getStoreOptions());
+        ((FoundationDBRequiredOptions) options).getStoreOptions());
   }
 }
