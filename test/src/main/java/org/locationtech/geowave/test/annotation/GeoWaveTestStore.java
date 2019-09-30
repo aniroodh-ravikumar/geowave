@@ -16,7 +16,6 @@ import org.locationtech.geowave.test.AccumuloStoreTestEnvironment;
 import org.locationtech.geowave.test.BigtableStoreTestEnvironment;
 import org.locationtech.geowave.test.CassandraStoreTestEnvironment;
 import org.locationtech.geowave.test.DynamoDBStoreTestEnvironment;
-import org.locationtech.geowave.test.FoundationDBStoreTestEnvironment;
 import org.locationtech.geowave.test.HBaseStoreTestEnvironment;
 import org.locationtech.geowave.test.KuduStoreTestEnvironment;
 import org.locationtech.geowave.test.RedisStoreTestEnvironment;
@@ -48,7 +47,6 @@ public @interface GeoWaveTestStore {
     ACCUMULO(AccumuloStoreTestEnvironment.getInstance()),
     BIGTABLE(BigtableStoreTestEnvironment.getInstance()),
     CASSANDRA(CassandraStoreTestEnvironment.getInstance()),
-    FOUNDATIONDB(FoundationDBStoreTestEnvironment.getInstance()),
     HBASE(HBaseStoreTestEnvironment.getInstance()),
     KUDU(KuduStoreTestEnvironment.getInstance()),
     REDIS(RedisStoreTestEnvironment.getInstance()),
