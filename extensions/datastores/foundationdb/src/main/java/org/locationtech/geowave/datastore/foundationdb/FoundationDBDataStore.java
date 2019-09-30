@@ -32,5 +32,7 @@ public class FoundationDBDataStore extends BaseMapReduceDataStore implements Clo
   }
 
   @Override
-  public void close() throws IOException { ((FoundationDBOperations) baseOperations).close(); }
+  public void close() throws IOException {
+    ((FoundationDBOperations) baseOperations).close();
+  }
 }
