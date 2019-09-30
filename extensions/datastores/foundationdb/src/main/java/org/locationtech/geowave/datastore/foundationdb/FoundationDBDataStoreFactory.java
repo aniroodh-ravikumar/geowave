@@ -12,6 +12,7 @@ import org.locationtech.geowave.core.store.BaseDataStoreFactory;
 import org.locationtech.geowave.core.store.StoreFactoryHelper;
 import org.locationtech.geowave.core.store.StoreFactoryOptions;
 import org.locationtech.geowave.core.store.api.DataStore;
+import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBOptions;
 import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBRequiredOptions;
 import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
 
@@ -27,7 +28,7 @@ public class FoundationDBDataStoreFactory extends BaseDataStoreFactory {
   @Override
   public DataStore createStore(final StoreFactoryOptions options) {
     if (!(options instanceof FoundationDBRequiredOptions)) {
-      throw new AssertionError("Expected " + FoundationDBRequiredOptions.class.getSimpleName());
+      throw new AssertionError("Expected " + FoundationDBOptions.class.getSimpleName());
     }
 
     return new FoundationDBDataStore(

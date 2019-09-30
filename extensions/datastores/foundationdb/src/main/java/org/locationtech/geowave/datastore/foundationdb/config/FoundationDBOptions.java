@@ -27,5 +27,4 @@ public class FoundationDBOptions extends BaseDataStoreOptions {
   protected int defaultAggregationMaxRangeDecomposition() {
     return FoundationDBUtils.FOUNDATIONDB_DEFAULT_AGGREGATION_MAX_RANGE_DECOMPOSITION;
   }
-
 }

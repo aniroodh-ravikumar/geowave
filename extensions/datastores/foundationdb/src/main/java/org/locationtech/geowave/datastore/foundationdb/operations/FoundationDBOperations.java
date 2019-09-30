@@ -14,7 +14,6 @@ import java.io.IOException;
 
 // TODO: implement this
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
-
   public FoundationDBOperations(FoundationDBRequiredOptions options) {}
 
   @Override
