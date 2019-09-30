@@ -6,7 +6,7 @@ import org.locationtech.geowave.core.store.adapter.PersistentAdapterStore;
 import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import org.locationtech.geowave.core.store.operations.*;
-import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBOptions;
+import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBRequiredOptions;
 import org.locationtech.geowave.mapreduce.MapReduceDataStoreOperations;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
 import java.io.Closeable;
@@ -14,7 +14,7 @@ import java.io.IOException;
 
 // TODO: implement this
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
-  public FoundationDBOperations(FoundationDBOptions options) {}
+  public FoundationDBOperations(FoundationDBRequiredOptions options) {}
 
   @Override
   public void close() throws IOException {
