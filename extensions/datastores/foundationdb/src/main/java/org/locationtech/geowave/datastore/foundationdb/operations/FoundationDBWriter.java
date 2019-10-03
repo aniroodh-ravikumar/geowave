@@ -1,14 +1,19 @@
 package org.locationtech.geowave.datastore.foundationdb.operations;
 
+import com.apple.foundationdb.Database;
+import com.apple.foundationdb.FDB;
+import com.apple.foundationdb.tuple.Tuple;
 import org.locationtech.geowave.core.index.ByteArray;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import org.locationtech.geowave.core.store.entities.GeoWaveValue;
 import org.locationtech.geowave.core.store.operations.RowWriter;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClient;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBIndexTable;
-// import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
+import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+
+import java.time.Instant;
 
 public class FoundationDBWriter implements RowWriter {
   private final FoundationDBClient client;
@@ -50,18 +55,30 @@ public class FoundationDBWriter implements RowWriter {
 
   @Override
   public void write(final GeoWaveRow row) {
+    FDB fdb = FDB.selectAPIVersion(620);
     ByteArray partitionKey = null;
     if ((row.getPartitionKey() == null) || (row.getPartitionKey().length == 0)) {
-      // partitionKey = RocksDBUtils.EMPTY_PARTITION_KEY;
+      partitionKey = FoundationDBUtils.EMPTY_PARTITION_KEY;
     } else {
       partitionKey = new ByteArray(row.getPartitionKey());
     }
+    final ByteArray partKey = partitionKey;
     for (final GeoWaveValue value : row.getFieldValues()) {
-      tableCache.get(partitionKey).add(
-          row.getSortKey(),
-          row.getDataId(),
-          (short) row.getNumberOfDuplicates(),
-          value);
+//      tableCache.get(partitionKey).add(
+//          row.getSortKey(),
+//          row.getDataId(),
+//          (short) row.getNumberOfDuplicates(),
+//          value);
+      Tuple tuple = Tuple.fromBytes(value.getValue());
+
+
+      try(Database db = fdb.open()) {
+        // Run an operation on the database
+        db.run(tr -> {
+          tr.set(Tuple.from(partKey).pack(), Tuple.from(tuple).pack());
+          return null;
+        });
+      }
     }
   }
 
