@@ -12,7 +12,6 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBIndexTab
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-
 import javax.xml.crypto.Data;
 import java.time.Instant;
 
@@ -68,18 +67,18 @@ public class FoundationDBWriter implements RowWriter {
     }
     final ByteArray partKey = partitionKey;
     for (final GeoWaveValue value : row.getFieldValues()) {
-//      tableCache.get(partitionKey).add(
-//          row.getSortKey(),
-//          row.getDataId(),
-//          (short) row.getNumberOfDuplicates(),
-//          value);
+      // tableCache.get(partitionKey).add(
+      // row.getSortKey(),
+      // row.getDataId(),
+      // (short) row.getNumberOfDuplicates(),
+      // value);
       Tuple tuple = Tuple.fromBytes(value.getValue());
 
-        // Run an operation on the database
-        this.db.run(tr -> {
-          tr.set(Tuple.from(partKey).pack(), Tuple.from(tuple).pack());
-          return null;
-        });
+      // Run an operation on the database
+      this.db.run(tr -> {
+        tr.set(Tuple.from(partKey).pack(), Tuple.from(tuple).pack());
+        return null;
+      });
     }
   }
 
@@ -91,7 +90,7 @@ public class FoundationDBWriter implements RowWriter {
   @Override
   public void close() {
     flush();
-//    tableCache.invalidateAll();
+    // tableCache.invalidateAll();
     this.db.close();
   }
 }

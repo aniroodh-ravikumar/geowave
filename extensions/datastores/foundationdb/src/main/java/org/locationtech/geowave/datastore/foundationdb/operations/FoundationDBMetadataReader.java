@@ -18,8 +18,14 @@ public class FoundationDBMetadataReader implements MetadataReader {
     this.metadataType = metadataType;
   }
 
+  public CloseableIterator<GeoWaveMetadata> query(
+      final MetadataQuery query,
+      final boolean mergeStats) {
+    return null;
+  }
+
   @Override
   public CloseableIterator<GeoWaveMetadata> query(MetadataQuery query) {
-    return null;
+    return this.query(query, true);
   }
 }

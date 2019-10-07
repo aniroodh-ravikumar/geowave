@@ -4,7 +4,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Map.Entry;
-
 import com.apple.foundationdb.NetworkOptions;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -145,25 +144,25 @@ public class FoundationDBClient implements Closeable {
 
   protected static NetworkOptions indexWriteOptions = null;
 
-//  public synchronized FoundationDBIndexTable getIndexTable(
-//          final String tableName,
-//          final short adapterId,
-//          final byte[] partition,
-//          final boolean requiresTimestamp) {
-//    if (indexWriteOptions == null) {
-//      final int cores = Runtime.getRuntime().availableProcessors();
-//      indexWriteOptions =
-//              new NetworkOptions(null)..prepareForBulkLoad().setIncreaseParallelism(cores);
-//      indexReadOptions = new Options().setIncreaseParallelism(cores);
-//      batchWriteOptions =
-//              new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
-//    }
-//    final String directory = subDirectory + "/" + tableName;
-//    return indexTableCache.get(
-//            (IndexCacheKey) keyCache.get(
-//                    directory,
-//                    d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
-//  }
+  // public synchronized FoundationDBIndexTable getIndexTable(
+  // final String tableName,
+  // final short adapterId,
+  // final byte[] partition,
+  // final boolean requiresTimestamp) {
+  // if (indexWriteOptions == null) {
+  // final int cores = Runtime.getRuntime().availableProcessors();
+  // indexWriteOptions =
+  // new NetworkOptions(null)..prepareForBulkLoad().setIncreaseParallelism(cores);
+  // indexReadOptions = new Options().setIncreaseParallelism(cores);
+  // batchWriteOptions =
+  // new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
+  // }
+  // final String directory = subDirectory + "/" + tableName;
+  // return indexTableCache.get(
+  // (IndexCacheKey) keyCache.get(
+  // directory,
+  // d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
+  // }
 
 
   public void close() {}

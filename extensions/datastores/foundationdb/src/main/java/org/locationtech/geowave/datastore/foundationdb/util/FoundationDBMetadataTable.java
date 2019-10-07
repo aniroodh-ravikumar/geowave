@@ -1,8 +1,6 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
-import com.apple.foundationdb.Database;
-import com.apple.foundationdb.KeyValue;
-import com.apple.foundationdb.Transaction;
+import com.apple.foundationdb.*;
 import com.apple.foundationdb.async.AsyncIterable;
 import com.google.common.collect.Iterators;
 import com.google.common.primitives.Bytes;
@@ -29,7 +27,8 @@ public class FoundationDBMetadataTable implements Closeable {
       Database db,
       final boolean requiresTimestamp,
       final boolean visibilityEnabled) {
-    this.db = db;
+    FDB fdb = FDB.selectAPIVersion(620);
+    this.db = fdb.open();
     this.requiresTimestamp = requiresTimestamp;
     this.visibilityEnabled = visibilityEnabled;
     this.writes = new LinkedList<>();
@@ -43,6 +42,17 @@ public class FoundationDBMetadataTable implements Closeable {
         iterable.iterator(),
         this.requiresTimestamp,
         this.visibilityEnabled);
+  }
+
+  public void remove(final byte[] key) {
+    try {
+      this.db.run(tr -> {
+        tr.clear(key);
+        return null;
+      });
+    } catch (final FDBException e) {
+      LOGGER.warn("Unable to delete metadata", e);
+    }
   }
 
   public void add(final GeoWaveMetadata value) {

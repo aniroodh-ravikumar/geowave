@@ -9,7 +9,6 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
 import java.util.List;
-
 import org.locationtech.geowave.core.index.ByteArray;
 import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.slf4j.Logger;
@@ -23,27 +22,27 @@ public class FoundationDBUtils {
   public static int FOUNDATIONDB_DEFAULT_MAX_RANGE_DECOMPOSITION = 250;
   public static int FOUNDATIONDB_DEFAULT_AGGREGATION_MAX_RANGE_DECOMPOSITION = 250;
 
-//  public static FoundationDBIndexTable getIndexTableFromPrefix(
-//          final FoundationDBClient client,
-//          final String namePrefix,
-//          final short adapterId,
-//          final byte[] partitionKey,
-//          final boolean requiresTimestamp) {
-//    return getIndexTable(
-//            client,
-//            getTableName(namePrefix, partitionKey),
-//            adapterId,
-//            partitionKey,
-//            requiresTimestamp);
-//  }
-//
-//  public static FoundationDBIndexTable getIndexTable(
-//          final FoundationDBClient client,
-//          final String tableName,
-//          final short adapterId,
-//          final byte[] partitionKey,
-//          final boolean requiresTimestamp) {
-//    return client.getIndexTable(tableName, adapterId, partitionKey, requiresTimestamp);
-//  }
+  // public static FoundationDBIndexTable getIndexTableFromPrefix(
+  // final FoundationDBClient client,
+  // final String namePrefix,
+  // final short adapterId,
+  // final byte[] partitionKey,
+  // final boolean requiresTimestamp) {
+  // return getIndexTable(
+  // client,
+  // getTableName(namePrefix, partitionKey),
+  // adapterId,
+  // partitionKey,
+  // requiresTimestamp);
+  // }
+  //
+  // public static FoundationDBIndexTable getIndexTable(
+  // final FoundationDBClient client,
+  // final String tableName,
+  // final short adapterId,
+  // final byte[] partitionKey,
+  // final boolean requiresTimestamp) {
+  // return client.getIndexTable(tableName, adapterId, partitionKey, requiresTimestamp);
+  // }
 
 }
