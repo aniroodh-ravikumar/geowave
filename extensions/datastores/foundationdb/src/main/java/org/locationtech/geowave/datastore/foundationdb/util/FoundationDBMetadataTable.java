@@ -92,6 +92,17 @@ public class FoundationDBMetadataTable implements Closeable {
     writes.add(new FDBWrite(key, value));
   }
 
+  /**
+   * @TODO figure out arguments (maybe byte[] key?)
+   * https://apple.github.io/foundationdb/javadoc/com/apple/foundationdb/ReadTransaction.html#get-byte:A-
+   * use .get() or .getRange()
+   * When this method is done, we can work on MetadataReader
+   * @return
+   */
+  public CloseableIterator<GeoWaveMetadata> iterator() {
+    return null;
+  }
+
   public void flush() {
     db.run(txn -> {
       this.writes.forEach(write -> write.add(txn));
