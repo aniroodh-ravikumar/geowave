@@ -23,7 +23,7 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
   private static final GenericStoreFactory<DataStore> STORE_FACTORY =
       new FoundationDBStoreFactoryFamily().getDataStoreFactory();
   private static FoundationDBStoreTestEnvironment singletonInstance = null;
-  private static final String DEFAULT_HOST = "localhost";
+  private static final String DEFAULT_HOST = "127.0.0.1";
   private static final int DEFAULT_PORT = 4000;
 
   private FoundationDBLocal fdbLocal;
