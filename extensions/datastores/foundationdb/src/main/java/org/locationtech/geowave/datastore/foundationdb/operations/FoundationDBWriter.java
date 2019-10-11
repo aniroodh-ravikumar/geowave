@@ -26,6 +26,7 @@ public class FoundationDBWriter implements RowWriter {
   private Database db;
 
   public FoundationDBWriter(
+          final FoundationDBOperations fDBOperations,
       final FoundationDBClient client,
       final short adapterId,
       final String typeName,
@@ -35,8 +36,7 @@ public class FoundationDBWriter implements RowWriter {
     this.adapterId = adapterId;
     // indexNamePrefix = RocksDBUtils.getTablePrefix(typeName, indexName);
     this.isTimestampRequired = isTimestampRequired;
-    FDB fdb = FDB.selectAPIVersion(620);
-    this.db = fdb.open();
+    this.db = fDBOperations.fdb.open();
   }
 
   private FoundationDBIndexTable getTable(final byte[] partitionKey) {

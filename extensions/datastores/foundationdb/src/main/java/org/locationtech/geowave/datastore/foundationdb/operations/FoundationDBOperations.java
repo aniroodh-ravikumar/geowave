@@ -1,5 +1,7 @@
 package org.locationtech.geowave.datastore.foundationdb.operations;
 
+import com.apple.foundationdb.Database;
+import com.apple.foundationdb.FDB;
 import org.locationtech.geowave.core.store.adapter.InternalAdapterStore;
 import org.locationtech.geowave.core.store.adapter.InternalDataAdapter;
 import org.locationtech.geowave.core.store.adapter.PersistentAdapterStore;
@@ -14,7 +16,15 @@ import java.io.IOException;
 
 // TODO: implement this
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
-  public FoundationDBOperations(FoundationDBRequiredOptions options) {}
+
+  public final FDB fdb;
+
+  public FoundationDBOperations(
+          final FoundationDBRequiredOptions options) {
+    this.fdb = FDB.selectAPIVersion(610);
+    // this does not open the database
+    // open the database with fdb.open()
+  }
 
   @Override
   public void close() throws IOException {

@@ -8,8 +8,11 @@ import com.google.common.primitives.Longs;
 import org.locationtech.geowave.core.index.ByteArrayUtils;
 import org.locationtech.geowave.core.store.CloseableIterator;
 import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
+import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.crypto.Data;
 import java.io.Closeable;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -24,11 +27,11 @@ public class FoundationDBMetadataTable implements Closeable {
   private final List<FDBWrite> writes;
 
   public FoundationDBMetadataTable(
-      Database db,
+      final FoundationDBOperations fDBOperations,
       final boolean requiresTimestamp,
       final boolean visibilityEnabled) {
-    FDB fdb = FDB.selectAPIVersion(620);
-    this.db = fdb.open();
+    
+    this.db = fDBOperations.fdb.open();
     this.requiresTimestamp = requiresTimestamp;
     this.visibilityEnabled = visibilityEnabled;
     this.writes = new LinkedList<>();
