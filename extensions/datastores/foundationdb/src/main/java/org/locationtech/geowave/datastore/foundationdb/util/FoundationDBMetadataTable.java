@@ -2,7 +2,6 @@ package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.*;
 import com.apple.foundationdb.async.AsyncIterable;
-import com.google.common.collect.Iterators;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import org.locationtech.geowave.core.index.ByteArrayUtils;
@@ -12,11 +11,11 @@ import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOp
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.crypto.Data;
 import java.io.Closeable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FoundationDBMetadataTable implements Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBMetadataTable.class);
@@ -37,8 +36,16 @@ public class FoundationDBMetadataTable implements Closeable {
     this.writes = new LinkedList<>();
   }
 
+  public CloseableIterator<GeoWaveMetadata> iterator(byte[] primaryID) {
+    return prefixIterator(primaryID);
+  }
+
+  public CloseableIterator<GeoWaveMetadata> iterator(byte[] primaryID, byte[] secondaryID) {
+    return prefixIterator(ByteArrayUtils.combineArrays(primaryID, secondaryID));
+  }
+
   private CloseableIterator<GeoWaveMetadata> prefixIterator(final byte[] prefix) {
-    Transaction txn = db.createTransaction();
+    Transaction txn = this.db.createTransaction();
     AsyncIterable<KeyValue> iterable = txn.getRange(prefix, ByteArrayUtils.getNextPrefix(prefix));
     // TODO: can this class be asynchronous?
     return new FoundationDBMetadataIterator(
@@ -93,17 +100,6 @@ public class FoundationDBMetadataTable implements Closeable {
 
   public void write(final byte[] key, final byte[] value) {
     writes.add(new FDBWrite(key, value));
-  }
-
-  /**
-   * @TODO figure out arguments (maybe byte[] key?)
-   * https://apple.github.io/foundationdb/javadoc/com/apple/foundationdb/ReadTransaction.html#get-byte:A-
-   * use .get() or .getRange()
-   * When this method is done, we can work on MetadataReader
-   * @return
-   */
-  public CloseableIterator<GeoWaveMetadata> iterator() {
-    return null;
   }
 
   public void flush() {
