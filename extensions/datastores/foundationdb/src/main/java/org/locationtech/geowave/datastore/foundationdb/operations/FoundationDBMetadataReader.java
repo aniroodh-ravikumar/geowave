@@ -42,13 +42,13 @@ public class FoundationDBMetadataReader implements MetadataReader {
       originalResults =
           table.iterator(
               new byte[] {
-                  (byte) 0x00,
-                  (byte) 0x00,
-                  (byte) 0x00,
-                  (byte) 0x00,
-                  (byte) 0x00,
-                  (byte) 0x00,
-                  (byte) 0x00,},
+                  (byte) 0x0,
+                  (byte) 0x0,
+                  (byte) 0x0,
+                  (byte) 0x0,
+                  (byte) 0x0,
+                  (byte) 0x0,
+                  (byte) 0x0,},
               new byte[] {
                   (byte) 0xFF,
                   (byte) 0xFF,
