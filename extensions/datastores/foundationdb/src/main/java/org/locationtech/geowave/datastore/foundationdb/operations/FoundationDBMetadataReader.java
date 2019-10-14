@@ -1,9 +1,4 @@
 package org.locationtech.geowave.datastore.foundationdb.operations;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterators;
-import org.locationtech.geowave.core.store.CloseableIterator;
-import org.locationtech.geowave.core.store.CloseableIteratorWrapper;
 import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
 import org.locationtech.geowave.core.store.operations.MetadataQuery;
 import org.locationtech.geowave.core.store.operations.MetadataReader;
@@ -14,6 +9,7 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBMetadata
 
 import java.util.Arrays;
 import java.util.Iterator;
+import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBMetadataTable;
 
 public class FoundationDBMetadataReader implements MetadataReader {
   private final FoundationDBMetadataTable table;
@@ -81,7 +77,7 @@ public class FoundationDBMetadataReader implements MetadataReader {
     final CloseableIterator<GeoWaveMetadata> retVal =
             new CloseableIteratorWrapper<>(originalResults, resultsIt);
     return isStats ? new StatisticsRowIterator(retVal, query.getAuthorizations()) : retVal;
-
+    
   }
 
   @Override

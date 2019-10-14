@@ -2,6 +2,7 @@ package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.*;
 import com.apple.foundationdb.async.AsyncIterable;
+import com.google.common.collect.Iterators;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import org.locationtech.geowave.core.index.ByteArrayUtils;
