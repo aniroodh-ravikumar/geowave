@@ -23,7 +23,6 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBDataInde
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import org.locationtech.geowave.mapreduce.splits.GeoWaveRowRange;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
@@ -60,51 +59,51 @@ public class FoundationDBReader<T> implements RowReader<T> {
       final GeoWaveRowIteratorTransformer<T> rowTransformer,
       final boolean async) {
     final Collection<SinglePartitionQueryRanges> ranges =
-            readerParams.getQueryRanges().getPartitionQueryRanges();
+        readerParams.getQueryRanges().getPartitionQueryRanges();
 
     final Set<String> authorizations = Sets.newHashSet(readerParams.getAdditionalAuthorizations());
     if ((ranges != null) && !ranges.isEmpty()) {
       return createIterator(
-              client,
-              readerParams,
-              readerParams.getRowTransformer(),
-              ranges,
-              authorizations,
-              async);
+          client,
+          readerParams,
+          readerParams.getRowTransformer(),
+          ranges,
+          authorizations,
+          async);
     } else {
       final List<CloseableIterator<GeoWaveRow>> iterators = new ArrayList<>();
       for (final short adapterId : readerParams.getAdapterIds()) {
         final Pair<Boolean, Boolean> groupByRowAndSortByTime =
-                FoundationDBUtils.isGroupByRowAndIsSortByTime(readerParams, adapterId);
+            FoundationDBUtils.isGroupByRowAndIsSortByTime(readerParams, adapterId);
         final String indexNamePrefix =
-                FoundationDBUtils.getTablePrefix(
-                        readerParams.getInternalAdapterStore().getTypeName(adapterId),
-                        readerParams.getIndex().getName());
+            FoundationDBUtils.getTablePrefix(
+                readerParams.getInternalAdapterStore().getTypeName(adapterId),
+                readerParams.getIndex().getName());
         final Stream<CloseableIterator<GeoWaveRow>> streamIt =
-                FoundationDBUtils.getPartitions(client.getSubDirectory(), indexNamePrefix).stream().map(
-                        p -> FoundationDBUtils.getIndexTableFromPrefix(
-                                client,
-                                indexNamePrefix,
-                                adapterId,
-                                p.getBytes(),
-                                groupByRowAndSortByTime.getRight()).iterator());
+            FoundationDBUtils.getPartitions(client.getSubDirectory(), indexNamePrefix).stream().map(
+                p -> FoundationDBUtils.getIndexTableFromPrefix(
+                    client,
+                    indexNamePrefix,
+                    adapterId,
+                    p.getBytes(),
+                    groupByRowAndSortByTime.getRight()).iterator());
         iterators.addAll(streamIt.collect(Collectors.toList()));
       }
       return wrapResults(new Closeable() {
-                           AtomicBoolean closed = new AtomicBoolean(false);
+        AtomicBoolean closed = new AtomicBoolean(false);
 
-                           @Override
-                           public void close() throws IOException {
-                             if (!closed.getAndSet(true)) {
-                               iterators.forEach(it -> it.close());
-                             }
-                           }
-                         },
-              Iterators.concat(iterators.iterator()),
-              readerParams,
-              rowTransformer,
-              authorizations,
-              client.isVisibilityEnabled());
+        @Override
+        public void close() throws IOException {
+          if (!closed.getAndSet(true)) {
+            iterators.forEach(it -> it.close());
+          }
+        }
+      },
+          Iterators.concat(iterators.iterator()),
+          readerParams,
+          rowTransformer,
+          authorizations,
+          client.isVisibilityEnabled());
     }
   }
 
@@ -116,22 +115,22 @@ public class FoundationDBReader<T> implements RowReader<T> {
       final Set<String> authorizations,
       final boolean async) {
     final Iterator<CloseableIterator> it =
-            Arrays.stream(ArrayUtils.toObject(readerParams.getAdapterIds())).map(
-                    adapterId -> new FoundationDBQueryExecution(
-                            client,
-                            FoundationDBUtils.getTablePrefix(
-                                    readerParams.getInternalAdapterStore().getTypeName(adapterId),
-                                    readerParams.getIndex().getName()),
-                            adapterId,
-                            rowTransformer,
-                            ranges,
-                            new ClientVisibilityFilter(authorizations),
-                            DataStoreUtils.isMergingIteratorRequired(
-                                    readerParams,
-                                    client.isVisibilityEnabled()),
-                            async,
-                            FoundationDBUtils.isGroupByRowAndIsSortByTime(readerParams, adapterId),
-                            FoundationDBUtils.isSortByKeyRequired(readerParams)).results()).iterator();
+        Arrays.stream(ArrayUtils.toObject(readerParams.getAdapterIds())).map(
+            adapterId -> new FoundationDBQueryExecution(
+                client,
+                FoundationDBUtils.getTablePrefix(
+                    readerParams.getInternalAdapterStore().getTypeName(adapterId),
+                    readerParams.getIndex().getName()),
+                adapterId,
+                rowTransformer,
+                ranges,
+                new ClientVisibilityFilter(authorizations),
+                DataStoreUtils.isMergingIteratorRequired(
+                    readerParams,
+                    client.isVisibilityEnabled()),
+                async,
+                FoundationDBUtils.isGroupByRowAndIsSortByTime(readerParams, adapterId),
+                FoundationDBUtils.isSortByKeyRequired(readerParams)).results()).iterator();
     final CloseableIterator<T>[] itArray = Iterators.toArray(it, CloseableIterator.class);
     return new CloseableIteratorWrapper<>(new Closeable() {
       AtomicBoolean closed = new AtomicBoolean(false);
@@ -152,44 +151,44 @@ public class FoundationDBReader<T> implements RowReader<T> {
     final byte[] startKey = range.isInfiniteStartSortKey() ? null : range.getStartSortKey();
     final byte[] stopKey = range.isInfiniteStopSortKey() ? null : range.getEndSortKey();
     final SinglePartitionQueryRanges partitionRange =
-            new SinglePartitionQueryRanges(
-                    range.getPartitionKey(),
-                    Collections.singleton(new ByteArrayRange(startKey, stopKey)));
+        new SinglePartitionQueryRanges(
+            range.getPartitionKey(),
+            Collections.singleton(new ByteArrayRange(startKey, stopKey)));
     final Set<String> authorizations =
-            Sets.newHashSet(recordReaderParams.getAdditionalAuthorizations());
+        Sets.newHashSet(recordReaderParams.getAdditionalAuthorizations());
     return createIterator(
-            client,
-            (RangeReaderParams<T>) recordReaderParams,
-            (GeoWaveRowIteratorTransformer<T>) GeoWaveRowIteratorTransformer.NO_OP_TRANSFORMER,
-            Collections.singleton(partitionRange),
-            authorizations,
-            // there should already be sufficient parallelism created by
-            // input splits for record reader use cases
-            false);
+        client,
+        (RangeReaderParams<T>) recordReaderParams,
+        (GeoWaveRowIteratorTransformer<T>) GeoWaveRowIteratorTransformer.NO_OP_TRANSFORMER,
+        Collections.singleton(partitionRange),
+        authorizations,
+        // there should already be sufficient parallelism created by
+        // input splits for record reader use cases
+        false);
   }
 
   private Iterator<GeoWaveRow> createIteratorForDataIndexReader(
       final FoundationDBClient client,
       final DataIndexReaderParams dataIndexReaderParams) {
     final FoundationDBDataIndexTable dataIndexTable =
-            FoundationDBUtils.getDataIndexTable(
-                    client,
-                    dataIndexReaderParams.getInternalAdapterStore().getTypeName(
-                            dataIndexReaderParams.getAdapterId()),
-                    dataIndexReaderParams.getAdapterId());
+        FoundationDBUtils.getDataIndexTable(
+            client,
+            dataIndexReaderParams.getInternalAdapterStore().getTypeName(
+                dataIndexReaderParams.getAdapterId()),
+            dataIndexReaderParams.getAdapterId());
     Iterator<GeoWaveRow> iterator;
     if (dataIndexReaderParams.getDataIds() != null) {
       iterator = dataIndexTable.dataIndexIterator(dataIndexReaderParams.getDataIds());
     } else {
       iterator =
-              dataIndexTable.dataIndexIterator(
-                      dataIndexReaderParams.getStartInclusiveDataId(),
-                      dataIndexReaderParams.getEndInclusiveDataId());
+          dataIndexTable.dataIndexIterator(
+              dataIndexReaderParams.getStartInclusiveDataId(),
+              dataIndexReaderParams.getEndInclusiveDataId());
     }
     if (client.isVisibilityEnabled()) {
       Stream<GeoWaveRow> stream = Streams.stream(iterator);
       final Set<String> authorizations =
-              Sets.newHashSet(dataIndexReaderParams.getAdditionalAuthorizations());
+          Sets.newHashSet(dataIndexReaderParams.getAdditionalAuthorizations());
       stream = stream.filter(new ClientVisibilityFilter(authorizations));
       iterator = stream.iterator();
     }

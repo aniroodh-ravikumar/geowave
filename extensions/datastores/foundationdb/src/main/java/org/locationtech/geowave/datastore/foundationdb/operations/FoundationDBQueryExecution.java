@@ -27,7 +27,6 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBIndexTab
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Serializable;

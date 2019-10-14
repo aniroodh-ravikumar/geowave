@@ -20,7 +20,6 @@ import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import org.locationtech.geowave.core.store.operations.RangeReaderParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.Serializable;
 import java.util.Arrays;
@@ -52,44 +51,44 @@ public class FoundationDBUtils {
   }
 
   public static FoundationDBDataIndexTable getDataIndexTable(
-          final FoundationDBClient client,
-          final String typeName,
-          final short adapterId) {
+      final FoundationDBClient client,
+      final String typeName,
+      final short adapterId) {
     return client.getDataIndexTable(
-            getTablePrefix(typeName, DataIndexUtils.DATA_ID_INDEX.getName()),
-            adapterId);
+        getTablePrefix(typeName, DataIndexUtils.DATA_ID_INDEX.getName()),
+        adapterId);
   }
 
   public static FoundationDBIndexTable getIndexTableFromPrefix(
-          final FoundationDBClient client,
-          final String namePrefix,
-          final short adapterId,
-          final byte[] partitionKey,
-          final boolean requiresTimestamp) {
+      final FoundationDBClient client,
+      final String namePrefix,
+      final short adapterId,
+      final byte[] partitionKey,
+      final boolean requiresTimestamp) {
     return getIndexTable(
-            client,
-            getTableName(namePrefix, partitionKey),
-            adapterId,
-            partitionKey,
-            requiresTimestamp);
+        client,
+        getTableName(namePrefix, partitionKey),
+        adapterId,
+        partitionKey,
+        requiresTimestamp);
   }
 
   public static FoundationDBIndexTable getIndexTable(
-          final FoundationDBClient client,
-          final String tableName,
-          final short adapterId,
-          final byte[] partitionKey,
-          final boolean requiresTimestamp) {
+      final FoundationDBClient client,
+      final String tableName,
+      final short adapterId,
+      final byte[] partitionKey,
+      final boolean requiresTimestamp) {
     return client.getIndexTable(tableName, adapterId, partitionKey, requiresTimestamp);
   }
 
   public static Set<ByteArray> getPartitions(final String directory, final String tableNamePrefix) {
     return Arrays.stream(
-            new File(directory).list((dir, name) -> name.startsWith(tableNamePrefix))).map(
+        new File(directory).list((dir, name) -> name.startsWith(tableNamePrefix))).map(
             str -> str.length() > (tableNamePrefix.length() + 1)
-                    ? new ByteArray(
+                ? new ByteArray(
                     ByteArrayUtils.byteArrayFromString(str.substring(tableNamePrefix.length() + 1)))
-                    : new ByteArray()).collect(Collectors.toSet());
+                : new ByteArray()).collect(Collectors.toSet());
   }
 
   public static boolean isSortByTime(final InternalDataAdapter<?> adapter) {
@@ -99,7 +98,7 @@ public class FoundationDBUtils {
   public static boolean isSortByKeyRequired(final RangeReaderParams<?> params) {
     // subsampling needs to be sorted by sort key to work properly
     return (params.getMaxResolutionSubsamplingPerDimension() != null)
-            && (params.getMaxResolutionSubsamplingPerDimension().length > 0);
+        && (params.getMaxResolutionSubsamplingPerDimension().length > 0);
   }
 
   public static Iterator<GeoWaveRow> sortBySortKey(final Iterator<GeoWaveRow> it) {
@@ -107,8 +106,8 @@ public class FoundationDBUtils {
   }
 
   public static Pair<Boolean, Boolean> isGroupByRowAndIsSortByTime(
-          final RangeReaderParams<?> readerParams,
-          final short adapterId) {
+      final RangeReaderParams<?> readerParams,
+      final short adapterId) {
     final boolean sortByTime = isSortByTime(readerParams.getAdapterStore().getAdapter(adapterId));
     return Pair.of(readerParams.isMixedVisibility() || sortByTime, sortByTime);
   }

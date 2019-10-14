@@ -3,7 +3,6 @@ package org.locationtech.geowave.datastore.foundationdb.util;
 import com.apple.foundationdb.NetworkOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.util.Arrays;
 
@@ -17,10 +16,10 @@ public class FoundationDBClient implements Closeable {
   private final int batchWriteSize;
 
   public FoundationDBClient(
-          final String subDirectory,
-          final boolean visibilityEnabled,
-          final boolean compactOnWrite,
-          final int batchWriteSize) {
+      final String subDirectory,
+      final boolean visibilityEnabled,
+      final boolean compactOnWrite,
+      final int batchWriteSize) {
     this.subDirectory = subDirectory;
     this.visibilityEnabled = visibilityEnabled;
     this.compactOnWrite = compactOnWrite;
@@ -152,46 +151,46 @@ public class FoundationDBClient implements Closeable {
     }
   }
 
-  //TODO: Implement this function
+  // TODO: Implement this function
   public synchronized FoundationDBIndexTable getIndexTable(
-          final String tableName,
-          final short adapterId,
-          final byte[] partition,
-          final boolean requiresTimestamp) {
+      final String tableName,
+      final short adapterId,
+      final byte[] partition,
+      final boolean requiresTimestamp) {
 
-//    if (indexWriteOptions == null) {
-////      FDB.loadLibrary();
-//      final int cores = Runtime.getRuntime().availableProcessors();
-//      indexWriteOptions =
-//              new Options().setCreateIfMissing(true).prepareForBulkLoad().setIncreaseParallelism(cores);
-//      indexReadOptions = new Options().setIncreaseParallelism(cores);
-//      batchWriteOptions =
-//              new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
-//    }
-//    final String directory = subDirectory + "/" + tableName;
-//    return indexTableCache.get(
-//            (IndexCacheKey) keyCache.get(
-//                    directory,
-//                    d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
+    // if (indexWriteOptions == null) {
+    //// FDB.loadLibrary();
+    // final int cores = Runtime.getRuntime().availableProcessors();
+    // indexWriteOptions =
+    // new Options().setCreateIfMissing(true).prepareForBulkLoad().setIncreaseParallelism(cores);
+    // indexReadOptions = new Options().setIncreaseParallelism(cores);
+    // batchWriteOptions =
+    // new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
+    // }
+    // final String directory = subDirectory + "/" + tableName;
+    // return indexTableCache.get(
+    // (IndexCacheKey) keyCache.get(
+    // directory,
+    // d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
     return null;
   }
 
-  //TODO: Implement this function too.
+  // TODO: Implement this function too.
   public synchronized FoundationDBDataIndexTable getDataIndexTable(
-          final String tableName,
-          final short adapterId) {
-//    if (indexWriteOptions == null) {
-//      FDB.loadLibrary();
-//      final int cores = Runtime.getRuntime().availableProcessors();
-//      indexWriteOptions =
-//              new Options().setCreateIfMissing(true).prepareForBulkLoad().setIncreaseParallelism(cores);
-//      indexReadOptions = new Options().setIncreaseParallelism(cores);
-//      batchWriteOptions =
-//              new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
-//    }
-//    final String directory = subDirectory + "/" + tableName;
-//    return dataIndexTableCache.get(
-//            (DataIndexCacheKey) keyCache.get(directory, d -> new DataIndexCacheKey(d, adapterId)));
+      final String tableName,
+      final short adapterId) {
+    // if (indexWriteOptions == null) {
+    // FDB.loadLibrary();
+    // final int cores = Runtime.getRuntime().availableProcessors();
+    // indexWriteOptions =
+    // new Options().setCreateIfMissing(true).prepareForBulkLoad().setIncreaseParallelism(cores);
+    // indexReadOptions = new Options().setIncreaseParallelism(cores);
+    // batchWriteOptions =
+    // new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
+    // }
+    // final String directory = subDirectory + "/" + tableName;
+    // return dataIndexTableCache.get(
+    // (DataIndexCacheKey) keyCache.get(directory, d -> new DataIndexCacheKey(d, adapterId)));
     return null;
   }
 
