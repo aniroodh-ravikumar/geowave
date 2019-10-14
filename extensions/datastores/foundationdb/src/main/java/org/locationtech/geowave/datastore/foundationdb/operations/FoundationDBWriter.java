@@ -1,7 +1,6 @@
 package org.locationtech.geowave.datastore.foundationdb.operations;
 
 import com.apple.foundationdb.Database;
-import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.tuple.Tuple;
 import org.locationtech.geowave.core.index.ByteArray;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
@@ -12,13 +11,9 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBIndexTab
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import javax.xml.crypto.Data;
-import java.time.Instant;
 
 public class FoundationDBWriter implements RowWriter {
   private final FoundationDBClient client;
-  // private final String indexNamePrefix;
-
   private final short adapterId;
   private final LoadingCache<ByteArray, FoundationDBIndexTable> tableCache =
       Caffeine.newBuilder().build(partitionKey -> getTable(partitionKey.getBytes()));
@@ -26,7 +21,7 @@ public class FoundationDBWriter implements RowWriter {
   private Database db;
 
   public FoundationDBWriter(
-          final FoundationDBOperations fDBOperations,
+      final FoundationDBOperations fDBOperations,
       final FoundationDBClient client,
       final short adapterId,
       final String typeName,
@@ -34,19 +29,12 @@ public class FoundationDBWriter implements RowWriter {
       final boolean isTimestampRequired) {
     this.client = client;
     this.adapterId = adapterId;
-    // indexNamePrefix = RocksDBUtils.getTablePrefix(typeName, indexName);
     this.isTimestampRequired = isTimestampRequired;
     this.db = fDBOperations.fdb.open();
   }
 
   private FoundationDBIndexTable getTable(final byte[] partitionKey) {
     return null;
-    // return RocksDBUtils.getIndexTableFromPrefix(
-    // client,
-    // indexNamePrefix,
-    // adapterId,
-    // partitionKey,
-    // isTimestampRequired);
   }
 
   @Override
@@ -67,11 +55,6 @@ public class FoundationDBWriter implements RowWriter {
     }
     final ByteArray partKey = partitionKey;
     for (final GeoWaveValue value : row.getFieldValues()) {
-      // tableCache.get(partitionKey).add(
-      // row.getSortKey(),
-      // row.getDataId(),
-      // (short) row.getNumberOfDuplicates(),
-      // value);
       Tuple tuple = Tuple.fromBytes(value.getValue());
 
       // Run an operation on the database
@@ -90,7 +73,7 @@ public class FoundationDBWriter implements RowWriter {
   @Override
   public void close() {
     flush();
-    // tableCache.invalidateAll();
+    tableCache.invalidateAll();
     this.db.close();
   }
 }

@@ -19,8 +19,7 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
 
   public final FDB fdb;
 
-  public FoundationDBOperations(
-          final FoundationDBRequiredOptions options) {
+  public FoundationDBOperations(final FoundationDBRequiredOptions options) {
     this.fdb = FDB.selectAPIVersion(610);
     // this does not open the database
     // open the database with fdb.open()
