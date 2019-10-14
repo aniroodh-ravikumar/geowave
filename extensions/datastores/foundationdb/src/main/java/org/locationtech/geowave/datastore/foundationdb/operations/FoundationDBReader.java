@@ -1,14 +1,8 @@
 package org.locationtech.geowave.datastore.foundationdb.operations;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.geowave.core.index.ByteArrayRange;
@@ -29,7 +23,13 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBDataInde
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import org.locationtech.geowave.mapreduce.splits.GeoWaveRowRange;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
-import com.google.common.collect.Streams;
+
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FoundationDBReader<T> implements RowReader<T> {
   private final CloseableIterator<T> iterator;

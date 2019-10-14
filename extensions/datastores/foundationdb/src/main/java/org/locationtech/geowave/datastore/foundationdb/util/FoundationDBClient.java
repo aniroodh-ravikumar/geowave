@@ -1,10 +1,11 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
-import java.io.Closeable;
-import java.util.Arrays;
 import com.apple.foundationdb.NetworkOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.util.Arrays;
 
 public class FoundationDBClient implements Closeable {
 
