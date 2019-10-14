@@ -71,39 +71,42 @@ public class FoundationDBReader implements RowReader<GeoWaveRow> {
           authorizations,
           async);
     } else {
-      final List<CloseableIterator<GeoWaveRow>> iterators = new ArrayList<>();
-      for (final short adapterId : readerParams.getAdapterIds()) {
-        final Pair<Boolean, Boolean> groupByRowAndSortByTime =
-            FoundationDBUtils.isGroupByRowAndIsSortByTime(readerParams, adapterId);
-        final String indexNamePrefix =
-            FoundationDBUtils.getTablePrefix(
-                readerParams.getInternalAdapterStore().getTypeName(adapterId),
-                readerParams.getIndex().getName());
-        final Stream<CloseableIterator<GeoWaveRow>> streamIt =
-            FoundationDBUtils.getPartitions(client.getSubDirectory(), indexNamePrefix).stream().map(
-                p -> FoundationDBUtils.getIndexTableFromPrefix(
-                    client,
-                    indexNamePrefix,
-                    adapterId,
-                    p.getBytes(),
-                    groupByRowAndSortByTime.getRight()).iterator());
-        iterators.addAll(streamIt.collect(Collectors.toList()));
-      }
+      CloseableIterator<GeoWaveRow> iterator = new CloseableIterator<GeoWaveRow>() {
+        {
+          // TODO: initialization code goes here
+
+        }
+
+        @Override
+        public void close() {
+          // TODO: undo whatever happens in the init section
+        }
+
+        @Override
+        public boolean hasNext() {
+          // TODO: check if we've reached the end of our range
+          return false;
+        }
+
+        @Override
+        public GeoWaveRow next() {
+          // TODO: check if we've reached the end of our range, and if not, then
+          // make another transaction to read more data, and call the row
+          // transformer on the returned result
+          return null;
+        }
+      };
+
       return wrapResults(new Closeable() {
         AtomicBoolean closed = new AtomicBoolean(false);
 
         @Override
-        public void close() throws IOException {
+        public void close() {
           if (!closed.getAndSet(true)) {
-            iterators.forEach(CloseableIterator::close);
+            iterator.close();
           }
         }
-      },
-          Iterators.concat(iterators.iterator()),
-          readerParams,
-          rowTransformer,
-          authorizations,
-          client.isVisibilityEnabled());
+      }, iterator, readerParams, rowTransformer, authorizations, client.isVisibilityEnabled());
     }
   }
 
@@ -117,20 +120,21 @@ public class FoundationDBReader implements RowReader<GeoWaveRow> {
     final List<CloseableIterator<GeoWaveRow>> iterators =
         Arrays.stream(ArrayUtils.toObject(readerParams.getAdapterIds())).map(
             adapterId -> new FoundationDBQueryExecution<>(
-                    client,
-                    FoundationDBUtils.getTablePrefix(
-                            readerParams.getInternalAdapterStore().getTypeName(adapterId),
-                            readerParams.getIndex().getName()),
-                    adapterId,
-                    rowTransformer,
-                    ranges,
-                    new ClientVisibilityFilter(authorizations),
-                    DataStoreUtils.isMergingIteratorRequired(
-                            readerParams,
-                            client.isVisibilityEnabled()),
-                    async,
-                    FoundationDBUtils.isGroupByRowAndIsSortByTime(readerParams, adapterId),
-                    FoundationDBUtils.isSortByKeyRequired(readerParams)).results()).collect(Collectors.toList());
+                client,
+                FoundationDBUtils.getTablePrefix(
+                    readerParams.getInternalAdapterStore().getTypeName(adapterId),
+                    readerParams.getIndex().getName()),
+                adapterId,
+                rowTransformer,
+                ranges,
+                new ClientVisibilityFilter(authorizations),
+                DataStoreUtils.isMergingIteratorRequired(
+                    readerParams,
+                    client.isVisibilityEnabled()),
+                async,
+                FoundationDBUtils.isGroupByRowAndIsSortByTime(readerParams, adapterId),
+                FoundationDBUtils.isSortByKeyRequired(readerParams)).results()).collect(
+                    Collectors.toList());
     return new CloseableIteratorWrapper<>(new Closeable() {
       AtomicBoolean closed = new AtomicBoolean(false);
 
@@ -157,9 +161,9 @@ public class FoundationDBReader implements RowReader<GeoWaveRow> {
         Sets.newHashSet(recordReaderParams.getAdditionalAuthorizations());
     return createIterator(
         client,
-            recordReaderParams,
-            GeoWaveRowIteratorTransformer.NO_OP_TRANSFORMER,
-            Collections.singleton(partitionRange),
+        recordReaderParams,
+        GeoWaveRowIteratorTransformer.NO_OP_TRANSFORMER,
+        Collections.singleton(partitionRange),
         authorizations,
         // there should already be sufficient parallelism created by
         // input splits for record reader use cases
@@ -212,7 +216,7 @@ public class FoundationDBReader implements RowReader<GeoWaveRow> {
             sortBySortKeyIfRequired(
                 params,
                 DataStoreUtils.isMergingIteratorRequired(params, visibilityEnabled)
-                        // TODO: why is this a merging iterator?
+                    // TODO: why is this a merging iterator?
                     ? new GeoWaveRowMergingIterator(iterator)
                     : iterator)));
   }
