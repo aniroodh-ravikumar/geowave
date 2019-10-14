@@ -10,6 +10,22 @@ public class FoundationDBClient implements Closeable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBClient.class);
 
+  private final String subDirectory;
+  private final boolean visibilityEnabled;
+  private final boolean compactOnWrite;
+  private final int batchWriteSize;
+
+  public FoundationDBClient(
+          final String subDirectory,
+          final boolean visibilityEnabled,
+          final boolean compactOnWrite,
+          final int batchWriteSize) {
+    this.subDirectory = subDirectory;
+    this.visibilityEnabled = visibilityEnabled;
+    this.compactOnWrite = compactOnWrite;
+    this.batchWriteSize = batchWriteSize;
+  }
+
   private static class CacheKey {
     protected final String directory;
     protected final boolean requiresTimestamp;
@@ -135,7 +151,62 @@ public class FoundationDBClient implements Closeable {
     }
   }
 
+  //TODO: Implement this function
+  public synchronized FoundationDBIndexTable getIndexTable(
+          final String tableName,
+          final short adapterId,
+          final byte[] partition,
+          final boolean requiresTimestamp) {
+
+//    if (indexWriteOptions == null) {
+////      FDB.loadLibrary();
+//      final int cores = Runtime.getRuntime().availableProcessors();
+//      indexWriteOptions =
+//              new Options().setCreateIfMissing(true).prepareForBulkLoad().setIncreaseParallelism(cores);
+//      indexReadOptions = new Options().setIncreaseParallelism(cores);
+//      batchWriteOptions =
+//              new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
+//    }
+//    final String directory = subDirectory + "/" + tableName;
+//    return indexTableCache.get(
+//            (IndexCacheKey) keyCache.get(
+//                    directory,
+//                    d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
+    return null;
+  }
+
+  //TODO: Implement this function too.
+  public synchronized FoundationDBDataIndexTable getDataIndexTable(
+          final String tableName,
+          final short adapterId) {
+//    if (indexWriteOptions == null) {
+//      FDB.loadLibrary();
+//      final int cores = Runtime.getRuntime().availableProcessors();
+//      indexWriteOptions =
+//              new Options().setCreateIfMissing(true).prepareForBulkLoad().setIncreaseParallelism(cores);
+//      indexReadOptions = new Options().setIncreaseParallelism(cores);
+//      batchWriteOptions =
+//              new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
+//    }
+//    final String directory = subDirectory + "/" + tableName;
+//    return dataIndexTableCache.get(
+//            (DataIndexCacheKey) keyCache.get(directory, d -> new DataIndexCacheKey(d, adapterId)));
+    return null;
+  }
+
   protected static NetworkOptions indexWriteOptions = null;
+
+  public boolean isCompactOnWrite() {
+    return compactOnWrite;
+  }
+
+  public boolean isVisibilityEnabled() {
+    return visibilityEnabled;
+  }
+
+  public String getSubDirectory() {
+    return subDirectory;
+  }
 
 
   public void close() {}
