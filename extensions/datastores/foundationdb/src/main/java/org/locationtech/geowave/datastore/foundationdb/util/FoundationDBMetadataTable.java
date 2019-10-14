@@ -11,7 +11,6 @@ import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
 import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.xml.crypto.Data;
 import java.io.Closeable;
 import java.util.Iterator;
@@ -30,7 +29,7 @@ public class FoundationDBMetadataTable implements Closeable {
       final FoundationDBOperations fDBOperations,
       final boolean requiresTimestamp,
       final boolean visibilityEnabled) {
-    
+
     this.db = fDBOperations.fdb.open();
     this.requiresTimestamp = requiresTimestamp;
     this.visibilityEnabled = visibilityEnabled;
@@ -97,9 +96,8 @@ public class FoundationDBMetadataTable implements Closeable {
 
   /**
    * @TODO figure out arguments (maybe byte[] key?)
-   * https://apple.github.io/foundationdb/javadoc/com/apple/foundationdb/ReadTransaction.html#get-byte:A-
-   * use .get() or .getRange()
-   * When this method is done, we can work on MetadataReader
+   *       https://apple.github.io/foundationdb/javadoc/com/apple/foundationdb/ReadTransaction.html#get-byte:A-
+   *       use .get() or .getRange() When this method is done, we can work on MetadataReader
    * @return
    */
   public CloseableIterator<GeoWaveMetadata> iterator() {

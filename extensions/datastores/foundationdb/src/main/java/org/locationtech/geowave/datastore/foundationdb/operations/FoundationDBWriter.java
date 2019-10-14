@@ -21,7 +21,7 @@ public class FoundationDBWriter implements RowWriter {
   private Database db;
 
   public FoundationDBWriter(
-          final FoundationDBOperations fDBOperations,
+      final FoundationDBOperations fDBOperations,
       final FoundationDBClient client,
       final short adapterId,
       final String typeName,
