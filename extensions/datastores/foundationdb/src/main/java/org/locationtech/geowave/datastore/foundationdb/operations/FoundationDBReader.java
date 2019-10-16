@@ -198,6 +198,7 @@ public class FoundationDBReader implements RowReader<GeoWaveRow> {
     return iterator;
   }
 
+  @SuppressWarnings("unchecked")
   private CloseableIterator<GeoWaveRow> wrapResults(
       final Closeable closeable,
       final Iterator<GeoWaveRow> results,
