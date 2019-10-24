@@ -1,14 +1,26 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
+import com.apple.foundationdb.async.AsyncIterable;
+import com.apple.foundationdb.async.AsyncIterator;
+import com.apple.foundationdb.Database;
 import org.locationtech.geowave.core.index.ByteArrayRange;
-import org.locationtech.geowave.core.index.ByteArrayUtils;
 import org.locationtech.geowave.core.store.CloseableIterator;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import org.locationtech.geowave.core.store.entities.GeoWaveValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class FoundationDBIndexTable extends AbstractFoundationDBTable {
+  private final boolean requiresTimestamp;
+  private final byte[] partition;
+
+  public FoundationDBIndexTable(
+      final short adapterId,
+      final byte[] partition,
+      final boolean requiresTimestamp,
+      final boolean visibilityEnabled) {
+    super(adapterId, visibilityEnabled);
+    this.partition = partition;
+    this.requiresTimestamp = requiresTimestamp;
+  }
 
   public void delete(final byte[] sortKey, final byte[] dataId) {}
 
@@ -23,8 +35,24 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
   }
 
   public CloseableIterator<GeoWaveRow> iterator(final ByteArrayRange range) {
-    return null;
+    try {
+      Database db = getDb();
+      if (db == null) {
+        return new CloseableIterator.Empty<>();
+      }
+      AsyncIterable iterable = db.run(tr -> {
+        return tr.getRange(range.getStart(), range.getEnd());
+      });
+      AsyncIterator iterator = iterable.iterator();
+      return new FoundationDBRowIterator(
+          iterator,
+          adapterId,
+          partition,
+          requiresTimestamp,
+          visibilityEnabled);
+    } catch (Exception e) {
+      return new CloseableIterator.Empty<>();
+    }
   }
-
 
 }

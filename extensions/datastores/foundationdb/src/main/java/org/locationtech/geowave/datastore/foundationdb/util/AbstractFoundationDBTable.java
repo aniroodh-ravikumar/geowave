@@ -1,5 +1,6 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
+import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.FDBException;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -14,8 +15,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 abstract public class AbstractFoundationDBTable {
 
-  public AbstractFoundationDBTable() {
+  protected final short adapterId;
+  private Database db;
+  protected boolean visibilityEnabled;
+
+  public AbstractFoundationDBTable(final short adapterId, final boolean visibilityEnabled) {
     super();
+    this.adapterId = adapterId;
+    this.visibilityEnabled = visibilityEnabled;
   }
 
   public void delete(final byte[] key) {
@@ -42,14 +49,12 @@ abstract public class AbstractFoundationDBTable {
 
   @SuppressFBWarnings(
       justification = "double check for null is intentional to avoid synchronized blocks when not needed.")
-  protected FDB getWriteDb() {
-    return null;
-  }
-
-  @SuppressFBWarnings(
-      justification = "double check for null is intentional to avoid synchronized blocks when not needed.")
-  protected FDB getReadDb() {
-    return null;
+  protected Database getDb() {
+    if (db == null) {
+      FDB fdb = FDB.selectAPIVersion(610);
+      db = fdb.open();
+    }
+    return db;
   }
 
   private static class BatchWriter implements Runnable {
@@ -82,7 +87,5 @@ abstract public class AbstractFoundationDBTable {
       }
     }
   }
-
-
 
 }
