@@ -6,7 +6,6 @@ import com.apple.foundationdb.async.AsyncIterator;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import org.locationtech.geowave.core.index.ByteArrayRange;
-import org.locationtech.geowave.core.index.ByteArrayRange;
 import org.locationtech.geowave.core.index.ByteArrayUtils;
 import org.locationtech.geowave.core.store.CloseableIterator;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;

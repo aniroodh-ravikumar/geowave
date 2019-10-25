@@ -1,14 +1,26 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.NetworkOptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import java.io.Closeable;
 import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FoundationDBClient implements Closeable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBClient.class);
+
+  private final Cache<String, CacheKey> keyCache = Caffeine.newBuilder().build();
+  private final LoadingCache<IndexCacheKey, FoundationDBIndexTable> indexTableCache =
+      Caffeine.newBuilder().build(key -> loadIndexTable(key));
+
+  private final LoadingCache<DataIndexCacheKey, FoundationDBDataIndexTable> dataIndexTableCache =
+      Caffeine.newBuilder().build(key -> loadDataIndexTable(key));
+  private final LoadingCache<CacheKey, FoundationDBMetadataTable> metadataTableCache =
+      Caffeine.newBuilder().build(key -> loadMetadataTable(key));
 
   private final String subDirectory;
   private final boolean visibilityEnabled;
@@ -151,28 +163,37 @@ public class FoundationDBClient implements Closeable {
     }
   }
 
+  private FoundationDBIndexTable loadIndexTable(final IndexCacheKey key) {
+    return new FoundationDBIndexTable(
+        key.adapterId,
+        key.partition,
+        key.requiresTimestamp,
+        visibilityEnabled,
+        compactOnWrite,
+        batchWriteSize);
+  }
+
+  // TODO: Implement this
+  private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
+    return null;
+  }
+
+  // TODO: Implement this
+  private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {
+    return null;
+  }
+
   // TODO: Implement this function
   public synchronized FoundationDBIndexTable getIndexTable(
       final String tableName,
       final short adapterId,
       final byte[] partition,
       final boolean requiresTimestamp) {
-
-    // if (indexWriteOptions == null) {
-    //// FDB.loadLibrary();
-    // final int cores = Runtime.getRuntime().availableProcessors();
-    // indexWriteOptions =
-    // new Options().setCreateIfMissing(true).prepareForBulkLoad().setIncreaseParallelism(cores);
-    // indexReadOptions = new Options().setIncreaseParallelism(cores);
-    // batchWriteOptions =
-    // new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
-    // }
-    // final String directory = subDirectory + "/" + tableName;
-    // return indexTableCache.get(
-    // (IndexCacheKey) keyCache.get(
-    // directory,
-    // d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
-    return null;
+    final String directory = subDirectory + "/" + tableName;
+    return indexTableCache.get(
+        (IndexCacheKey) keyCache.get(
+            directory,
+            d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
   }
 
   // TODO: Implement this function too.
@@ -207,7 +228,6 @@ public class FoundationDBClient implements Closeable {
   public String getSubDirectory() {
     return subDirectory;
   }
-
 
   public void close() {}
 
