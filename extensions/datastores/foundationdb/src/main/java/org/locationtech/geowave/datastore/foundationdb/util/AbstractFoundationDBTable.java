@@ -19,19 +19,44 @@ abstract public class AbstractFoundationDBTable {
   private Database db;
   protected boolean visibilityEnabled;
 
-  public AbstractFoundationDBTable(final short adapterId, final boolean visibilityEnabled) {
+  // Batch Write Fields
+  // TODO: Figure out if FoundationDB supports batch writes
+  private WriteBatch currentBatch;
+  private final int batchSize;
+  protected boolean compactOnWrite;
+  private final boolean batchWrite;
+
+  public AbstractFoundationDBTable(
+      final short adapterId,
+      final boolean visibilityEnabled,
+      final boolean compactOnWrite,
+      final int batchSize) {
     super();
     this.adapterId = adapterId;
     this.visibilityEnabled = visibilityEnabled;
+    this.compactOnWrite = compactOnWrite;
+    this.batchSize = batchSize;
+    batchWrite = batchSize > 1;
   }
 
   public void delete(final byte[] key) {
-
+    Database db = getDb();
+    db.run(tr -> {
+      tr.clear(key);
+      return null;
+    });
   }
 
   @SuppressFBWarnings(
       justification = "The null check outside of the synchronized block is intentional to minimize the need for synchronization.")
-  protected void put(final byte[] key, final byte[] value) {}
+  protected void put(final byte[] key, final byte[] value) {
+    // TODO: Handle batchWrites if FoundationDB supports this
+    Database db = getDb();
+    db.run(tr -> {
+      tr.set(key, value);
+      return null;
+    });
+  }
 
   private void flushWriteQueue() {}
 
@@ -57,6 +82,7 @@ abstract public class AbstractFoundationDBTable {
     return db;
   }
 
+  // TODO: Figure out if FoundationDB supports batch writes
   private static class BatchWriter implements Runnable {
     private final WriteBatch dataToWrite;
     private final FDB db;

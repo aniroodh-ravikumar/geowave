@@ -15,7 +15,7 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
       final boolean visibilityEnabled,
       final boolean compactOnWrite,
       final int batchSize) {
-    super(adapterId, visibilityEnabled);
+    super(adapterId, visibilityEnabled, compactOnWrite, batchSize);
   }
 
   public synchronized void add(final byte[] dataId, final GeoWaveValue value) {}
