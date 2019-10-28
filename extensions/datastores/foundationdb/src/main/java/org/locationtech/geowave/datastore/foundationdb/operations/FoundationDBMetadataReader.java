@@ -39,24 +39,7 @@ public class FoundationDBMetadataReader implements MetadataReader {
       resultsIt = originalResults;
     } else {
       // TODO figure out the length of a typical primaryID array
-      originalResults =
-          table.iterator(
-              new byte[] {
-                  (byte) 0x0,
-                  (byte) 0x0,
-                  (byte) 0x0,
-                  (byte) 0x0,
-                  (byte) 0x0,
-                  (byte) 0x0,
-                  (byte) 0x0,},
-              new byte[] {
-                  (byte) 0xFF,
-                  (byte) 0xFF,
-                  (byte) 0xFF,
-                  (byte) 0xFF,
-                  (byte) 0xFF,
-                  (byte) 0xFF,
-                  (byte) 0xFF,});
+      originalResults = table.iterator();
       resultsIt = originalResults;
     }
     if (query.hasPrimaryId() || query.hasSecondaryId()) {

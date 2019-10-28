@@ -37,6 +37,10 @@ public class FoundationDBMetadataTable implements Closeable {
     this.writes = new LinkedList<>();
   }
 
+  public CloseableIterator<GeoWaveMetadata> iterator() {
+    return prefixIterator(new byte[] {});
+  }
+
   public CloseableIterator<GeoWaveMetadata> iterator(byte[] primaryID) {
     return prefixIterator(primaryID);
   }
@@ -109,9 +113,6 @@ public class FoundationDBMetadataTable implements Closeable {
    *       use .get() or .getRange() When this method is done, we can work on MetadataReader
    * @return
    */
-  public CloseableIterator<GeoWaveMetadata> iterator() {
-    return null;
-  }
 
   public void flush() {
     db.run(txn -> {
