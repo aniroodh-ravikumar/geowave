@@ -11,6 +11,7 @@ package org.locationtech.geowave.test;
 import org.locationtech.geowave.core.store.GenericStoreFactory;
 import org.locationtech.geowave.core.store.StoreFactoryOptions;
 import org.locationtech.geowave.core.store.api.DataStore;
+import org.locationtech.geowave.datastore.foundationdb.FoundationDBStoreFactoryFamily;
 import org.locationtech.geowave.test.annotation.GeoWaveTestStore.GeoWaveStoreType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +21,9 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
   private static final Logger LOGGER =
       LoggerFactory.getLogger(FoundationDBStoreTestEnvironment.class);
   private static final GenericStoreFactory<DataStore> STORE_FACTORY =
-      new FoundationDBStoreTestEnvironment().getDataStoreFactory();
+      new FoundationDBStoreFactoryFamily().getDataStoreFactory();
   private static FoundationDBStoreTestEnvironment singletonInstance = null;
-  private static final String DEFAULT_HOST = "localhost";
+  private static final String DEFAULT_HOST = "127.0.0.1";
   private static final int DEFAULT_PORT = 4000;
 
   private FoundationDBLocal fdbLocal;
