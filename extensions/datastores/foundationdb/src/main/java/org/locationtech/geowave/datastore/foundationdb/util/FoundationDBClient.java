@@ -1,19 +1,42 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
-import java.io.Closeable;
-import java.io.File;
-import java.util.Arrays;
-import java.util.Map.Entry;
+import com.apple.foundationdb.NetworkOptions;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import org.locationtech.geowave.core.store.operations.MetadataType;
+import java.io.Closeable;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class FoundationDBClient implements Closeable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBClient.class);
+
+  private final Cache<String, CacheKey> keyCache = Caffeine.newBuilder().build();
+  private final LoadingCache<IndexCacheKey, FoundationDBIndexTable> indexTableCache =
+      Caffeine.newBuilder().build(key -> loadIndexTable(key));
+
+  private final LoadingCache<DataIndexCacheKey, FoundationDBDataIndexTable> dataIndexTableCache =
+      Caffeine.newBuilder().build(key -> loadDataIndexTable(key));
+  private final LoadingCache<CacheKey, FoundationDBMetadataTable> metadataTableCache =
+      Caffeine.newBuilder().build(key -> loadMetadataTable(key));
+
+  private final String subDirectory;
+  private final boolean visibilityEnabled;
+  private final boolean compactOnWrite;
+  private final int batchWriteSize;
+
+  public FoundationDBClient(
+      final String subDirectory,
+      final boolean visibilityEnabled,
+      final boolean compactOnWrite,
+      final int batchWriteSize) {
+    this.subDirectory = subDirectory;
+    this.visibilityEnabled = visibilityEnabled;
+    this.compactOnWrite = compactOnWrite;
+    this.batchWriteSize = batchWriteSize;
+  }
 
   private static class CacheKey {
     protected final String directory;
@@ -138,6 +161,72 @@ public class FoundationDBClient implements Closeable {
       }
       return true;
     }
+  }
+
+  private FoundationDBIndexTable loadIndexTable(final IndexCacheKey key) {
+    return new FoundationDBIndexTable(
+        key.adapterId,
+        key.partition,
+        key.requiresTimestamp,
+        visibilityEnabled,
+        compactOnWrite,
+        batchWriteSize);
+  }
+
+  // TODO: Implement this
+  private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
+    return null;
+  }
+
+  // TODO: Implement this
+  private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {
+    return null;
+  }
+
+  // TODO: Implement this function
+  public synchronized FoundationDBIndexTable getIndexTable(
+      final String tableName,
+      final short adapterId,
+      final byte[] partition,
+      final boolean requiresTimestamp) {
+    final String directory = subDirectory + "/" + tableName;
+    return indexTableCache.get(
+        (IndexCacheKey) keyCache.get(
+            directory,
+            d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
+  }
+
+  // TODO: Implement this function too.
+  public synchronized FoundationDBDataIndexTable getDataIndexTable(
+      final String tableName,
+      final short adapterId) {
+    // if (indexWriteOptions == null) {
+    // FDB.loadLibrary();
+    // final int cores = Runtime.getRuntime().availableProcessors();
+    // indexWriteOptions =
+    // new Options().setCreateIfMissing(true).prepareForBulkLoad().setIncreaseParallelism(cores);
+    // indexReadOptions = new Options().setIncreaseParallelism(cores);
+    // batchWriteOptions =
+    // new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
+    // }
+    // final String directory = subDirectory + "/" + tableName;
+    // return dataIndexTableCache.get(
+    // (DataIndexCacheKey) keyCache.get(directory, d -> new DataIndexCacheKey(d, adapterId)));
+    return null;
+  }
+
+  protected static NetworkOptions indexWriteOptions = null;
+
+  public boolean isCompactOnWrite() {
+    return compactOnWrite;
+  }
+
+  public boolean isVisibilityEnabled() {
+    return visibilityEnabled;
+  }
+
+  public String getSubDirectory() {
+    return subDirectory;
   }
 
   public void close() {}

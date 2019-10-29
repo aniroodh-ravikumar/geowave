@@ -1,21 +1,8 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import com.apple.foundationdb.FDB;
-import com.apple.foundationdb.FDBException;
-import org.locationtech.geowave.core.index.ByteArrayUtils;
 import org.locationtech.geowave.core.store.CloseableIterator;
-import org.locationtech.geowave.core.store.base.dataidx.DataIndexUtils;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import org.locationtech.geowave.core.store.entities.GeoWaveValue;
-// import org.rocksdb.Options;
-// import org.rocksdb.ReadOptions;
-// import org.rocksdb.RocksDB;
-// import org.rocksdb.RocksIterator;
-// import org.rocksdb.Slice;
-// import org.rocksdb.WriteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,20 +10,15 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBDataIndexTable.class);
 
   public FoundationDBDataIndexTable(
-      // final Options writeOptions,
-      // final Options readOptions,
-      // final WriteOptions batchWriteOptions,
       final String subDirectory,
       final short adapterId,
       final boolean visibilityEnabled,
       final boolean compactOnWrite,
       final int batchSize) {
-    //
+    super(adapterId, visibilityEnabled, compactOnWrite, batchSize);
   }
 
-  public synchronized void add(final byte[] dataId, final GeoWaveValue value) {
-    // put(dataId, DataIndexUtils.serializeDataIndexValue(value, visibilityEnabled));
-  }
+  public synchronized void add(final byte[] dataId, final GeoWaveValue value) {}
 
   public CloseableIterator<GeoWaveRow> dataIndexIterator(final byte[][] dataIds) {
     return null;
