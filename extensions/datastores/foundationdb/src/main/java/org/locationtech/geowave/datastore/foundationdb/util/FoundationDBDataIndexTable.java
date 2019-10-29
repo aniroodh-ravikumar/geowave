@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import org.locationtech.geowave.core.store.CloseableIterator;
+import org.locationtech.geowave.core.store.base.dataidx.DataIndexUtils;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import org.locationtech.geowave.core.store.entities.GeoWaveValue;
 import org.slf4j.Logger;
@@ -47,12 +48,12 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
         dataIdxResults.put(dataId, value);
       }
       return new CloseableIterator.Wrapper(
-              dataIdsList.stream().filter(dataId -> dataIdxResults.containsKey(dataId)).map(
-                      dataId -> DataIndexUtils.deserializeDataIndexRow(
-                              dataId,
-                              adapterId,
-                              dataIdxResults.get(dataId),
-                              visibilityEnabled)).iterator());
+          dataIdsList.stream().filter(dataId -> dataIdxResults.containsKey(dataId)).map(
+              dataId -> DataIndexUtils.deserializeDataIndexRow(
+                  dataId,
+                  adapterId,
+                  dataIdxResults.get(dataId),
+                  visibilityEnabled)).iterator());
     } catch (final Exception e) {
       LOGGER.error("Unable to get values by data ID", e);
     }
@@ -67,28 +68,29 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
       return new CloseableIterator.Empty<>();
     }
     AsyncIterable iterable = db.run(tr -> {
-      byte[] start = startDataId != null ? startDataId: new byte[] {
-              (byte) 0x00,
-              (byte) 0x00,
-              (byte) 0x00,
-              (byte) 0x00,
-              (byte) 0x00,
-              (byte) 0x00,
-              (byte) 0x00};
-      byte[] end = endDataId != null ? endDataId : new byte[] {
-              (byte) 0xFF,
-              (byte) 0xFF,
-              (byte) 0xFF,
-              (byte) 0xFF,
-              (byte) 0xFF,
-              (byte) 0xFF,
-              (byte) 0xFF};
+      byte[] start =
+          startDataId != null ? startDataId
+              : new byte[] {
+                  (byte) 0x00,
+                  (byte) 0x00,
+                  (byte) 0x00,
+                  (byte) 0x00,
+                  (byte) 0x00,
+                  (byte) 0x00,
+                  (byte) 0x00};
+      byte[] end =
+          endDataId != null ? endDataId
+              : new byte[] {
+                  (byte) 0xFF,
+                  (byte) 0xFF,
+                  (byte) 0xFF,
+                  (byte) 0xFF,
+                  (byte) 0xFF,
+                  (byte) 0xFF,
+                  (byte) 0xFF};
       return tr.getRange(start, end);
     });
     AsyncIterator iterator = iterable.iterator();
-    return new FoundationDBDataIndexRowIterator(
-        iterator,
-        adapterId,
-        visibilityEnabled);
+    return new FoundationDBDataIndexRowIterator(iterator, adapterId, visibilityEnabled);
   }
 }

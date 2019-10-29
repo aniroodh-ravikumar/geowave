@@ -6,22 +6,22 @@ import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import com.apple.foundationdb.KeyValue;
 
 public class FoundationDBDataIndexRowIterator extends AbstractFoundationDBIterator<GeoWaveRow> {
-    private final short adapterId;
-    private final boolean visibilityEnabled;
+  private final short adapterId;
+  private final boolean visibilityEnabled;
 
-    public FoundationDBDataIndexRowIterator(
-            final AsyncIterator it,
-            final short adapterId,
-            final boolean visiblityEnabled) {
-        super(it);
-        this.adapterId = adapterId;
-        visibilityEnabled = visiblityEnabled;
-    }
+  public FoundationDBDataIndexRowIterator(
+      final AsyncIterator it,
+      final short adapterId,
+      final boolean visiblityEnabled) {
+    super(it);
+    this.adapterId = adapterId;
+    visibilityEnabled = visiblityEnabled;
+  }
 
-    @Override
-    protected GeoWaveRow readRow(final KeyValue keyValue) {
-        final byte[] key = keyValue.getKey();
-        final byte[] value = keyValue.getValue();
-        return DataIndexUtils.deserializeDataIndexRow(key, adapterId, value, visibilityEnabled);
-    }
+  @Override
+  protected GeoWaveRow readRow(final KeyValue keyValue) {
+    final byte[] key = keyValue.getKey();
+    final byte[] value = keyValue.getValue();
+    return DataIndexUtils.deserializeDataIndexRow(key, adapterId, value, visibilityEnabled);
+  }
 }
