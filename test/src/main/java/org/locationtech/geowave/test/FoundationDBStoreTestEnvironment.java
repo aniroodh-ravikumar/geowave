@@ -51,7 +51,8 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 
   @Override
   public void tearDown() throws Exception {
-    fdbLocal.stop();
+    if (fdbLocal != null)
+      fdbLocal.stop();
   }
 
   @Override
