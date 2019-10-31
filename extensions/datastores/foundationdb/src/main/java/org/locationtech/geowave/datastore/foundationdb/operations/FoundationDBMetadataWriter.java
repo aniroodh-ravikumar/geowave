@@ -14,12 +14,16 @@ public class FoundationDBMetadataWriter implements MetadataWriter {
 
   @Override
   public void write(GeoWaveMetadata metadata) {
-    table.add(metadata);
+    if (table != null) {
+      table.add(metadata);
+    }
   }
 
   @Override
   public void flush() {
-    table.flush();
+    if (table != null) {
+      table.flush();
+    }
   }
 
   @Override
