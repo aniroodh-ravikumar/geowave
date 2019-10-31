@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FoundationDBReader implements RowReader<GeoWaveRow> {
+public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
   private final CloseableIterator<GeoWaveRow> iterator;
 
   public FoundationDBReader(

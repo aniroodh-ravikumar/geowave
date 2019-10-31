@@ -6,6 +6,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import java.io.Closeable;
 import java.util.Arrays;
+import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,6 +195,12 @@ public class FoundationDBClient implements Closeable {
         (IndexCacheKey) keyCache.get(
             directory,
             d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
+  }
+
+  public synchronized FoundationDBMetadataTable getMetadataTable(final MetadataType type) {
+    final String directory = subDirectory + "/" + type.name();
+    return metadataTableCache.get(
+        keyCache.get(directory, d -> new CacheKey(d, type.equals(MetadataType.STATS))));
   }
 
   // TODO: Implement this function too.

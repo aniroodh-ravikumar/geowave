@@ -52,7 +52,7 @@ public class FoundationDBLocal {
   }
 
   public void stop() {
-    if(db != null){
+    if (db != null) {
       db.close();
     }
   }
