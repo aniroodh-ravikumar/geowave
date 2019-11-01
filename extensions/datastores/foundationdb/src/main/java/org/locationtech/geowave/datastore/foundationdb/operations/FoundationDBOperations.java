@@ -16,10 +16,13 @@ import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 // TODO: implement this
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
-
+  private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBOperations.class);
   public final FDB fdb;
   private static final boolean READER_ASYNC = true;
   private final FoundationDBClient client;
@@ -49,22 +52,17 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
 
   @Override
   public void close() throws IOException {
-
-  }
-
-  @Override
-  public RowReader<GeoWaveRow> createReader(RecordReaderParams readerParams) {
-    return null;
+    client.close();
   }
 
   @Override
   public boolean indexExists(String indexName) throws IOException {
-    return false;
+    return client.indexTableExists(indexName);
   }
 
   @Override
   public boolean metadataExists(MetadataType type) throws IOException {
-    return false;
+    return client.metadataTableExists(type);
   }
 
   @Override
@@ -119,8 +117,12 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
 
   @Override
   public <T> RowReader<T> createReader(final ReaderParams<T> readerParams) {
-    // TODO implement
-    return null;
+    return new FoundationDBReader(client, readerParams, READER_ASYNC);
+  }
+
+  @Override
+  public RowReader<GeoWaveRow> createReader(final RecordReaderParams readerParams) {
+    return new FoundationDBReader<>(client, readerParams);
   }
 
   @Override
@@ -134,6 +136,6 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
       PersistentAdapterStore adapterStore,
       InternalAdapterStore internalAdapterStore,
       String... authorizations) {
-    return null;
+    return new FoundationDBRowDeleter(client, adapterStore, internalAdapterStore, indexName);
   }
 }

@@ -6,6 +6,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import java.io.Closeable;
 import java.util.Arrays;
+import java.io.File;
 import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,29 +198,41 @@ public class FoundationDBClient implements Closeable {
             d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
   }
 
+  public boolean indexTableExists(final String indexName) {
+    // then look for prefixes of this index directory in which case there is
+    // a partition key
+    for (final String key : keyCache.asMap().keySet()) {
+      if (key.substring(subDirectory.length()).contains(indexName)) {
+        return true;
+      }
+    }
+    // this could have been created by a different process so check the
+    // directory listing
+    final String[] listing = new File(subDirectory).list((dir, name) -> name.contains(indexName));
+    return (listing != null) && (listing.length > 0);
+  }
+
+
   public synchronized FoundationDBMetadataTable getMetadataTable(final MetadataType type) {
     final String directory = subDirectory + "/" + type.name();
     return metadataTableCache.get(
         keyCache.get(directory, d -> new CacheKey(d, type.equals(MetadataType.STATS))));
   }
 
+  public boolean metadataTableExists(final MetadataType type) {
+    // this could have been created by a different process so check the
+    // directory listing
+    return (keyCache.getIfPresent(subDirectory + "/" + type.name()) != null)
+            || new File(subDirectory + "/" + type.name()).exists();
+  }
+
   // TODO: Implement this function too.
   public synchronized FoundationDBDataIndexTable getDataIndexTable(
       final String tableName,
       final short adapterId) {
-    // if (indexWriteOptions == null) {
-    // FDB.loadLibrary();
-    // final int cores = Runtime.getRuntime().availableProcessors();
-    // indexWriteOptions =
-    // new Options().setCreateIfMissing(true).prepareForBulkLoad().setIncreaseParallelism(cores);
-    // indexReadOptions = new Options().setIncreaseParallelism(cores);
-    // batchWriteOptions =
-    // new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
-    // }
-    // final String directory = subDirectory + "/" + tableName;
-    // return dataIndexTableCache.get(
-    // (DataIndexCacheKey) keyCache.get(directory, d -> new DataIndexCacheKey(d, adapterId)));
-    return null;
+    final String directory = subDirectory + "/" + tableName;
+    return dataIndexTableCache.get(
+            (DataIndexCacheKey) keyCache.get(directory, d -> new DataIndexCacheKey(d, adapterId)));
   }
 
   protected static NetworkOptions indexWriteOptions = null;
