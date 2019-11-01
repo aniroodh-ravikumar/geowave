@@ -17,6 +17,7 @@ import org.locationtech.geowave.core.store.adapter.InternalDataAdapter;
 import org.locationtech.geowave.core.store.adapter.RowMergingDataAdapter;
 import org.locationtech.geowave.core.store.base.dataidx.DataIndexUtils;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
+import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.locationtech.geowave.core.store.operations.RangeReaderParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,15 @@ public class FoundationDBUtils {
       partitionStr = "";
     }
     return setNamePrefix + partitionStr;
+  }
+
+  public static FoundationDBMetadataTable getMetadataTable(
+      final FoundationDBClient client,
+      final MetadataType metadataType) {
+    // stats also store a timestamp because stats can be the exact same but
+    // need to still be unique (consider multiple count statistics that are
+    // exactly the same count, but need to be merged)
+    return client.getMetadataTable(metadataType);
   }
 
   public static FoundationDBDataIndexTable getDataIndexTable(

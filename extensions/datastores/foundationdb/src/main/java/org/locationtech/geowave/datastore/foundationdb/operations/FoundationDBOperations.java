@@ -1,7 +1,7 @@
 package org.locationtech.geowave.datastore.foundationdb.operations;
 
-import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
+import org.apache.commons.io.FileUtils;
 import org.locationtech.geowave.core.store.adapter.InternalAdapterStore;
 import org.locationtech.geowave.core.store.adapter.InternalDataAdapter;
 import org.locationtech.geowave.core.store.adapter.PersistentAdapterStore;
@@ -9,18 +9,40 @@ import org.locationtech.geowave.core.store.api.Index;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import org.locationtech.geowave.core.store.operations.*;
 import org.locationtech.geowave.datastore.foundationdb.config.FoundationDBRequiredOptions;
+import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClient;
+import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import org.locationtech.geowave.mapreduce.MapReduceDataStoreOperations;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 
 // TODO: implement this
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
 
   public final FDB fdb;
+  private static final boolean READER_ASYNC = true;
+  private final FoundationDBClient client;
+  private final String directory;
+  private final boolean visibilityEnabled;
+  private final boolean compactOnWrite;
+  private final int batchWriteSize;
 
   public FoundationDBOperations(final FoundationDBRequiredOptions options) {
     this.fdb = FDB.selectAPIVersion(610);
+    this.directory =
+        options.getDirectory()
+            + File.separator
+            + ((options.getGeoWaveNamespace() == null)
+                || options.getGeoWaveNamespace().trim().isEmpty()
+                || "null".equalsIgnoreCase(options.getGeoWaveNamespace()) ? "default"
+                    : options.getGeoWaveNamespace());
+    this.visibilityEnabled = options.getStoreOptions().isVisibilityEnabled();
+    this.compactOnWrite = options.isCompactOnWrite();
+    this.batchWriteSize = options.getBatchWriteSize();
+    this.client =
+        new FoundationDBClient(directory, visibilityEnabled, compactOnWrite, batchWriteSize);
+
     // this does not open the database
     // open the database with fdb.open()
   }
@@ -47,7 +69,8 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
 
   @Override
   public void deleteAll() throws Exception {
-
+    close();
+    FileUtils.deleteDirectory(new File(directory));
   }
 
   @Override
@@ -66,27 +89,43 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
 
   @Override
   public RowWriter createWriter(Index index, InternalDataAdapter<?> adapter) {
-    return null;
+    return new FoundationDBWriter(
+        this,
+        this.client,
+        adapter.getAdapterId(),
+        adapter.getTypeName(),
+        index.getName(),
+        true);
   }
 
   @Override
   public MetadataWriter createMetadataWriter(MetadataType metadataType) {
-    return null;
+    return new FoundationDBMetadataWriter(FoundationDBUtils.getMetadataTable(client, metadataType));
   }
 
   @Override
   public MetadataReader createMetadataReader(MetadataType metadataType) {
-    return null;
+    return new FoundationDBMetadataReader(
+        FoundationDBUtils.getMetadataTable(client, metadataType),
+        metadataType);
   }
 
   @Override
   public MetadataDeleter createMetadataDeleter(MetadataType metadataType) {
+    return new FoundationDBMetadataDeleter(
+        FoundationDBUtils.getMetadataTable(client, metadataType),
+        metadataType);
+  }
+
+  @Override
+  public <T> RowReader<T> createReader(final ReaderParams<T> readerParams) {
+    // TODO implement
     return null;
   }
 
   @Override
-  public <T> RowReader<T> createReader(ReaderParams<T> readerParams) {
-    return null;
+  public RowReader<GeoWaveRow> createReader(final DataIndexReaderParams readerParams) {
+    return new FoundationDBReader<>(client, readerParams);
   }
 
   @Override
