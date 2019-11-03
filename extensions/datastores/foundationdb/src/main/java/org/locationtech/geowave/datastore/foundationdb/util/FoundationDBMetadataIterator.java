@@ -3,6 +3,8 @@ package org.locationtech.geowave.datastore.foundationdb.util;
 import com.apple.foundationdb.KeyValue;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+
+import com.apple.foundationdb.async.AsyncIterator;
 import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
 
 public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<GeoWaveMetadata> {
@@ -11,9 +13,9 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
   private final boolean visibilityEnabled;
 
   public FoundationDBMetadataIterator(
-      Iterator<KeyValue> it,
-      final boolean containsTimestamp,
-      final boolean visibilityEnabled) {
+          AsyncIterator<KeyValue> it,
+          final boolean containsTimestamp,
+          final boolean visibilityEnabled) {
     super(it);
     this.containsTimestamp = containsTimestamp;
     this.visibilityEnabled = visibilityEnabled;
