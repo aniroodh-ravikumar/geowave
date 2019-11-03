@@ -44,7 +44,7 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
     this.compactOnWrite = options.isCompactOnWrite();
     this.batchWriteSize = options.getBatchWriteSize();
     this.client =
-        new FoundationDBClient(directory, visibilityEnabled, compactOnWrite, batchWriteSize);
+        new FoundationDBClient(this, directory, visibilityEnabled, compactOnWrite, batchWriteSize);
 
     // this does not open the database
     // open the database with fdb.open()
@@ -88,7 +88,6 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
   @Override
   public RowWriter createWriter(Index index, InternalDataAdapter<?> adapter) {
     return new FoundationDBWriter(
-        this,
         this.client,
         adapter.getAdapterId(),
         adapter.getTypeName(),

@@ -6,6 +6,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper;
+import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +33,14 @@ public class FoundationDBClient implements Closeable {
   private final boolean visibilityEnabled;
   private final boolean compactOnWrite;
   private final int batchWriteSize;
+  private final FoundationDBOperations fDBOperations;
+
+  public FoundationDBOperations getfDBOperations() {
+    return fDBOperations;
+  }
 
   public FoundationDBClient(
+          final FoundationDBOperations fDBOperations,
       final String subDirectory,
       final boolean visibilityEnabled,
       final boolean compactOnWrite,
@@ -42,6 +49,7 @@ public class FoundationDBClient implements Closeable {
     this.visibilityEnabled = visibilityEnabled;
     this.compactOnWrite = compactOnWrite;
     this.batchWriteSize = batchWriteSize;
+    this.fDBOperations = fDBOperations;
   }
 
   private static class CacheKey {
@@ -194,9 +202,7 @@ public class FoundationDBClient implements Closeable {
       LOGGER.error("Unable to create directory for foundationdb store '" + key.directory + "'");
     }
     return new FoundationDBMetadataTable(
-        // TODO: replace this with the actual operations instance that should be passed as a
-        // constructor parameter
-        factoryHelper.createOperations(factoryHelper.createOptionsInstance()),
+            fDBOperations,
         key.requiresTimestamp,
         visibilityEnabled);
   }
@@ -243,7 +249,6 @@ public class FoundationDBClient implements Closeable {
         || new File(subDirectory + "/" + type.name()).exists();
   }
 
-  // TODO: Implement this function too.
   public synchronized FoundationDBDataIndexTable getDataIndexTable(
       final String tableName,
       final short adapterId) {

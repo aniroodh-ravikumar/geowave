@@ -21,7 +21,6 @@ public class FoundationDBWriter implements RowWriter {
   private Database db;
 
   public FoundationDBWriter(
-      final FoundationDBOperations fDBOperations,
       final FoundationDBClient client,
       final short adapterId,
       final String typeName,
@@ -30,7 +29,7 @@ public class FoundationDBWriter implements RowWriter {
     this.client = client;
     this.adapterId = adapterId;
     this.isTimestampRequired = isTimestampRequired;
-    this.db = fDBOperations.fdb.open();
+    this.db = client.getfDBOperations().fdb.open();
   }
 
   private FoundationDBIndexTable getTable(final byte[] partitionKey) {
