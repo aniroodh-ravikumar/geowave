@@ -7,6 +7,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import java.io.Closeable;
 import java.util.Arrays;
 import java.io.File;
+import java.util.Objects;
 import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +18,12 @@ public class FoundationDBClient implements Closeable {
 
   private final Cache<String, CacheKey> keyCache = Caffeine.newBuilder().build();
   private final LoadingCache<IndexCacheKey, FoundationDBIndexTable> indexTableCache =
-      Caffeine.newBuilder().build(key -> loadIndexTable(key));
+      Caffeine.newBuilder().build(this::loadIndexTable);
 
   private final LoadingCache<DataIndexCacheKey, FoundationDBDataIndexTable> dataIndexTableCache =
-      Caffeine.newBuilder().build(key -> loadDataIndexTable(key));
+      Caffeine.newBuilder().build(this::loadDataIndexTable);
   private final LoadingCache<CacheKey, FoundationDBMetadataTable> metadataTableCache =
-      Caffeine.newBuilder().build(key -> loadMetadataTable(key));
+      Caffeine.newBuilder().build(this::loadMetadataTable);
 
   private final String subDirectory;
   private final boolean visibilityEnabled;
@@ -193,9 +194,10 @@ public class FoundationDBClient implements Closeable {
       final boolean requiresTimestamp) {
     final String directory = subDirectory + "/" + tableName;
     return indexTableCache.get(
-        (IndexCacheKey) keyCache.get(
-            directory,
-            d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
+        (IndexCacheKey) Objects.requireNonNull(
+            keyCache.get(
+                directory,
+                d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp))));
   }
 
   public boolean indexTableExists(final String indexName) {
@@ -216,14 +218,15 @@ public class FoundationDBClient implements Closeable {
   public synchronized FoundationDBMetadataTable getMetadataTable(final MetadataType type) {
     final String directory = subDirectory + "/" + type.name();
     return metadataTableCache.get(
-        keyCache.get(directory, d -> new CacheKey(d, type.equals(MetadataType.STATS))));
+        Objects.requireNonNull(
+            keyCache.get(directory, d -> new CacheKey(d, type.equals(MetadataType.STATS)))));
   }
 
   public boolean metadataTableExists(final MetadataType type) {
     // this could have been created by a different process so check the
     // directory listing
     return (keyCache.getIfPresent(subDirectory + "/" + type.name()) != null)
-            || new File(subDirectory + "/" + type.name()).exists();
+        || new File(subDirectory + "/" + type.name()).exists();
   }
 
   // TODO: Implement this function too.
@@ -232,7 +235,8 @@ public class FoundationDBClient implements Closeable {
       final short adapterId) {
     final String directory = subDirectory + "/" + tableName;
     return dataIndexTableCache.get(
-            (DataIndexCacheKey) keyCache.get(directory, d -> new DataIndexCacheKey(d, adapterId)));
+        (DataIndexCacheKey) Objects.requireNonNull(
+            keyCache.get(directory, d -> new DataIndexCacheKey(d, adapterId))));
   }
 
   protected static NetworkOptions indexWriteOptions = null;

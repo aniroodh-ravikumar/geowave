@@ -42,9 +42,9 @@ public class FoundationDBUtils {
   }
 
   public static String getTableName(
-          final String typeName,
-          final String indexName,
-          final byte[] partitionKey) {
+      final String typeName,
+      final String indexName,
+      final byte[] partitionKey) {
     return getTableName(getTablePrefix(typeName, indexName), partitionKey);
   }
 

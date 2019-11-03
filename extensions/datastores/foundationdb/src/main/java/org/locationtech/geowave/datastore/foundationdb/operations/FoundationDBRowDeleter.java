@@ -27,118 +27,118 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 
 
 public class FoundationDBRowDeleter implements RowDeleter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBRowDeleter.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBRowDeleter.class);
 
-    private static class CacheKey {
-        private final String tableName;
-        private final short adapterId;
-        private final byte[] partition;
+  private static class CacheKey {
+    private final String tableName;
+    private final short adapterId;
+    private final byte[] partition;
 
-        public CacheKey(final String tableName, final short adapterId, final byte[] partition) {
-            this.tableName = tableName;
-            this.adapterId = adapterId;
-            this.partition = partition;
-        }
-
-        @Override
-        public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = (prime * result) + ((tableName == null) ? 0 : tableName.hashCode());
-            return result;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final CacheKey other = (CacheKey) obj;
-            if (tableName == null) {
-                if (other.tableName != null) {
-                    return false;
-                }
-            } else if (!tableName.equals(other.tableName)) {
-                return false;
-            }
-            return true;
-        }
-    }
-
-    private final LoadingCache<CacheKey, FoundationDBIndexTable> tableCache =
-            Caffeine.newBuilder().build(nameAndAdapterId -> getIndexTable(nameAndAdapterId));
-    private final FoundationDBClient client;
-    private final PersistentAdapterStore adapterStore;
-    private final InternalAdapterStore internalAdapterStore;
-    private final String indexName;
-
-    public FoundationDBRowDeleter(
-            final FoundationDBClient client,
-            final PersistentAdapterStore adapterStore,
-            final InternalAdapterStore internalAdapterStore,
-            final String indexName) {
-        this.client = client;
-        this.adapterStore = adapterStore;
-        this.internalAdapterStore = internalAdapterStore;
-        this.indexName = indexName;
+    public CacheKey(final String tableName, final short adapterId, final byte[] partition) {
+      this.tableName = tableName;
+      this.adapterId = adapterId;
+      this.partition = partition;
     }
 
     @Override
-    public void close() {
-        tableCache.asMap().forEach((k, v) -> v.flush());
-        tableCache.invalidateAll();
-    }
-
-    private FoundationDBIndexTable getIndexTable(final CacheKey cacheKey) {
-        return FoundationDBUtils.getIndexTable(
-                client,
-                cacheKey.tableName,
-                cacheKey.adapterId,
-                cacheKey.partition,
-                FoundationDBUtils.isSortByTime(adapterStore.getAdapter(cacheKey.adapterId)));
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = (prime * result) + ((tableName == null) ? 0 : tableName.hashCode());
+      return result;
     }
 
     @Override
-    public void delete(final GeoWaveRow row) {
-        final FoundationDBIndexTable table =
-                tableCache.get(
-                        new CacheKey(
-                                FoundationDBUtils.getTableName(
-                                        internalAdapterStore.getTypeName(row.getAdapterId()),
-                                        indexName,
-                                        row.getPartitionKey()),
-                                row.getAdapterId(),
-                                row.getPartitionKey()));
-        if (row instanceof GeoWaveRowImpl) {
-            final GeoWaveKey key = ((GeoWaveRowImpl) row).getKey();
-            if (key instanceof FoundationDBRow) {
-                deleteRow(table, (FoundationDBRow) key);
-            } else {
-                LOGGER.info(
-                        "Unable to convert scanned row into FoundationDBRow for deletion.  Row is of type GeoWaveRowImpl.");
-                table.delete(key.getSortKey(), key.getDataId());
-            }
-        } else if (row instanceof FoundationDBRow) {
-            deleteRow(table, (FoundationDBRow) row);
-        } else {
-            LOGGER.info(
-                    "Unable to convert scanned row into FoundationDBRow for deletion. Row is of type "
-                            + row.getClass());
-            table.delete(row.getSortKey(), row.getDataId());
+    public boolean equals(final Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      final CacheKey other = (CacheKey) obj;
+      if (tableName == null) {
+        if (other.tableName != null) {
+          return false;
         }
+      } else if (!tableName.equals(other.tableName)) {
+        return false;
+      }
+      return true;
     }
+  }
 
-    private static void deleteRow(final FoundationDBIndexTable table, final FoundationDBRow row) {
-        Arrays.stream(row.getKeys()).forEach(k -> table.delete(k));
+  private final LoadingCache<CacheKey, FoundationDBIndexTable> tableCache =
+      Caffeine.newBuilder().build(nameAndAdapterId -> getIndexTable(nameAndAdapterId));
+  private final FoundationDBClient client;
+  private final PersistentAdapterStore adapterStore;
+  private final InternalAdapterStore internalAdapterStore;
+  private final String indexName;
+
+  public FoundationDBRowDeleter(
+      final FoundationDBClient client,
+      final PersistentAdapterStore adapterStore,
+      final InternalAdapterStore internalAdapterStore,
+      final String indexName) {
+    this.client = client;
+    this.adapterStore = adapterStore;
+    this.internalAdapterStore = internalAdapterStore;
+    this.indexName = indexName;
+  }
+
+  @Override
+  public void close() {
+    tableCache.asMap().forEach((k, v) -> v.flush());
+    tableCache.invalidateAll();
+  }
+
+  private FoundationDBIndexTable getIndexTable(final CacheKey cacheKey) {
+    return FoundationDBUtils.getIndexTable(
+        client,
+        cacheKey.tableName,
+        cacheKey.adapterId,
+        cacheKey.partition,
+        FoundationDBUtils.isSortByTime(adapterStore.getAdapter(cacheKey.adapterId)));
+  }
+
+  @Override
+  public void delete(final GeoWaveRow row) {
+    final FoundationDBIndexTable table =
+        tableCache.get(
+            new CacheKey(
+                FoundationDBUtils.getTableName(
+                    internalAdapterStore.getTypeName(row.getAdapterId()),
+                    indexName,
+                    row.getPartitionKey()),
+                row.getAdapterId(),
+                row.getPartitionKey()));
+    if (row instanceof GeoWaveRowImpl) {
+      final GeoWaveKey key = ((GeoWaveRowImpl) row).getKey();
+      if (key instanceof FoundationDBRow) {
+        deleteRow(table, (FoundationDBRow) key);
+      } else {
+        LOGGER.info(
+            "Unable to convert scanned row into FoundationDBRow for deletion.  Row is of type GeoWaveRowImpl.");
+        table.delete(key.getSortKey(), key.getDataId());
+      }
+    } else if (row instanceof FoundationDBRow) {
+      deleteRow(table, (FoundationDBRow) row);
+    } else {
+      LOGGER.info(
+          "Unable to convert scanned row into FoundationDBRow for deletion. Row is of type "
+              + row.getClass());
+      table.delete(row.getSortKey(), row.getDataId());
     }
+  }
 
-    @Override
-    public void flush() {}
+  private static void deleteRow(final FoundationDBIndexTable table, final FoundationDBRow row) {
+    Arrays.stream(row.getKeys()).forEach(k -> table.delete(k));
+  }
+
+  @Override
+  public void flush() {}
 }
 
