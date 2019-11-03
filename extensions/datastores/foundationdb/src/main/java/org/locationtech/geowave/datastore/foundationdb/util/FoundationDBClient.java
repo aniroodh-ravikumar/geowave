@@ -4,13 +4,15 @@ import com.apple.foundationdb.NetworkOptions;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import java.io.Closeable;
-import java.util.Arrays;
-import java.io.File;
-import java.util.Objects;
 import org.locationtech.geowave.core.store.operations.MetadataType;
+import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class FoundationDBClient implements Closeable {
 
@@ -24,6 +26,7 @@ public class FoundationDBClient implements Closeable {
       Caffeine.newBuilder().build(this::loadDataIndexTable);
   private final LoadingCache<CacheKey, FoundationDBMetadataTable> metadataTableCache =
       Caffeine.newBuilder().build(this::loadMetadataTable);
+  private final FoundationDBFactoryHelper factoryHelper = new FoundationDBFactoryHelper();
 
   private final String subDirectory;
   private final boolean visibilityEnabled;
@@ -176,17 +179,28 @@ public class FoundationDBClient implements Closeable {
         batchWriteSize);
   }
 
-  // TODO: Implement this
   private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
-    return null;
+    return new FoundationDBDataIndexTable(
+        subDirectory,
+        key.adapterId,
+        visibilityEnabled,
+        compactOnWrite,
+        batchWriteSize);
   }
 
-  // TODO: Implement this
   private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {
-    return null;
+    final File dir = new File(key.directory);
+    if (!dir.exists() && !dir.mkdirs()) {
+      LOGGER.error("Unable to create directory for foundationdb store '" + key.directory + "'");
+    }
+    return new FoundationDBMetadataTable(
+        // TODO: replace this with the actual operations instance that should be passed as a
+        // constructor parameter
+        factoryHelper.createOperations(factoryHelper.createOptionsInstance()),
+        key.requiresTimestamp,
+        visibilityEnabled);
   }
 
-  // TODO: Implement this function
   public synchronized FoundationDBIndexTable getIndexTable(
       final String tableName,
       final short adapterId,
