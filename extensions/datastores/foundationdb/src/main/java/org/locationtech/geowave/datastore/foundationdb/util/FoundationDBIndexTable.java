@@ -90,15 +90,7 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    byte[] start =
-        new byte[] {
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00};
+    byte[] start = new byte[0];
     byte[] end =
         new byte[] {
             (byte) 0xFF,
