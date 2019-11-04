@@ -90,10 +90,17 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    // TODO: Figure out what range should be.
-    // I think we should the range should begin at the beginning of the DB.
-    // return iterator(range)
-    return null;
+    byte[] start = new byte[0];
+    byte[] end =
+        new byte[] {
+            (byte) 0xFF,
+            (byte) 0xFF,
+            (byte) 0xFF,
+            (byte) 0xFF,
+            (byte) 0xFF,
+            (byte) 0xFF,
+            (byte) 0xFF};
+    return iterator(new ByteArrayRange(start, end));
   }
 
   public CloseableIterator<GeoWaveRow> iterator(final ByteArrayRange range) {
