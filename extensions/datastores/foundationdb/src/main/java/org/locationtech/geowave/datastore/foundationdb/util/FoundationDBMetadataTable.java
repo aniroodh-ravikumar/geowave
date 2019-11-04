@@ -16,6 +16,7 @@ import java.io.Closeable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class FoundationDBMetadataTable implements Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBMetadataTable.class);
@@ -36,8 +37,16 @@ public class FoundationDBMetadataTable implements Closeable {
     this.writes = new LinkedList<>();
   }
 
+  public CloseableIterator<GeoWaveMetadata> iterator(byte[] primaryID) {
+    return prefixIterator(primaryID);
+  }
+
+  public CloseableIterator<GeoWaveMetadata> iterator(byte[] primaryID, byte[] secondaryID) {
+    return prefixIterator(ByteArrayUtils.combineArrays(primaryID, secondaryID));
+  }
+
   private CloseableIterator<GeoWaveMetadata> prefixIterator(final byte[] prefix) {
-    Transaction txn = db.createTransaction();
+    Transaction txn = this.db.createTransaction();
     AsyncIterable<KeyValue> iterable = txn.getRange(prefix, ByteArrayUtils.getNextPrefix(prefix));
     // TODO: can this class be asynchronous?
     return new FoundationDBMetadataIterator(
