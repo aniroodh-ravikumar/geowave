@@ -3,22 +3,36 @@ package org.locationtech.geowave.datastore.foundationdb.util;
 import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.FDBException;
+import com.apple.foundationdb.KeyValue;
+import com.google.common.util.concurrent.MoreExecutors;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.util.concurrent.Semaphore;
-import org.iq80.leveldb.WriteBatch;
+import java.util.ArrayList;
+import java.util.concurrent.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 abstract public class AbstractFoundationDBTable {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFoundationDBTable.class);
+  private static final int BATCH_WRITE_THREAD_SIZE = 16;
+  private static final ExecutorService BATCH_WRITE_THREADS =
+      MoreExecutors.getExitingExecutorService(
+          (ThreadPoolExecutor) Executors.newFixedThreadPool(BATCH_WRITE_THREAD_SIZE));
+  private static final int MAX_CONCURRENT_WRITE = 100;
+  // only allow so many outstanding async reads or writes, use this semaphore
+  // to control it
+  private final Object BATCH_WRITE_MUTEX = new Object();
+  private final Semaphore writeSemaphore = new Semaphore(MAX_CONCURRENT_WRITE);
 
   protected final short adapterId;
   private Database db;
   protected boolean visibilityEnabled;
 
   // Batch Write Fields
-  // TODO: Figure out if FoundationDB supports batch writes
-  private WriteBatch currentBatch;
+  private ArrayList<KeyValue> currentBatch;
   private final int batchSize;
   protected boolean compactOnWrite;
   private final boolean batchWrite;
+  protected boolean readerDirty = false;
 
   public AbstractFoundationDBTable(
       final short adapterId,
@@ -35,6 +49,7 @@ abstract public class AbstractFoundationDBTable {
 
   public void delete(final byte[] key) {
     Database db = getDb();
+    readerDirty = true;
     db.run(tr -> {
       tr.clear(key);
       return null;
@@ -44,64 +59,150 @@ abstract public class AbstractFoundationDBTable {
   @SuppressFBWarnings(
       justification = "The null check outside of the synchronized block is intentional to minimize the need for synchronization.")
   protected void put(final byte[] key, final byte[] value) {
-    // TODO: Handle batchWrites if FoundationDB supports this
     Database db = getDb();
-    db.run(tr -> {
-      tr.set(key, value);
-      return null;
-    });
+    if (batchWrite) {
+      ArrayList<KeyValue> thisBatch = currentBatch;
+      if (thisBatch == null) {
+        synchronized (BATCH_WRITE_MUTEX) {
+          if (currentBatch == null) {
+            currentBatch = new ArrayList<>();
+          }
+          thisBatch = currentBatch;
+        }
+      }
+      try {
+        KeyValue keyValue = new KeyValue(key, value);
+        thisBatch.add(keyValue);
+      } catch (final FDBException e) {
+        LOGGER.warn("Unable to add data to batched write", e);
+      }
+      if (thisBatch.size() >= batchSize) {
+        synchronized (BATCH_WRITE_MUTEX) {
+          if (currentBatch != null) {
+            flushWriteQueue();
+          }
+        }
+      }
+    } else {
+      readerDirty = true;
+      db.run(tr -> {
+        tr.set(key, value);
+        return null;
+      });
+    }
   }
 
-  private void flushWriteQueue() {}
+  private void flushWriteQueue() {
+    try {
+      writeSemaphore.acquire();
+      readerDirty = true;
+      CompletableFuture.runAsync(
+          new BatchWriter(currentBatch, getDb(), writeSemaphore),
+          BATCH_WRITE_THREADS);
+    } catch (final InterruptedException e) {
+      LOGGER.warn("async write semaphore interrupted", e);
+      writeSemaphore.release();
+    }
+    currentBatch = null;
+  }
 
   @SuppressFBWarnings(
       justification = "The null check outside of the synchronized block is intentional to minimize the need for synchronization.")
-  public void flush() {}
+  public void flush() {
+    if (batchWrite) {
+      synchronized (BATCH_WRITE_MUTEX) {
+        if (currentBatch != null) {
+          flushWriteQueue();
+        }
+        waitForBatchWrite();
+      }
+    }
+    internalFlush();
+  }
 
-  protected void internalFlush() {}
+  protected void internalFlush() {
+    // force re-opening a reader to catch the updates from this write
+    if (readerDirty && (db != null)) {
+      synchronized (this) {
+        if (db != null) {
+          db.close();
+          db = null;
+        }
+      }
+    }
+  }
 
-  public void compact() {}
+  private void waitForBatchWrite() {
+    if (batchWrite) {
+      // need to wait for all asynchronous batches to finish writing
+      // before exiting close() method
+      try {
+        writeSemaphore.acquire(MAX_CONCURRENT_WRITE);
+      } catch (final InterruptedException e) {
+        LOGGER.warn("Unable to wait for batch write to complete");
+      }
+      writeSemaphore.release(MAX_CONCURRENT_WRITE);
+    }
+  }
 
-  private void waitForBatchWrite() {}
-
-  public void close() {}
+  public void close() {
+    waitForBatchWrite();
+    synchronized (this) {
+      if (db != null) {
+        db.close();
+        db = null;
+      }
+    }
+  }
 
   @SuppressFBWarnings(
       justification = "double check for null is intentional to avoid synchronized blocks when not needed.")
   protected Database getDb() {
+    // avoid synchronization if unnecessary by checking for null outside
+    // synchronized block
     if (db == null) {
-      FDB fdb = FDB.selectAPIVersion(610);
-      db = fdb.open();
+      synchronized (this) {
+        // check again within synchronized block
+        if (db == null) {
+          try {
+            readerDirty = false;
+            FDB fdb = FDB.selectAPIVersion(610);
+            db = fdb.open();
+          } catch (final FDBException e) {
+            LOGGER.warn("Unable to open FDB Database", e);
+          }
+        }
+      }
     }
     return db;
   }
 
-  // TODO: Figure out if FoundationDB supports batch writes
   private static class BatchWriter implements Runnable {
-    private final WriteBatch dataToWrite;
-    private final FDB db;
-    // private final WriteOptions options;
+    private final ArrayList<KeyValue> dataToWrite;
+    private final Database db;
     private final Semaphore writeSemaphore;
 
     private BatchWriter(
-        final WriteBatch dataToWrite,
-        final FDB db,
-        // final WriteOptions options,
+        final ArrayList<KeyValue> dataToWrite,
+        final Database db,
         final Semaphore writeSemaphore) {
       super();
       this.dataToWrite = dataToWrite;
       this.db = db;
-      // this.options = options;
       this.writeSemaphore = writeSemaphore;
     }
 
     @Override
     public void run() {
       try {
-        // db.write(options, dataToWrite);
-        // dataToWrite.close();
+        db.run(tr -> {
+          for (KeyValue keyValue : dataToWrite) {
+            tr.set(keyValue.getKey(), keyValue.getValue());
+          }
+          return null;
+        });
       } catch (final FDBException e) {
-        // LOGGER.warn("Unable to write batch", e);
+        LOGGER.warn("Unable to write batch", e);
       } finally {
         writeSemaphore.release();
       }
