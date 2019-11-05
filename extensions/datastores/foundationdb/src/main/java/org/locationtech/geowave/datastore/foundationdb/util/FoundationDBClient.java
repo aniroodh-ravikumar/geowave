@@ -1,6 +1,8 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.NetworkOptions;
+import com.apple.foundationdb.Database;
+import com.apple.foundationdb.FDB;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -9,7 +11,6 @@ import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper
 import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.io.File;
 import java.util.Arrays;
@@ -33,14 +34,8 @@ public class FoundationDBClient implements Closeable {
   private final boolean visibilityEnabled;
   private final boolean compactOnWrite;
   private final int batchWriteSize;
-  private final FoundationDBOperations fDBOperations;
-
-  public FoundationDBOperations getfDBOperations() {
-    return fDBOperations;
-  }
 
   public FoundationDBClient(
-          final FoundationDBOperations fDBOperations,
       final String subDirectory,
       final boolean visibilityEnabled,
       final boolean compactOnWrite,
@@ -49,7 +44,6 @@ public class FoundationDBClient implements Closeable {
     this.visibilityEnabled = visibilityEnabled;
     this.compactOnWrite = compactOnWrite;
     this.batchWriteSize = batchWriteSize;
-    this.fDBOperations = fDBOperations;
   }
 
   private static class CacheKey {
@@ -189,7 +183,6 @@ public class FoundationDBClient implements Closeable {
 
   private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
     return new FoundationDBDataIndexTable(
-        subDirectory,
         key.adapterId,
         visibilityEnabled,
         compactOnWrite,
@@ -201,10 +194,9 @@ public class FoundationDBClient implements Closeable {
     if (!dir.exists() && !dir.mkdirs()) {
       LOGGER.error("Unable to create directory for foundationdb store '" + key.directory + "'");
     }
-    return new FoundationDBMetadataTable(
-            fDBOperations,
-        key.requiresTimestamp,
-        visibilityEnabled);
+    FDB fdb = FDB.selectAPIVersion(610);
+    Database db = fdb.open();
+    return new FoundationDBMetadataTable(db, key.requiresTimestamp, visibilityEnabled);
   }
 
   public synchronized FoundationDBIndexTable getIndexTable(

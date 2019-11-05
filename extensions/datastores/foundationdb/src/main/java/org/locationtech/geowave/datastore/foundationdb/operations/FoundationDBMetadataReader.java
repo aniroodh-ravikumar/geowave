@@ -13,8 +13,11 @@ import org.locationtech.geowave.core.store.util.StatisticsRowIterator;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBMetadataTable;
 import java.util.Arrays;
 import java.util.Iterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FoundationDBMetadataReader implements MetadataReader {
+  private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBMetadataReader.class);
   private final FoundationDBMetadataTable table;
   private final MetadataType metadataType;
 
@@ -28,7 +31,6 @@ public class FoundationDBMetadataReader implements MetadataReader {
   public CloseableIterator<GeoWaveMetadata> query(
       final MetadataQuery query,
       final boolean mergeStats) {
-
     CloseableIterator<GeoWaveMetadata> originalResults;
     Iterator<GeoWaveMetadata> resultsIt;
     if (query.hasPrimaryId()) {

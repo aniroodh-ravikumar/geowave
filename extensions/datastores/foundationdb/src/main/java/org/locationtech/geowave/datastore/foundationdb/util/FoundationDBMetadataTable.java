@@ -2,6 +2,7 @@ package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.*;
 import com.apple.foundationdb.async.AsyncIterable;
+import com.apple.foundationdb.async.AsyncIterator;
 import com.google.common.collect.Iterators;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
@@ -27,18 +28,38 @@ public class FoundationDBMetadataTable implements Closeable {
   private final List<FDBWrite> writes;
 
   public FoundationDBMetadataTable(
-      final FoundationDBOperations fDBOperations,
+      Database db,
       final boolean requiresTimestamp,
       final boolean visibilityEnabled) {
-
-    this.db = fDBOperations.fdb.open();
+    super();
+    this.db = db;
     this.requiresTimestamp = requiresTimestamp;
     this.visibilityEnabled = visibilityEnabled;
     this.writes = new LinkedList<>();
   }
 
   public CloseableIterator<GeoWaveMetadata> iterator() {
-    return prefixIterator(new byte[] {});
+    if (db == null) {
+      return new CloseableIterator.Empty<>();
+    }
+    AsyncIterable iterable = db.run(tr -> {
+      byte[] start = new byte[0];
+      byte[] end =
+          new byte[] {
+              (byte) 0xFF,
+              (byte) 0xFF,
+              (byte) 0xFF,
+              (byte) 0xFF,
+              (byte) 0xFF,
+              (byte) 0xFF,
+              (byte) 0xFF};
+      return tr.getRange(start, end);
+    });
+    AsyncIterator iterator = iterable.iterator();
+    return new FoundationDBMetadataIterator(
+        iterator,
+        this.requiresTimestamp,
+        this.visibilityEnabled);
   }
 
   public CloseableIterator<GeoWaveMetadata> iterator(byte[] primaryID) {
@@ -46,7 +67,7 @@ public class FoundationDBMetadataTable implements Closeable {
   }
 
   public CloseableIterator<GeoWaveMetadata> iterator(byte[] primaryID, byte[] secondaryID) {
-    return prefixIterator(ByteArrayUtils.combineArrays(primaryID, secondaryID));
+    return prefixIterator(Bytes.concat(primaryID, secondaryID));
   }
 
   private CloseableIterator<GeoWaveMetadata> prefixIterator(final byte[] prefix) {

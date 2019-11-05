@@ -44,7 +44,7 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
     this.compactOnWrite = options.isCompactOnWrite();
     this.batchWriteSize = options.getBatchWriteSize();
     this.client =
-        new FoundationDBClient(this, directory, visibilityEnabled, compactOnWrite, batchWriteSize);
+        new FoundationDBClient(directory, visibilityEnabled, compactOnWrite, batchWriteSize);
 
     // this does not open the database
     // open the database with fdb.open()

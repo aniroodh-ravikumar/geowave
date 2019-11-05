@@ -18,7 +18,6 @@ public class FoundationDBWriter implements RowWriter {
   private final LoadingCache<ByteArray, FoundationDBIndexTable> tableCache =
       Caffeine.newBuilder().build(partitionKey -> getTable(partitionKey.getBytes()));
   private final boolean isTimestampRequired;
-  private Database db;
 
   public FoundationDBWriter(
       final FoundationDBClient client,
@@ -29,7 +28,6 @@ public class FoundationDBWriter implements RowWriter {
     this.client = client;
     this.adapterId = adapterId;
     this.isTimestampRequired = isTimestampRequired;
-    this.db = client.getfDBOperations().fdb.open();
   }
 
   private FoundationDBIndexTable getTable(final byte[] partitionKey) {
@@ -52,15 +50,12 @@ public class FoundationDBWriter implements RowWriter {
     } else {
       partitionKey = new ByteArray(row.getPartitionKey());
     }
-    final ByteArray partKey = partitionKey;
     for (final GeoWaveValue value : row.getFieldValues()) {
-      Tuple tuple = Tuple.fromBytes(value.getValue());
-
-      // Run an operation on the database
-      this.db.run(tr -> {
-        tr.set(Tuple.from(partKey).pack(), Tuple.from(tuple).pack());
-        return null;
-      });
+      tableCache.get(partitionKey).add(
+          row.getSortKey(),
+          row.getDataId(),
+          (short) row.getNumberOfDuplicates(),
+          value);
     }
   }
 
@@ -73,6 +68,5 @@ public class FoundationDBWriter implements RowWriter {
   public void close() {
     flush();
     tableCache.invalidateAll();
-    this.db.close();
   }
 }
