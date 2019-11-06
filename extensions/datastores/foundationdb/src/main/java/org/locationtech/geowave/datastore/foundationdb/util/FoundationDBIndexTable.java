@@ -94,13 +94,13 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
     byte[] start = new byte[0];
     byte[] end =
         new byte[] {
-            (byte) 0xFF,
-            (byte) 0xFF,
-            (byte) 0xFF,
-            (byte) 0xFF,
-            (byte) 0xFF,
-            (byte) 0xFF,
-            (byte) 0xFF};
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE};
     return iterator(new ByteArrayRange(start, end));
   }
 

@@ -43,16 +43,23 @@ public class FoundationDBMetadataTable implements Closeable {
       return new CloseableIterator.Empty<>();
     }
     Transaction txn = this.db.createTransaction();
-    byte[] start = new byte[0];
+    byte[] start = new byte[] {
+            (byte) 0x00,
+            (byte) 0x00,
+            (byte) 0x00,
+            (byte) 0x00,
+            (byte) 0x00,
+            (byte) 0x00,
+            (byte) 0x00};
     byte[] end =
             new byte[] {
-                    (byte) 0xFF,
-                    (byte) 0xFF,
-                    (byte) 0xFF,
-                    (byte) 0xFF,
-                    (byte) 0xFF,
-                    (byte) 0xFF,
-                    (byte) 0xFF};
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE};
     AsyncIterable<KeyValue> iterable = txn.getRange(start, end);
     AsyncIterator<KeyValue> iterator = iterable.iterator();
     return new FoundationDBMetadataIterator(

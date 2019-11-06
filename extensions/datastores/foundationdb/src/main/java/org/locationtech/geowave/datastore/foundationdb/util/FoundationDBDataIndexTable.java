@@ -69,17 +69,24 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
       return new CloseableIterator.Empty<>();
     }
     AsyncIterable<KeyValue> iterable = db.run(tr -> {
-      byte[] start = startDataId != null ? startDataId : new byte[0];
+      byte[] start = startDataId != null ? startDataId : new byte[] {
+              (byte) 0x00,
+              (byte) 0x00,
+              (byte) 0x00,
+              (byte) 0x00,
+              (byte) 0x00,
+              (byte) 0x00,
+              (byte) 0x00};
       byte[] end =
           endDataId != null ? endDataId
               : new byte[] {
-                  (byte) 0xFF,
-                  (byte) 0xFF,
-                  (byte) 0xFF,
-                  (byte) 0xFF,
-                  (byte) 0xFF,
-                  (byte) 0xFF,
-                  (byte) 0xFF};
+                  Byte.MAX_VALUE,
+                  Byte.MAX_VALUE,
+                  Byte.MAX_VALUE,
+                  Byte.MAX_VALUE,
+                  Byte.MAX_VALUE,
+                  Byte.MAX_VALUE,
+                  Byte.MAX_VALUE};
       return tr.getRange(start, end);
     });
     AsyncIterator<KeyValue> iterator = iterable.iterator();
