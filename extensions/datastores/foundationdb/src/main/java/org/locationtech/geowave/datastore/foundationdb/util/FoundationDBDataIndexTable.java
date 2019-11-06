@@ -1,6 +1,7 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.Database;
+import com.apple.foundationdb.KeyValue;
 import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
 import java.util.Arrays;
@@ -67,7 +68,7 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    AsyncIterable iterable = db.run(tr -> {
+    AsyncIterable<KeyValue> iterable = db.run(tr -> {
       byte[] start = startDataId != null ? startDataId : new byte[0];
       byte[] end =
           endDataId != null ? endDataId
@@ -81,7 +82,7 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
                   (byte) 0xFF};
       return tr.getRange(start, end);
     });
-    AsyncIterator iterator = iterable.iterator();
+    AsyncIterator<KeyValue> iterator = iterable.iterator();
     return new FoundationDBDataIndexRowIterator(iterator, adapterId, visibilityEnabled);
   }
 }
