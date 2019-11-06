@@ -16,18 +16,21 @@ public class FoundationDBWriter implements RowWriter {
   private final FoundationDBClient client;
   private final short adapterId;
   private final LoadingCache<ByteArray, FoundationDBIndexTable> tableCache =
-      Caffeine.newBuilder().build(partitionKey -> getTable(partitionKey.getBytes()));
+          Caffeine.newBuilder().build(partitionKey -> getTable(partitionKey.getBytes()));
   private final boolean isTimestampRequired;
+  private Database db;
 
   public FoundationDBWriter(
-      final FoundationDBClient client,
-      final short adapterId,
-      final String typeName,
-      final String indexName,
-      final boolean isTimestampRequired) {
+          final FoundationDBOperations fDBOperations,
+          final FoundationDBClient client,
+          final short adapterId,
+          final String typeName,
+          final String indexName,
+          final boolean isTimestampRequired) {
     this.client = client;
     this.adapterId = adapterId;
     this.isTimestampRequired = isTimestampRequired;
+    this.db = fDBOperations.fdb.open();
   }
 
   private FoundationDBIndexTable getTable(final byte[] partitionKey) {
@@ -50,12 +53,15 @@ public class FoundationDBWriter implements RowWriter {
     } else {
       partitionKey = new ByteArray(row.getPartitionKey());
     }
+    final ByteArray partKey = partitionKey;
     for (final GeoWaveValue value : row.getFieldValues()) {
-      tableCache.get(partitionKey).add(
-          row.getSortKey(),
-          row.getDataId(),
-          (short) row.getNumberOfDuplicates(),
-          value);
+      Tuple tuple = Tuple.fromBytes(value.getValue());
+
+      // Run an operation on the database
+      this.db.run(tr -> {
+        tr.set(Tuple.from(partKey).pack(), Tuple.from(tuple).pack());
+        return null;
+      });
     }
   }
 
@@ -68,5 +74,6 @@ public class FoundationDBWriter implements RowWriter {
   public void close() {
     flush();
     tableCache.invalidateAll();
+    this.db.close();
   }
 }
