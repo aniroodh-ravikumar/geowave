@@ -53,8 +53,8 @@ public class FoundationDBMetadataTable implements Closeable {
                     (byte) 0xFF,
                     (byte) 0xFF,
                     (byte) 0xFF};
-    AsyncIterable iterable = txn.getRange(start, end);
-    AsyncIterator iterator = iterable.iterator();
+    AsyncIterable<KeyValue> iterable = txn.getRange(start, end);
+    AsyncIterator<KeyValue> iterator = iterable.iterator();
     return new FoundationDBMetadataIterator(
         iterator,
         this.requiresTimestamp,

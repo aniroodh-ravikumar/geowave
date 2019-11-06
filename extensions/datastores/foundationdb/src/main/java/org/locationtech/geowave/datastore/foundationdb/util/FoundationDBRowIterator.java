@@ -11,7 +11,7 @@ public class FoundationDBRowIterator extends AbstractFoundationDBIterator<GeoWav
   private final boolean visibilityEnabled;
 
   public FoundationDBRowIterator(
-      final AsyncIterator it,
+      final AsyncIterator<KeyValue> it,
       final short adapterId,
       final byte[] partition,
       final boolean containsTimestamp,
