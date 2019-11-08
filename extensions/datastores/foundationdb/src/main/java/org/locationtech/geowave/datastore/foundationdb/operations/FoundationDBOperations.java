@@ -19,11 +19,8 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-// TODO: implement this
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBOperations.class);
-  public final FDB fdb;
   private static final boolean READER_ASYNC = true;
   private final FoundationDBClient client;
   private final String directory;
@@ -32,7 +29,6 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
   private final int batchWriteSize;
 
   public FoundationDBOperations(final FoundationDBRequiredOptions options) {
-    this.fdb = FDB.selectAPIVersion(610);
     this.directory =
         options.getDirectory()
             + File.separator

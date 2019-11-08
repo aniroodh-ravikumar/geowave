@@ -33,14 +33,13 @@ public class FoundationDBMetadataReader implements MetadataReader {
       final boolean mergeStats) {
     CloseableIterator<GeoWaveMetadata> originalResults;
     Iterator<GeoWaveMetadata> resultsIt;
-    if (query.hasPrimaryId()) {
-      originalResults = table.iterator(query.getPrimaryId());
-      resultsIt = originalResults;
-    } else if (query.hasPrimaryId() && query.hasSecondaryId()) {
+    if (query.hasPrimaryId() && query.hasSecondaryId()) {
       originalResults = table.iterator(query.getPrimaryId(), query.getSecondaryId());
       resultsIt = originalResults;
+    } else if (query.hasPrimaryId()) {
+      originalResults = table.iterator(query.getPrimaryId());
+      resultsIt = originalResults;
     } else {
-      // TODO figure out the length of a typical primaryID array
       originalResults = table.iterator();
       resultsIt = originalResults;
     }

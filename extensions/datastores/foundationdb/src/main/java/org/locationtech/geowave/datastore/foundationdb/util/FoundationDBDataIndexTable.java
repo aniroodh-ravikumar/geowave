@@ -21,8 +21,9 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
       final short adapterId,
       final boolean visibilityEnabled,
       final boolean compactOnWrite,
-      final int batchSize) {
-    super(adapterId, visibilityEnabled, compactOnWrite, batchSize);
+      final int batchSize,
+      final FoundationDBClient client) {
+    super(adapterId, visibilityEnabled, compactOnWrite, batchSize, client);
   }
 
   public synchronized void add(final byte[] dataId, final GeoWaveValue value) {
@@ -69,14 +70,16 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
       return new CloseableIterator.Empty<>();
     }
     AsyncIterable<KeyValue> iterable = db.run(tr -> {
-      byte[] start = startDataId != null ? startDataId : new byte[] {
-              (byte) 0x00,
-              (byte) 0x00,
-              (byte) 0x00,
-              (byte) 0x00,
-              (byte) 0x00,
-              (byte) 0x00,
-              (byte) 0x00};
+      byte[] start =
+          startDataId != null ? startDataId
+              : new byte[] {
+                  (byte) 0x00,
+                  (byte) 0x00,
+                  (byte) 0x00,
+                  (byte) 0x00,
+                  (byte) 0x00,
+                  (byte) 0x00,
+                  (byte) 0x00};
       byte[] end =
           endDataId != null ? endDataId
               : new byte[] {

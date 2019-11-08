@@ -43,7 +43,8 @@ public class FoundationDBMetadataTable implements Closeable {
       return new CloseableIterator.Empty<>();
     }
     Transaction txn = this.db.createTransaction();
-    byte[] start = new byte[] {
+    byte[] start =
+        new byte[] {
             (byte) 0x00,
             (byte) 0x00,
             (byte) 0x00,
@@ -52,14 +53,14 @@ public class FoundationDBMetadataTable implements Closeable {
             (byte) 0x00,
             (byte) 0x00};
     byte[] end =
-            new byte[] {
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE};
+        new byte[] {
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE,
+            Byte.MAX_VALUE};
     AsyncIterable<KeyValue> iterable = txn.getRange(start, end);
     AsyncIterator<KeyValue> iterator = iterable.iterator();
     return new FoundationDBMetadataIterator(
@@ -133,13 +134,6 @@ public class FoundationDBMetadataTable implements Closeable {
   public void write(final byte[] key, final byte[] value) {
     writes.add(new FDBWrite(key, value));
   }
-
-  /**
-   * @TODO figure out arguments (maybe byte[] key?)
-   *       https://apple.github.io/foundationdb/javadoc/com/apple/foundationdb/ReadTransaction.html#get-byte:A-
-   *       use .get() or .getRange() When this method is done, we can work on MetadataReader
-   * @return
-   */
 
   public void flush() {
     db.run(txn -> {

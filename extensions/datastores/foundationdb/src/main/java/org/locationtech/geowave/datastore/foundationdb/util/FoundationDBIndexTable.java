@@ -26,8 +26,9 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
       final boolean requiresTimestamp,
       final boolean visibilityEnabled,
       final boolean compactOnWrite,
-      final int batchSize) {
-    super(adapterId, visibilityEnabled, compactOnWrite, batchSize);
+      final int batchSize,
+      final FoundationDBClient client) {
+    super(adapterId, visibilityEnabled, compactOnWrite, batchSize, client);
     this.partition = partition;
     this.requiresTimestamp = requiresTimestamp;
   }

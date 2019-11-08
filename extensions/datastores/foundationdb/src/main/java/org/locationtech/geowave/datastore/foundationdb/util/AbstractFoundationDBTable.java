@@ -33,18 +33,21 @@ abstract public class AbstractFoundationDBTable {
   protected boolean compactOnWrite;
   private final boolean batchWrite;
   protected boolean readerDirty = false;
+  private FoundationDBClient client;
 
   public AbstractFoundationDBTable(
       final short adapterId,
       final boolean visibilityEnabled,
       final boolean compactOnWrite,
-      final int batchSize) {
+      final int batchSize,
+      final FoundationDBClient client) {
     super();
     this.adapterId = adapterId;
     this.visibilityEnabled = visibilityEnabled;
     this.compactOnWrite = compactOnWrite;
     this.batchSize = batchSize;
     batchWrite = batchSize > 1;
+    this.client = client;
   }
 
   public void delete(final byte[] key) {
@@ -155,26 +158,8 @@ abstract public class AbstractFoundationDBTable {
     }
   }
 
-  @SuppressFBWarnings(
-      justification = "double check for null is intentional to avoid synchronized blocks when not needed.")
   protected Database getDb() {
-    // avoid synchronization if unnecessary by checking for null outside
-    // synchronized block
-    if (db == null) {
-      synchronized (this) {
-        // check again within synchronized block
-        if (db == null) {
-          try {
-            readerDirty = false;
-            FDB fdb = FDB.selectAPIVersion(610);
-            db = fdb.open();
-          } catch (final FDBException e) {
-            LOGGER.warn("Unable to open FDB Database", e);
-          }
-        }
-      }
-    }
-    return db;
+    return this.client.getDb();
   }
 
   private static class BatchWriter implements Runnable {

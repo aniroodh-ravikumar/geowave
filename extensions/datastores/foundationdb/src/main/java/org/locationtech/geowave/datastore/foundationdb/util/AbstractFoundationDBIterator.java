@@ -16,7 +16,6 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
 
   @Override
   public boolean hasNext() {
-    System.out.println(it.hasNext());
     return !closed && it.hasNext();
   }
 

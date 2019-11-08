@@ -11,6 +11,8 @@ import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper
 import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.crypto.Data;
 import java.io.Closeable;
 import java.io.File;
 import java.util.Arrays;
@@ -34,6 +36,7 @@ public class FoundationDBClient implements Closeable {
   private final boolean visibilityEnabled;
   private final boolean compactOnWrite;
   private final int batchWriteSize;
+  private Database db;
 
   public FoundationDBClient(
       final String subDirectory,
@@ -178,7 +181,8 @@ public class FoundationDBClient implements Closeable {
         key.requiresTimestamp,
         visibilityEnabled,
         compactOnWrite,
-        batchWriteSize);
+        batchWriteSize,
+            this);
   }
 
   private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
@@ -186,7 +190,8 @@ public class FoundationDBClient implements Closeable {
         key.adapterId,
         visibilityEnabled,
         compactOnWrite,
-        batchWriteSize);
+        batchWriteSize,
+            this);
   }
 
   private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {
@@ -194,9 +199,11 @@ public class FoundationDBClient implements Closeable {
     if (!dir.exists() && !dir.mkdirs()) {
       LOGGER.error("Unable to create directory for foundationdb store '" + key.directory + "'");
     }
-    FDB fdb = FDB.selectAPIVersion(610);
-    Database db = fdb.open();
-    return new FoundationDBMetadataTable(db, key.requiresTimestamp, visibilityEnabled);
+    if (this.db == null) {
+      FDB fdb = FDB.selectAPIVersion(610);
+      this.db = fdb.open();
+    }
+    return new FoundationDBMetadataTable(this.db, key.requiresTimestamp, visibilityEnabled);
   }
 
   public synchronized FoundationDBIndexTable getIndexTable(
@@ -262,6 +269,10 @@ public class FoundationDBClient implements Closeable {
 
   public String getSubDirectory() {
     return subDirectory;
+  }
+
+  public Database getDb() {
+    return this.db;
   }
 
   public void close() {}
