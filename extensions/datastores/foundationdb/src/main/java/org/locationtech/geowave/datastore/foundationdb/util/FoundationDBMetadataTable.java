@@ -42,6 +42,13 @@ public class FoundationDBMetadataTable implements Closeable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
+    LOGGER.warn("HERE!");
+    try {
+      Long version = this.db.createTransaction().getReadVersion().get();
+      LOGGER.warn("Got version: " + version);
+    } catch (Exception e) {
+      LOGGER.warn("Failed getReadVersion: " + e.toString());
+    }
     Transaction txn = this.db.createTransaction();
     byte[] start =
         new byte[] {
