@@ -676,6 +676,7 @@
 								<sourceDirectory>../extensions/datastores/bigtable/src/main/java</sourceDirectory>
 								<sourceDirectory>../extensions/datastores/cassandra/src/main/java</sourceDirectory>
 								<sourceDirectory>../extensions/datastores/kudu/src/main/java</sourceDirectory>
+								<sourceDirectory>../extensions/datastores/foundationdb/src/main/java</sourceDirectory>
 								<sourceDirectory>../extensions/datastores/dynamodb/src/main/java</sourceDirectory>
 								<sourceDirectory>../extensions/datastores/redis/src/main/java</sourceDirectory>
 								<sourceDirectory>../extensions/datastores/rocksdb/src/main/java</sourceDirectory>
@@ -808,6 +809,13 @@
 			<properties>
 				<skipITs>false</skipITs>
 				<testStoreType>ROCKSDB</testStoreType>
+			</properties>
+		</profile>
+		<profile>
+			<id>foundationdb-it</id>
+			<properties>
+				<skipITs>false</skipITs>
+				<testStoreType>FOUNDATIONDB</testStoreType>
 			</properties>
 		</profile>
 		<profile>
