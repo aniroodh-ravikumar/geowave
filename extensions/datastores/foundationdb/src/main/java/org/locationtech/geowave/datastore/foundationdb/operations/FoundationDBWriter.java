@@ -1,7 +1,5 @@
 package org.locationtech.geowave.datastore.foundationdb.operations;
 
-import com.apple.foundationdb.Database;
-import com.apple.foundationdb.tuple.Tuple;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.locationtech.geowave.core.index.ByteArray;
@@ -11,11 +9,6 @@ import org.locationtech.geowave.core.store.operations.RowWriter;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClient;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBIndexTable;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
-import sun.rmi.runtime.Log;
-
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 public class FoundationDBWriter implements RowWriter {
   private final FoundationDBClient client;
