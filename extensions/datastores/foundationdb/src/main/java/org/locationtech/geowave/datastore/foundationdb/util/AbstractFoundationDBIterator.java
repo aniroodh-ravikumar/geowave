@@ -33,4 +33,9 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
   public void close() {
     closed = true;
   }
+
+  private byte[] increment(byte[] start) {
+    // TODO
+    return start;
+  }
 }
