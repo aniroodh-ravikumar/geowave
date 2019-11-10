@@ -36,7 +36,7 @@ public class FoundationDBClient implements Closeable {
   private final boolean visibilityEnabled;
   private final boolean compactOnWrite;
   private final int batchWriteSize;
-  private Database db;
+  private FDB fdb;
 
   public FoundationDBClient(
       final String subDirectory,
@@ -47,6 +47,7 @@ public class FoundationDBClient implements Closeable {
     this.visibilityEnabled = visibilityEnabled;
     this.compactOnWrite = compactOnWrite;
     this.batchWriteSize = batchWriteSize;
+    this.fdb = FDB.selectAPIVersion(610);
   }
 
   private static class CacheKey {
@@ -199,11 +200,7 @@ public class FoundationDBClient implements Closeable {
     if (!dir.exists() && !dir.mkdirs()) {
       LOGGER.error("Unable to create directory for foundationdb store '" + key.directory + "'");
     }
-    if (this.db == null) {
-      FDB fdb = FDB.selectAPIVersion(610);
-      this.db = fdb.open();
-    }
-    return new FoundationDBMetadataTable(this.db, key.requiresTimestamp, visibilityEnabled);
+    return new FoundationDBMetadataTable(this.fdb, key.requiresTimestamp, visibilityEnabled);
   }
 
   public synchronized FoundationDBIndexTable getIndexTable(
@@ -271,8 +268,8 @@ public class FoundationDBClient implements Closeable {
     return subDirectory;
   }
 
-  public Database getDb() {
-    return this.db;
+  public FDB getFDB() {
+    return this.fdb;
   }
 
   public void close() {}

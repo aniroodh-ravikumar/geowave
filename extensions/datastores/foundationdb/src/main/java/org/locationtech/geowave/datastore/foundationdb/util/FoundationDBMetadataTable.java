@@ -28,11 +28,11 @@ public class FoundationDBMetadataTable implements Closeable {
   private final List<FDBWrite> writes;
 
   public FoundationDBMetadataTable(
-      Database db,
+      FDB fdb,
       final boolean requiresTimestamp,
       final boolean visibilityEnabled) {
     super();
-    this.db = db;
+    this.db = fdb.open();
     this.requiresTimestamp = requiresTimestamp;
     this.visibilityEnabled = visibilityEnabled;
     this.writes = new LinkedList<>();
@@ -42,7 +42,7 @@ public class FoundationDBMetadataTable implements Closeable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    Transaction txn = this.db.createTransaction();
+    ReadTransaction txn = this.db.createTransaction();
     byte[] start =
         new byte[] {
             (byte) 0x00,

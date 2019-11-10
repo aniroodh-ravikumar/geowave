@@ -159,7 +159,7 @@ abstract public class AbstractFoundationDBTable {
   }
 
   protected Database getDb() {
-    return this.client.getDb();
+    return this.client.getFDB().open();
   }
 
   private static class BatchWriter implements Runnable {
