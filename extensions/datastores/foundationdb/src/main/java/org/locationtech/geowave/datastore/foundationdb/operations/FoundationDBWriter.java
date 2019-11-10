@@ -11,6 +11,11 @@ import org.locationtech.geowave.core.store.operations.RowWriter;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClient;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBIndexTable;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
+import sun.rmi.runtime.Log;
+
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class FoundationDBWriter implements RowWriter {
   private final FoundationDBClient client;
@@ -18,6 +23,7 @@ public class FoundationDBWriter implements RowWriter {
   private final LoadingCache<ByteArray, FoundationDBIndexTable> tableCache =
       Caffeine.newBuilder().build(partitionKey -> getTable(partitionKey.getBytes()));
   private final boolean isTimestampRequired;
+  private final String indexNamePrefix;
 
   public FoundationDBWriter(
       final FoundationDBClient client,
@@ -28,10 +34,16 @@ public class FoundationDBWriter implements RowWriter {
     this.client = client;
     this.adapterId = adapterId;
     this.isTimestampRequired = isTimestampRequired;
+    this.indexNamePrefix = FoundationDBUtils.getTablePrefix(typeName, indexName);
   }
 
   private FoundationDBIndexTable getTable(final byte[] partitionKey) {
-    return null;
+    return FoundationDBUtils.getIndexTableFromPrefix(
+            client,
+            indexNamePrefix,
+            adapterId,
+            partitionKey,
+            isTimestampRequired);
   }
 
   @Override
@@ -51,6 +63,9 @@ public class FoundationDBWriter implements RowWriter {
       partitionKey = new ByteArray(row.getPartitionKey());
     }
     for (final GeoWaveValue value : row.getFieldValues()) {
+
+//      System.out.println(tableCache.asMap().keySet().toString());
+
       tableCache.get(partitionKey).add(
           row.getSortKey(),
           row.getDataId(),
