@@ -1,5 +1,6 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
+import com.apple.foundationdb.Database;
 import com.apple.foundationdb.async.AsyncIterator;
 import org.locationtech.geowave.core.store.base.dataidx.DataIndexUtils;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
@@ -10,12 +11,14 @@ public class FoundationDBDataIndexRowIterator extends AbstractFoundationDBIterat
   private final boolean visibilityEnabled;
 
   public FoundationDBDataIndexRowIterator(
-      final AsyncIterator<KeyValue> it,
       final short adapterId,
-      final boolean visiblityEnabled) {
-    super(it);
+      final boolean visiblityEnabled,
+      final Database db,
+      final byte[] startId,
+      final byte[] endId) {
+    super(db,startId,endId);
     this.adapterId = adapterId;
-    visibilityEnabled = visiblityEnabled;
+    this.visibilityEnabled = visiblityEnabled;
   }
 
   @Override

@@ -16,6 +16,9 @@ import org.slf4j.LoggerFactory;
 
 public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBDataIndexTable.class);
+  private Database db;
+  private byte[] start;
+  private byte[] end;
 
   public FoundationDBDataIndexTable(
       final short adapterId,
@@ -24,6 +27,7 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
       final int batchSize,
       final FoundationDBClient client) {
     super(adapterId, visibilityEnabled, compactOnWrite, batchSize, client);
+    this.db = client.getFDB().open();
   }
 
   public synchronized void add(final byte[] dataId, final GeoWaveValue value) {
@@ -69,30 +73,30 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    AsyncIterable<KeyValue> iterable = db.run(tr -> {
-      byte[] start =
-          startDataId != null ? startDataId
-              : new byte[] {
-                  (byte) 0x00,
-                  (byte) 0x00,
-                  (byte) 0x00,
-                  (byte) 0x00,
-                  (byte) 0x00,
-                  (byte) 0x00,
-                  (byte) 0x00};
-      byte[] end =
-          endDataId != null ? endDataId
-              : new byte[] {
-                  Byte.MAX_VALUE,
-                  Byte.MAX_VALUE,
-                  Byte.MAX_VALUE,
-                  Byte.MAX_VALUE,
-                  Byte.MAX_VALUE,
-                  Byte.MAX_VALUE,
-                  Byte.MAX_VALUE};
-      return tr.getRange(start, end);
-    });
-    AsyncIterator<KeyValue> iterator = iterable.iterator();
-    return new FoundationDBDataIndexRowIterator(iterator, adapterId, visibilityEnabled);
+
+    this.start =
+            startDataId != null ? startDataId
+                    : new byte[] {
+                            (byte) 0x00,
+                    (byte) 0x00,
+                    (byte) 0x00,
+                    (byte) 0x00,
+                    (byte) 0x00,
+                    (byte) 0x00,
+                    (byte) 0x00};
+
+    this.end =
+            endDataId != null ? endDataId
+                    : new byte[] {
+                            Byte.MAX_VALUE,
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE,
+                    Byte.MAX_VALUE};
+
+//    AsyncIterator<KeyValue> iterator = iterable.iterator();
+    return new FoundationDBDataIndexRowIterator(adapterId, visibilityEnabled, this.db, start, end);
   }
 }

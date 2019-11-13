@@ -42,7 +42,7 @@ public class FoundationDBMetadataTable implements Closeable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    ReadTransaction txn = this.db.createTransaction();
+//    ReadTransaction txn = this.db.createTransaction();
     byte[] start =
         new byte[] {
             (byte) 0x00,
@@ -61,12 +61,14 @@ public class FoundationDBMetadataTable implements Closeable {
             Byte.MAX_VALUE,
             Byte.MAX_VALUE,
             Byte.MAX_VALUE};
-    AsyncIterable<KeyValue> iterable = txn.getRange(start, end);
-    AsyncIterator<KeyValue> iterator = iterable.iterator();
+//    AsyncIterable<KeyValue> iterable = txn.getRange(start, end);
+//    AsyncIterator<KeyValue> iterator = iterable.iterator();
     return new FoundationDBMetadataIterator(
-        iterator,
         this.requiresTimestamp,
-        this.visibilityEnabled);
+        this.visibilityEnabled,
+            db,
+            start,
+            end);
   }
 
   public CloseableIterator<GeoWaveMetadata> iterator(byte[] primaryID) {
@@ -78,13 +80,15 @@ public class FoundationDBMetadataTable implements Closeable {
   }
 
   private CloseableIterator<GeoWaveMetadata> prefixIterator(final byte[] prefix) {
-    Transaction txn = this.db.createTransaction();
-    AsyncIterable<KeyValue> iterable = txn.getRange(prefix, ByteArrayUtils.getNextPrefix(prefix));
+//    Transaction txn = this.db.createTransaction();
+//    AsyncIterable<KeyValue> iterable = txn.getRange(prefix, ByteArrayUtils.getNextPrefix(prefix));
     // TODO: can this class be asynchronous?
     return new FoundationDBMetadataIterator(
-        iterable.iterator(),
         this.requiresTimestamp,
-        this.visibilityEnabled);
+        this.visibilityEnabled,
+            this.db,
+            prefix,
+            ByteArrayUtils.getNextPrefix(prefix));
   }
 
   public void remove(final byte[] key) {

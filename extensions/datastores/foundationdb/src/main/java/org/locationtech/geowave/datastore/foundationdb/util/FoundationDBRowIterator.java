@@ -1,5 +1,6 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
+import com.apple.foundationdb.Database;
 import com.apple.foundationdb.async.AsyncIterator;
 import com.apple.foundationdb.KeyValue;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
@@ -11,12 +12,14 @@ public class FoundationDBRowIterator extends AbstractFoundationDBIterator<GeoWav
   private final boolean visibilityEnabled;
 
   public FoundationDBRowIterator(
-      final AsyncIterator<KeyValue> it,
-      final short adapterId,
-      final byte[] partition,
-      final boolean containsTimestamp,
-      final boolean visiblityEnabled) {
-    super(it);
+          final short adapterId,
+          final byte[] partition,
+          final boolean containsTimestamp,
+          final boolean visiblityEnabled,
+          final Database db,
+          final byte[] startId,
+          final byte[] endId) {
+    super(db,startId,endId);
     this.adapterId = adapterId;
     this.partition = partition;
     this.containsTimestamp = containsTimestamp;

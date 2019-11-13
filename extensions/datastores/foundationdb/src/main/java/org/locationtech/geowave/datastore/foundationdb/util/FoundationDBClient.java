@@ -272,6 +272,14 @@ public class FoundationDBClient implements Closeable {
     return this.fdb;
   }
 
-  public void close() {}
+  public void close() {
+    keyCache.invalidateAll();
+    indexTableCache.asMap().values().forEach(db -> db.close());
+    indexTableCache.invalidateAll();
+    dataIndexTableCache.asMap().values().forEach(db -> db.close());
+    dataIndexTableCache.invalidateAll();
+    metadataTableCache.asMap().values().forEach(db -> db.close());
+    metadataTableCache.invalidateAll();
+  }
 
 }

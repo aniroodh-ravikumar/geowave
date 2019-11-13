@@ -121,11 +121,13 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
     AsyncIterable<KeyValue> iterable = db.run(tr -> tr.getRange(range.getStart(), range.getEnd()));
     AsyncIterator<KeyValue> iterator = iterable.iterator();
     return new FoundationDBRowIterator(
-        iterator,
         adapterId,
         partition,
         requiresTimestamp,
-        visibilityEnabled);
+        visibilityEnabled,
+            db,
+            range.getStart(),
+            range.getEnd());
   }
 
 }

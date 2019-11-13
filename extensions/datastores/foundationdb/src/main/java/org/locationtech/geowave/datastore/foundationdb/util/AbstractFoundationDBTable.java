@@ -33,7 +33,6 @@ abstract public class AbstractFoundationDBTable {
   protected boolean compactOnWrite;
   private final boolean batchWrite;
   protected boolean readerDirty = false;
-  private FoundationDBClient client;
 
   public AbstractFoundationDBTable(
       final short adapterId,
@@ -47,7 +46,7 @@ abstract public class AbstractFoundationDBTable {
     this.compactOnWrite = compactOnWrite;
     this.batchSize = batchSize;
     batchWrite = batchSize > 1;
-    this.client = client;
+    this.db = client.getFDB().open();
   }
 
   public void delete(final byte[] key) {
@@ -159,7 +158,7 @@ abstract public class AbstractFoundationDBTable {
   }
 
   protected Database getDb() {
-    return this.client.getFDB().open();
+    return this.db;
   }
 
   private static class BatchWriter implements Runnable {

@@ -1,8 +1,13 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
+import com.apple.foundationdb.Database;
 import com.apple.foundationdb.KeyValue;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
 import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
 
@@ -12,12 +17,16 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
   private final boolean visibilityEnabled;
 
   public FoundationDBMetadataIterator(
-      AsyncIterator<KeyValue> it,
       final boolean containsTimestamp,
-      final boolean visibilityEnabled) {
-    super(it);
+      final boolean visibilityEnabled,
+      final Database db,
+      final byte[] start,
+      final byte[] end) {
+    super(db,start,end);
     this.containsTimestamp = containsTimestamp;
     this.visibilityEnabled = visibilityEnabled;
+    AsyncIterable<KeyValue> iterable = db.run(tr -> tr.getRange(start, end));
+
   }
 
   @Override
@@ -33,12 +42,12 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
     } else {
       visibility = new byte[0];
     }
-    int secondaryIdLength = key.length - primaryId.length - visibility.length - 1;
+    int secondaryIdLength = Math.max(key.length - primaryId.length - visibility.length - 1,0);
     if (containsTimestamp) {
-      secondaryIdLength -= 8;
+      secondaryIdLength = Math.max(secondaryIdLength - 8,0);
     }
     if (visibilityEnabled) {
-      secondaryIdLength--;
+      secondaryIdLength = Math.max(secondaryIdLength - 1,0);;
     }
     final byte[] secondaryId = new byte[secondaryIdLength];
     buf.get(primaryId);
@@ -46,7 +55,11 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
     if (containsTimestamp) {
       // just skip 8 bytes - we don't care to parse out the timestamp but
       // its there for key uniqueness and to maintain expected sort order
-      buf.position(buf.position() + 8);
+      try {
+        buf.position(buf.position() + 8);
+      }
+      catch (IllegalArgumentException e) {
+      }
     }
     if (visibilityEnabled) {
       buf.get(visibility);
