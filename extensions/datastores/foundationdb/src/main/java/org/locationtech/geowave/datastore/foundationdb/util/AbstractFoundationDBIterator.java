@@ -43,12 +43,31 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
 
   @Override
   public synchronized boolean hasNext() {
+//    if (!closed) {
+//      boolean hasNext;
+//      try {
+//        hasNext = it.hasNext();
+//      }
+//      catch (CompletionException e) {
+//        this.txn.close();
+//        this.txn = db.createTransaction();
+//        this.it = this.txn.getRange(next,end).iterator();
+//        hasNext = it.hasNext();
+//      }
+//      if (!hasNext) {
+//        txn.close();
+//      }
+//      return hasNext;
+//    }
+//    txn.close();
+//    return false;
     return !closed && it.hasNext();
   }
 
   @Override
   public synchronized T next() {
     if (closed) {
+      this.txn.close();
       throw new NoSuchElementException();
     }
     T nextRow;
@@ -59,7 +78,7 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
       this.txn.close();
       // Try to load the next piece
       this.txn = db.createTransaction();
-      it = this.txn.getRange(next,end).iterator();
+      this.it = this.txn.getRange(next,end).iterator();
       nextRow = readRow(it.next());
     }
     this.next = increment(next);
