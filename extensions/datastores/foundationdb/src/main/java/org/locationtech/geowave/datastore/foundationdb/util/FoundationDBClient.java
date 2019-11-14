@@ -11,7 +11,6 @@ import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper
 import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.xml.crypto.Data;
 import java.io.Closeable;
 import java.io.File;
@@ -182,7 +181,7 @@ public class FoundationDBClient implements Closeable {
         visibilityEnabled,
         compactOnWrite,
         batchWriteSize,
-            this);
+        this);
   }
 
   private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
@@ -191,7 +190,7 @@ public class FoundationDBClient implements Closeable {
         visibilityEnabled,
         compactOnWrite,
         batchWriteSize,
-            this);
+        this);
   }
 
   private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {

@@ -4,8 +4,11 @@ import com.apple.foundationdb.KeyValue;
 import com.apple.foundationdb.async.AsyncIterator;
 import org.locationtech.geowave.core.store.CloseableIterator;
 import java.util.NoSuchElementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractFoundationDBIterator<T> implements CloseableIterator<T> {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFoundationDBIterator.class);
   protected boolean closed = false;
   protected AsyncIterator<KeyValue> it;
 
@@ -16,6 +19,7 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
 
   @Override
   public boolean hasNext() {
+    LOGGER.warn("IN HAS NEXT");
     return !closed && it.hasNext();
   }
 

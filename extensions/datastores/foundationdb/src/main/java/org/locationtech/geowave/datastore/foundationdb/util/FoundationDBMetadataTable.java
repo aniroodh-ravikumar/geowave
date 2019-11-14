@@ -43,33 +43,30 @@ public class FoundationDBMetadataTable implements Closeable {
       return new CloseableIterator.Empty<>();
     }
     LOGGER.warn("HERE!");
-    try {
-      Long version = this.db.createTransaction().getReadVersion().get();
-      LOGGER.warn("Got version: " + version);
-    } catch (Exception e) {
-      LOGGER.warn("Failed getReadVersion: " + e.toString());
-    }
-    Transaction txn = this.db.createTransaction();
-    byte[] start =
-        new byte[] {
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00};
-    byte[] end =
-        new byte[] {
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE};
-    AsyncIterable<KeyValue> iterable = txn.getRange(start, end);
-    AsyncIterator<KeyValue> iterator = iterable.iterator();
+    Long version = this.db.run(tr -> {
+        try {
+          return tr.getReadVersion().get();
+        } catch (Exception e) {
+          LOGGER.warn("Got exception from readVersion");
+          return null;
+        }
+    });
+    LOGGER.warn("GOT VERSION: " + version);
+    AsyncIterator iterator = this.db.run(tr -> {
+      byte[] start =  new byte[0];
+      byte[] end =
+              new byte[] {
+                      Byte.MAX_VALUE,
+                      Byte.MAX_VALUE,
+                      Byte.MAX_VALUE,
+                      Byte.MAX_VALUE,
+                      Byte.MAX_VALUE,
+                      Byte.MAX_VALUE,
+                      Byte.MAX_VALUE};
+      AsyncIterable iterable = tr.getRange(start, end);
+      return iterable.iterator();
+    });
+    LOGGER.warn("GOT ITERATOR");
     return new FoundationDBMetadataIterator(
         iterator,
         this.requiresTimestamp,
