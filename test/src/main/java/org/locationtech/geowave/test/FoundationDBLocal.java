@@ -29,22 +29,12 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecuteResultHandler;
 import org.apache.commons.exec.DefaultExecutor;
-import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.codehaus.plexus.archiver.tar.TarGZipUnArchiver;
 import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.slf4j.LoggerFactory;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class FoundationDBLocal {
   private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(FoundationDBLocal.class);
@@ -58,11 +48,9 @@ public class FoundationDBLocal {
       "https://www.foundationdb.org/downloads/6.2.7/ubuntu/installers/";
   private static final String FDB_CLIENT_DEB_PACKAGE = "foundationdb-clients_6.2.7-1_amd64.deb";
   private static final String FDB_SERVER_DEB_PACKAGE = "foundationdb-server_6.2.7-1_amd64.deb";
-  private static final String FDB_MONITOR = "fdbmonitor";
   private static final String FDB_CLI = "fdbcli";
   private static final String FDB_SERVER = "fdbserver";
   private static final String FDB_CLUSTER_FILE = "fdb.cluster";
-  private static final String FDB_CONF_FILE = "foundationdb.conf";
   private static final long STARTUP_DELAY_MS = 1500L;
 
   private final File foundationLocalDir;
@@ -92,24 +80,8 @@ public class FoundationDBLocal {
 
     // Create and write to fdb.cluster file
     clusterFilePath = foundationLocalDir.getPath() + "/" + FDB_CLUSTER_FILE;
-    FileOutputStream fileStream = null;
-    OutputStreamWriter fw = null;
-    try {
-      fileStream = new FileOutputStream(clusterFilePath);
-      fw = new OutputStreamWriter(fileStream, "UTF-8");
-      fw.write(String.format("test:test@%s:%d", host, port));
-    } catch (IOException e) {
-      LOGGER.error("Failed to create fdb.cluster file");
-    }
-    try {
-      if (fw != null) {
-        fw.close();
-      }
-    } catch (IOException e) {
-      LOGGER.error("Failed to close writer");
-    }
-
-    writeContentToFile("status", foundationLocalDir.getPath() + "/" + "fdbcli-input.txt");
+    final String clusterFileContents = String.format("test:test@%s:%d", host, port);
+    writeContentToFile(clusterFileContents, clusterFilePath);
 
     this.watchdogs = new ArrayList<>();
   }
@@ -147,7 +119,7 @@ public class FoundationDBLocal {
 
     try {
       startFDBServer();
-    } catch (IOException | InterruptedException e) {
+    } catch (InterruptedException e) {
       LOGGER.error("FDB server start error: {}", e.getMessage());
       return false;
     }
@@ -160,7 +132,7 @@ public class FoundationDBLocal {
     return true;
   }
 
-  private void startFDBServer() throws ExecuteException, IOException, InterruptedException {
+  private void startFDBServer() throws InterruptedException {
     LOGGER.warn("isInstalled: " + isInstalled());
     if (!isInstalled()) {
       LOGGER.warn("NOT INSTALLED; EXITING");
@@ -172,11 +144,8 @@ public class FoundationDBLocal {
       LOGGER.error("{} exists but is not a directory", foundationDBDir.getAbsolutePath());
     }
 
-    // final File fdbMonitorBinary = new File(foundationLocalDir.getAbsolutePath(), FDB_MONITOR);
     final File fdbCliBinary = new File(foundationLocalDir.getAbsolutePath(), FDB_CLI);
     final File fdbServerBinary = new File(foundationLocalDir.getAbsolutePath(), FDB_SERVER);
-
-
 
     final CommandLine startServer = new CommandLine(fdbServerBinary.getAbsolutePath());
     startServer.addArgument("-p");
@@ -185,20 +154,15 @@ public class FoundationDBLocal {
     startServer.addArgument(new File(foundationLocalDir, FDB_CLUSTER_FILE).getAbsolutePath());
     executeCommand(startServer, true);
 
-    Thread.sleep(STARTUP_DELAY_MS);
-
-    final CommandLine configureDatabase = new CommandLine("./configure-db");
+    final CommandLine configureDatabase = new CommandLine(fdbCliBinary.getAbsolutePath());
+    configureDatabase.addArgument("--exec");
+    configureDatabase.addArgument("configure new single memory", false);
     executeCommand(configureDatabase, false);
 
     final CommandLine status = new CommandLine(fdbCliBinary.getAbsolutePath());
     status.addArgument("--exec");
     status.addArgument("\"status\"");
-    executeCommand(status, true);
-
-    // final CommandLine configureDatabase = new CommandLine(fdbCliBinary.getAbsolutePath());
-    // configureDatabase.addArgument("--exec");
-    // configureDatabase.addArgument("configure new single memory");
-    // executeCommand(configureDatabase, true);
+    executeCommand(status, false);
 
     Thread.sleep(STARTUP_DELAY_MS);
 
@@ -206,14 +170,13 @@ public class FoundationDBLocal {
   }
 
   private void executeCommand(final CommandLine command, final boolean shouldExecuteAsync) {
-    LOGGER.warn("Running async: {}", String.join(" ", command.toStrings()));
+    LOGGER.warn("Running command: {}", String.join(" ", command.toStrings()));
     try {
       final ExecuteWatchdog watchdog = new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT);
       final DefaultExecutor executor = new DefaultExecutor();
       executor.setWatchdog(watchdog);
       executor.setWorkingDirectory(foundationLocalDir);
       watchdogs.add(watchdog);
-      LOGGER.warn("command: " + command.toString());
       if (shouldExecuteAsync) {
         // Using a result handler makes the command run async
         executor.execute(command, new DefaultExecuteResultHandler());
@@ -227,16 +190,10 @@ public class FoundationDBLocal {
   }
 
   private boolean isInstalled() {
-    // final File fdbMonitorBinary = new File(foundationLocalDir, FDB_MONITOR);
     final File fdbCliBinary = new File(foundationLocalDir, FDB_CLI);
     final File fdbServerBinary = new File(foundationLocalDir, FDB_SERVER);
-    // final File fdbConfFile = new File(foundationLocalDir, FDB_CONF_FILE);
-    LOGGER.warn("CLI PATH: " + fdbCliBinary.getAbsolutePath());
-    // final boolean okMonitor = fdbMonitorBinary.exists() && fdbMonitorBinary.canExecute();
     final boolean okCli = fdbCliBinary.exists() && fdbCliBinary.canExecute();
     final boolean okServer = fdbServerBinary.exists() && fdbServerBinary.canExecute();
-    // final boolean okConfFile = fdbConfFile.exists();
-    // return okMonitor && okCli && okServer && okConfFile;
     return okCli && okServer;
   }
 
@@ -292,6 +249,7 @@ public class FoundationDBLocal {
 
   private boolean install() throws IOException, ArchiveException {
     String osName = System.getProperty("os.name").toLowerCase();
+    LOGGER.warn("Running on OS: " + osName);
     LOGGER.warn("Installing");
     if (osName.indexOf("mac") >= 0) { // Running macOS
       LOGGER.warn("INSTALLING MACOS");
@@ -308,14 +266,24 @@ public class FoundationDBLocal {
         pkgUtilExpandFull.addArgument("pkg");
         executeCommand(pkgUtilExpandFull, false);
 
-        LOGGER.warn("Moving fdbmonitor, fdbserver, fdbcli binaries and fdb conf file to {}", foundationLocalDir);
-        final Path fdbClientPath = Paths.get(foundationLocalDir.getAbsolutePath(), "pkg", "FoundationDB-clients.pkg", "Payload");
-        final Path fdbServerPath = Paths.get(foundationLocalDir.getAbsolutePath(), "pkg", "FoundationDB-server.pkg", "Payload");
+        LOGGER.warn("Moving fdbserver and fdbcli binaries to {}", foundationLocalDir);
+        final Path fdbClientPath =
+            Paths.get(
+                foundationLocalDir.getAbsolutePath(),
+                "pkg",
+                "FoundationDB-clients.pkg",
+                "Payload");
+        final Path fdbServerPath =
+            Paths.get(
+                foundationLocalDir.getAbsolutePath(),
+                "pkg",
+                "FoundationDB-server.pkg",
+                "Payload");
 
         final Path fdbClientBin =
-                Paths.get(fdbClientPath.toAbsolutePath().toString(), "usr", "local", "bin");
+            Paths.get(fdbClientPath.toAbsolutePath().toString(), "usr", "local", "bin");
         final Path fdbServerLibExec =
-                Paths.get(fdbServerPath.toAbsolutePath().toString(), "usr", "local", "libexec");
+            Paths.get(fdbServerPath.toAbsolutePath().toString(), "usr", "local", "libexec");
 
         final File fdbCliBinary = fdbClientBin.resolve(FDB_CLI).toFile();
         final File fdbServerBinary = fdbServerLibExec.resolve(FDB_SERVER).toFile();
@@ -326,50 +294,37 @@ public class FoundationDBLocal {
         FileUtils.moveFileToDirectory(fdbCliBinary, foundationLocalDir, false);
         FileUtils.moveFileToDirectory(fdbServerBinary, foundationLocalDir, false);
 
-        String configureDbContents  = "#!/bin/sh\n" + foundationLocalDir.getAbsolutePath() + "/fdbcli --exec \"configure new single memory\"";
-        writeContentToFile(configureDbContents, foundationLocalDir.getPath() + "/" + "configure-db");
-
-        final Path fdbLocalDirPath = Paths.get(foundationLocalDir.getAbsolutePath());
-        final File configureDb = fdbLocalDirPath.resolve("configure-db").toFile();
-        configureDb.setExecutable(true);
-
         LOGGER.warn("FINISHED INSTALLING");
         return true;
       } catch (Exception e) {
-        LOGGER.warn("FAILED INSTALLINGGGGG for reason: " + e.toString());
+        LOGGER.warn("FAILED INSTALLING for reason: " + e.toString());
         return false;
       }
     }
 
-    if (osName.indexOf("nix") >= 0) { // Running Unix
-      LOGGER.warn("Downloading FDB client package");
-      installPackageFromURL(FDB_REPO_URL, FDB_CLIENT_DEB_PACKAGE);
-      extractContentsFromDebPackage(FDB_CLIENT_DEB_PACKAGE);
+    // TODO: Uncomment
+    // if (osName.indexOf("nix") >= 0) { // Running Unix
+    LOGGER.warn("Downloading FDB client package");
+    installPackageFromURL(FDB_REPO_URL, FDB_CLIENT_DEB_PACKAGE);
+    extractContentsFromDebPackage(FDB_CLIENT_DEB_PACKAGE);
 
-      LOGGER.warn("Downloading FDB server package");
-      installPackageFromURL(FDB_REPO_URL, FDB_SERVER_DEB_PACKAGE);
-      extractContentsFromDebPackage(FDB_SERVER_DEB_PACKAGE);
+    LOGGER.warn("Downloading FDB server package");
+    installPackageFromURL(FDB_REPO_URL, FDB_SERVER_DEB_PACKAGE);
+    extractContentsFromDebPackage(FDB_SERVER_DEB_PACKAGE);
 
-      LOGGER.warn("Moving fdbmonitor and fdbserver binaries to {}", foundationLocalDir);
-      // Move the fdbmonitor binary, fdbserver binary, fdbcli binary, and fdb conf file into the fdb
-      // local directory
-      final Path fdbLib =
-              Paths.get(foundationLocalDir.getAbsolutePath(), "usr", "lib", "foundationdb");
-      final Path fdbBin = Paths.get(foundationLocalDir.getAbsolutePath(), "usr", "bin");
-      final Path fdbSBin = Paths.get(foundationLocalDir.getAbsolutePath(), "usr", "sbin");
-      final Path fdbEtc = Paths.get(foundationLocalDir.getAbsolutePath(), "etc", "foundationdb");
-      final File fdbMonitorBinary = fdbLib.resolve(FDB_MONITOR).toFile();
-      final File fdbCliBinary = fdbBin.resolve(FDB_CLI).toFile();
-      final File fdbServerBinary = fdbSBin.resolve(FDB_SERVER).toFile();
-      final File fdbConfFile = fdbEtc.resolve(FDB_CONF_FILE).toFile();
-      fdbMonitorBinary.setExecutable(true);
-      fdbCliBinary.setExecutable(true);
-      fdbServerBinary.setExecutable(true);
-      FileUtils.moveFileToDirectory(fdbMonitorBinary, foundationLocalDir, false);
-      FileUtils.moveFileToDirectory(fdbCliBinary, foundationLocalDir, false);
-      FileUtils.moveFileToDirectory(fdbServerBinary, foundationLocalDir, false);
-      FileUtils.moveFileToDirectory(fdbConfFile, foundationLocalDir, false);
-    }
+    LOGGER.warn("Moving fdbserver and fdbcli binaries to {}", foundationLocalDir);
+    final Path fdbBin = Paths.get(foundationLocalDir.getAbsolutePath(), "usr", "bin");
+    final Path fdbSBin = Paths.get(foundationLocalDir.getAbsolutePath(), "usr", "sbin");
+
+    final File fdbCliBinary = fdbBin.resolve(FDB_CLI).toFile();
+    final File fdbServerBinary = fdbSBin.resolve(FDB_SERVER).toFile();
+
+    fdbCliBinary.setExecutable(true);
+    fdbServerBinary.setExecutable(true);
+
+    FileUtils.moveFileToDirectory(fdbCliBinary, foundationLocalDir, false);
+    FileUtils.moveFileToDirectory(fdbServerBinary, foundationLocalDir, false);
+    // }
 
     if (isInstalled()) {
       LOGGER.warn("FoundationDBLocal installation successful");

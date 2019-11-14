@@ -44,25 +44,25 @@ public class FoundationDBMetadataTable implements Closeable {
     }
     LOGGER.warn("HERE!");
     Long version = this.db.run(tr -> {
-        try {
-          return tr.getReadVersion().get();
-        } catch (Exception e) {
-          LOGGER.warn("Got exception from readVersion");
-          return null;
-        }
+      try {
+        return tr.getReadVersion().get();
+      } catch (Exception e) {
+        LOGGER.warn("Got exception from readVersion");
+        return null;
+      }
     });
     LOGGER.warn("GOT VERSION: " + version);
     AsyncIterator iterator = this.db.run(tr -> {
-      byte[] start =  new byte[0];
+      byte[] start = new byte[0];
       byte[] end =
-              new byte[] {
-                      Byte.MAX_VALUE,
-                      Byte.MAX_VALUE,
-                      Byte.MAX_VALUE,
-                      Byte.MAX_VALUE,
-                      Byte.MAX_VALUE,
-                      Byte.MAX_VALUE,
-                      Byte.MAX_VALUE};
+          new byte[] {
+              Byte.MAX_VALUE,
+              Byte.MAX_VALUE,
+              Byte.MAX_VALUE,
+              Byte.MAX_VALUE,
+              Byte.MAX_VALUE,
+              Byte.MAX_VALUE,
+              Byte.MAX_VALUE};
       AsyncIterable iterable = tr.getRange(start, end);
       return iterable.iterator();
     });
