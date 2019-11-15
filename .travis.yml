@@ -12,20 +12,20 @@ env:
     - NAME='Unit Tests on Latest ASF Versions' MAVEN_PROFILES='""' BUILD_AND_PUBLISH=false   IT_ONLY=false
     - NAME='Python Bindings Tests' MAVEN_PROFILES='""' BUILD_AND_PUBLISH=false IT_ONLY=false PYTHON_BUILD=true
     - NAME='FoundationDB IT on Latest ASF Versions' MAVEN_PROFILES='foundationdb-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      # - NAME='Redis IT on Latest ASF Versions' MAVEN_PROFILES='redis-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      # - NAME='RocksDB IT on Latest ASF Versions' MAVEN_PROFILES='rocksdb-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='Accumulo Client IT on Latest ASF Versions' MAVEN_PROFILES='accumulo-it-client' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      # - NAME='Accumulo Server IT on Latest ASF Versions' MAVEN_PROFILES='accumulo-it-server' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='HBase Client IT on Latest ASF Versions' MAVEN_PROFILES='hbase-it-client' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='HBase Server IT on Latest ASF Versions' MAVEN_PROFILES='hbase-it-server' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='Cassandra IT on Latest ASF Versions' MAVEN_PROFILES='cassandra-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='DynamoDB IT on Latest ASF Versions' MAVEN_PROFILES='dynamodb-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='Bigtable IT on Latest ASF Versions' MAVEN_PROFILES='bigtable-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='Accumulo Server IT on Older ASF and GeoTools Versions' MAVEN_PROFILES='accumulo-it-server,compatibility' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='HBase Client IT on Older ASF and GeoTools Versions' MAVEN_PROFILES='hbase-it-client,compatibility' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='Accumulo Server IT on Latest HDP Versions' MAVEN_PROFILES='accumulo-it-server,hortonworks' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='RocksDB IT with Secondary Indexing'  MAVEN_PROFILES='rocksdb-it,secondary-index-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
-      #- NAME='Kudu IT on Latest ASF Versions' MAVEN_PROFILES='kudu-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='Redis IT on Latest ASF Versions' MAVEN_PROFILES='redis-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='RocksDB IT on Latest ASF Versions' MAVEN_PROFILES='rocksdb-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='Accumulo Client IT on Latest ASF Versions' MAVEN_PROFILES='accumulo-it-client' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='Accumulo Server IT on Latest ASF Versions' MAVEN_PROFILES='accumulo-it-server' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='HBase Client IT on Latest ASF Versions' MAVEN_PROFILES='hbase-it-client' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='HBase Server IT on Latest ASF Versions' MAVEN_PROFILES='hbase-it-server' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='Cassandra IT on Latest ASF Versions' MAVEN_PROFILES='cassandra-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='DynamoDB IT on Latest ASF Versions' MAVEN_PROFILES='dynamodb-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='Bigtable IT on Latest ASF Versions' MAVEN_PROFILES='bigtable-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='Accumulo Server IT on Older ASF and GeoTools Versions' MAVEN_PROFILES='accumulo-it-server,compatibility' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='HBase Client IT on Older ASF and GeoTools Versions' MAVEN_PROFILES='hbase-it-client,compatibility' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='Accumulo Server IT on Latest HDP Versions' MAVEN_PROFILES='accumulo-it-server,hortonworks' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='RocksDB IT with Secondary Indexing'  MAVEN_PROFILES='rocksdb-it,secondary-index-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
+    - NAME='Kudu IT on Latest ASF Versions' MAVEN_PROFILES='kudu-it' BUILD_AND_PUBLISH=false  IT_ONLY=true
   global:
     - secure: C3gdJmFavZxvsRVqCLpRUAaisNV3MhWbSYf4Wjs2SBLC/AIEwN0vDWHOuYiUExuXR1kApBVdNffuCX7bt/5siewHgmiVUGyY1xytxDdv+PAKZihlfYZRGattyg3XUbEFwyjr7c74639Y1w45NPUoBMUT4SKHZkfqD+FDU47OHIM=
 
