@@ -189,7 +189,7 @@ public class FoundationDBLocal {
         executor.execute(command);
       }
     } catch (Exception e) {
-      LOGGER.warn("FAILED EXECUTE: " + e.getStackTrace());
+      LOGGER.warn("FAILED EXECUTE: " + e.toString());
     }
   }
 
