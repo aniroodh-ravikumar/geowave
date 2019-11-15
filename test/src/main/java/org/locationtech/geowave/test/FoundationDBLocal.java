@@ -50,6 +50,10 @@ public class FoundationDBLocal {
   private static final String FDB_SERVER_DEB_PACKAGE = "foundationdb-server_6.2.7-1_amd64.deb";
   private static final String FDB_CLI = "fdbcli";
   private static final String FDB_SERVER = "fdbserver";
+  private static final String FDB_C = "libfdb_c";
+  private static final String FDB_C_DYLIB = FDB_C + ".dylib";
+  private static final String FDB_C_SO = FDB_C + ".so";
+  private static final String FDB_C_LIBRARY_PATH = "FDB_LIBRARY_PATH_FDB_C";
   private static final String FDB_CLUSTER_FILE = "fdb.cluster";
   private static final long STARTUP_DELAY_MS = 1500L;
 
@@ -190,11 +194,22 @@ public class FoundationDBLocal {
   }
 
   private boolean isInstalled() {
+    final File fdbCDylib = new File(foundationLocalDir, FDB_C_DYLIB);
+    final File fdbCSo = new File(foundationLocalDir, FDB_C_SO);
     final File fdbCliBinary = new File(foundationLocalDir, FDB_CLI);
     final File fdbServerBinary = new File(foundationLocalDir, FDB_SERVER);
+    final boolean okCSo = fdbCSo.exists() && fdbCSo.canExecute();
+    final boolean okCDylib = fdbCDylib.exists() && fdbCDylib.canExecute();
     final boolean okCli = fdbCliBinary.exists() && fdbCliBinary.canExecute();
     final boolean okServer = fdbServerBinary.exists() && fdbServerBinary.canExecute();
-    return okCli && okServer;
+    boolean okFdbC = false;
+    String osName = System.getProperty("os.name").toLowerCase();
+    if (osName.indexOf("mac") >= 0) { // Running macOS
+      okFdbC = okCDylib;
+    } else if (osName.indexOf("nix") >= 0) { // Running nix
+      okFdbC = okCSo;
+    }
+    return okFdbC && okCli && okServer;
   }
 
   private void installPackageFromURL(final String repoURL, final String packageName)
@@ -280,51 +295,65 @@ public class FoundationDBLocal {
                 "FoundationDB-server.pkg",
                 "Payload");
 
+        final Path fdbClientLib =
+            Paths.get(fdbClientPath.toAbsolutePath().toString(), "usr", "local", "lib");
         final Path fdbClientBin =
             Paths.get(fdbClientPath.toAbsolutePath().toString(), "usr", "local", "bin");
         final Path fdbServerLibExec =
             Paths.get(fdbServerPath.toAbsolutePath().toString(), "usr", "local", "libexec");
 
+        final File fdbCDylib = fdbClientLib.resolve(FDB_C_DYLIB).toFile();
         final File fdbCliBinary = fdbClientBin.resolve(FDB_CLI).toFile();
         final File fdbServerBinary = fdbServerLibExec.resolve(FDB_SERVER).toFile();
 
+        fdbCDylib.setExecutable(true);
         fdbCliBinary.setExecutable(true);
         fdbServerBinary.setExecutable(true);
 
+        FileUtils.moveFileToDirectory(fdbCDylib, foundationLocalDir, false);
         FileUtils.moveFileToDirectory(fdbCliBinary, foundationLocalDir, false);
         FileUtils.moveFileToDirectory(fdbServerBinary, foundationLocalDir, false);
 
+        // Set FDB_LIBRARY_PATH_FDB_C environment property to path of FDB_C_DYLIB
+        final String fdbCDylibPath = foundationLocalDir.getAbsolutePath() + "/" + FDB_C_DYLIB;
+        System.setProperty(FDB_C_LIBRARY_PATH, fdbCDylibPath);
+
         LOGGER.warn("FINISHED INSTALLING");
-        return true;
       } catch (Exception e) {
         LOGGER.warn("FAILED INSTALLING for reason: " + e.toString());
-        return false;
       }
     }
 
-    // TODO: Uncomment
-    // if (osName.indexOf("nix") >= 0) { // Running Unix
-    LOGGER.warn("Downloading FDB client package");
-    installPackageFromURL(FDB_REPO_URL, FDB_CLIENT_DEB_PACKAGE);
-    extractContentsFromDebPackage(FDB_CLIENT_DEB_PACKAGE);
+    if (osName.indexOf("nix") >= 0) { // Running nix
+      LOGGER.warn("Downloading FDB client package");
+      installPackageFromURL(FDB_REPO_URL, FDB_CLIENT_DEB_PACKAGE);
+      extractContentsFromDebPackage(FDB_CLIENT_DEB_PACKAGE);
 
-    LOGGER.warn("Downloading FDB server package");
-    installPackageFromURL(FDB_REPO_URL, FDB_SERVER_DEB_PACKAGE);
-    extractContentsFromDebPackage(FDB_SERVER_DEB_PACKAGE);
+      LOGGER.warn("Downloading FDB server package");
+      installPackageFromURL(FDB_REPO_URL, FDB_SERVER_DEB_PACKAGE);
+      extractContentsFromDebPackage(FDB_SERVER_DEB_PACKAGE);
 
-    LOGGER.warn("Moving fdbserver and fdbcli binaries to {}", foundationLocalDir);
-    final Path fdbBin = Paths.get(foundationLocalDir.getAbsolutePath(), "usr", "bin");
-    final Path fdbSBin = Paths.get(foundationLocalDir.getAbsolutePath(), "usr", "sbin");
+      LOGGER.warn("Moving fdbserver and fdbcli binaries to {}", foundationLocalDir);
+      final Path fdbLib = Paths.get(foundationLocalDir.getAbsolutePath(), "usr", "lib");
+      final Path fdbBin = Paths.get(foundationLocalDir.getAbsolutePath(), "usr", "bin");
+      final Path fdbSBin = Paths.get(foundationLocalDir.getAbsolutePath(), "usr", "sbin");
 
-    final File fdbCliBinary = fdbBin.resolve(FDB_CLI).toFile();
-    final File fdbServerBinary = fdbSBin.resolve(FDB_SERVER).toFile();
+      final File fdbCSo = fdbLib.resolve(FDB_C_SO).toFile();
+      final File fdbCliBinary = fdbBin.resolve(FDB_CLI).toFile();
+      final File fdbServerBinary = fdbSBin.resolve(FDB_SERVER).toFile();
 
-    fdbCliBinary.setExecutable(true);
-    fdbServerBinary.setExecutable(true);
+      fdbCSo.setExecutable(true);
+      fdbCliBinary.setExecutable(true);
+      fdbServerBinary.setExecutable(true);
 
-    FileUtils.moveFileToDirectory(fdbCliBinary, foundationLocalDir, false);
-    FileUtils.moveFileToDirectory(fdbServerBinary, foundationLocalDir, false);
-    // }
+      FileUtils.moveFileToDirectory(fdbCSo, foundationLocalDir, false);
+      FileUtils.moveFileToDirectory(fdbCliBinary, foundationLocalDir, false);
+      FileUtils.moveFileToDirectory(fdbServerBinary, foundationLocalDir, false);
+
+      // Set FDB_LIBRARY_PATH_FDB_C environment property to path of FDB_C_SO
+      final String fdbCSoPath = foundationLocalDir.getAbsolutePath() + "/" + FDB_C_SO;
+      System.setProperty(FDB_C_LIBRARY_PATH, fdbCSoPath);
+    }
 
     if (isInstalled()) {
       LOGGER.warn("FoundationDBLocal installation successful");
