@@ -32,36 +32,34 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
     super();
     this.db = db;
     this.end = end;
-//    this.next = new byte[start.length];
-    this.next = start;
+    this.next = new byte[start.length];
 //    System.out.println(db.)
     this.txn = db.createTransaction();
-    this.it = (this.txn.getRange(start,end)).iterator();
+    this.it = this.txn.getRange(start, end).iterator();
 //    this.it = db.run(tr -> tr.getRange(start, end)).iterator();
     System.arraycopy(start, 0, next, 0, start.length);
   }
 
   @Override
   public synchronized boolean hasNext() {
-//    if (!closed) {
-//      boolean hasNext;
-//      try {
-//        hasNext = it.hasNext();
-//      }
-//      catch (CompletionException e) {
-//        this.txn.close();
-//        this.txn = db.createTransaction();
-//        this.it = this.txn.getRange(next,end).iterator();
-//        hasNext = it.hasNext();
-//      }
-//      if (!hasNext) {
-//        txn.close();
-//      }
-//      return hasNext;
-//    }
-//    txn.close();
-//    return false;
-    return !closed && it.hasNext();
+    if (!closed) {
+      boolean hasNext = false;
+      try {
+        hasNext = it.hasNext();
+      } catch (CompletionException e) {
+        this.txn.close();
+        this.txn = db.createTransaction();
+        this.it = this.txn.getRange(next, end).iterator();
+        hasNext = it.hasNext();
+      } finally {
+        if (!hasNext) {
+          this.txn.close();
+        }
+      }
+      return hasNext;
+    }
+    return false;
+//    return !closed && it.hasNext();
   }
 
   @Override
@@ -89,7 +87,8 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
 
   @Override
   public synchronized void close() {
-    closed = true;
+    this.closed = true;
+    this.txn.close();
   }
 
   private byte[] increment(byte[] start) {
