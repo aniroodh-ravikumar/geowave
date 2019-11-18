@@ -4,6 +4,7 @@ import com.apple.foundationdb.Database;
 import com.apple.foundationdb.KeyValue;
 import com.apple.foundationdb.Transaction;
 import com.apple.foundationdb.async.AsyncIterator;
+import org.locationtech.geowave.core.index.ByteArrayUtils;
 import org.locationtech.geowave.core.store.CloseableIterator;
 
 import java.util.NoSuchElementException;
@@ -79,7 +80,8 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
       this.it = this.txn.getRange(next,end).iterator();
       nextRow = readRow(it.next());
     }
-    this.next = increment(next);
+//    this.next = increment(next);
+    this.next = ByteArrayUtils.getNextPrefix(this.next);
     return nextRow;
   }
 
@@ -91,21 +93,21 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
     this.txn.close();
   }
 
-  private byte[] increment(byte[] start) {
-    // TODO
-    byte[] next = start;
-    for (int i = start.length - 1; i >= 0; i--) {
-      int nextPieceInt = next[i] + 1;
-      if (nextPieceInt > (int) Byte.MAX_VALUE) {
-        nextPieceInt = 0x00;
-        next[i] = (byte) nextPieceInt;
-      }
-      else {
-        next[i] = (byte) nextPieceInt;
-        break;
-      }
-    }
-
-    return next;
-  }
+//  private byte[] increment(byte[] start) {
+//    // TODO
+//    byte[] next = start;
+//    for (int i = start.length - 1; i >= 0; i--) {
+//      int nextPieceInt = next[i] + 1;
+//      if (nextPieceInt > (int) Byte.MAX_VALUE) {
+//        nextPieceInt = 0x00;
+//        next[i] = (byte) nextPieceInt;
+//      }
+//      else {
+//        next[i] = (byte) nextPieceInt;
+//        break;
+//      }
+//    }
+//
+//    return next;
+//  }
 }
