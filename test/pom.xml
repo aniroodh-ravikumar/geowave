@@ -164,6 +164,11 @@
 			<artifactId>geowave-datastore-cassandra</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>		
+ 			<groupId>org.locationtech.geowave</groupId>		
+ 			<artifactId>geowave-datastore-foundationdb</artifactId>		
+ 			<version>${project.version}</version>		
+ 		</dependency>
 		<dependency>
 			<groupId>org.locationtech.geowave</groupId>
 			<artifactId>geowave-datastore-hbase</artifactId>

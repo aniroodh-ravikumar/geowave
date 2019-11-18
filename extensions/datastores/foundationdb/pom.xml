@@ -11,6 +11,24 @@
 	<artifactId>geowave-datastore-foundationdb</artifactId>
 	<name>GeoWave FoundationDB</name>
 	<description>Geowave Data Store on FoundationDB</description>
+	
+	  <build>
+	    <plugins>
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-shade-plugin</artifactId>
+	        <version>3.2.1</version>
+	        <executions>
+	          <execution>
+	            <phase>package</phase>
+	            <goals>
+	              <goal>shade</goal>
+	            </goals>
+	          </execution>
+	        </executions>
+	      </plugin>
+	    </plugins>
+	  </build>
 
 	<dependencies>
 		<dependency>
