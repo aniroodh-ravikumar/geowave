@@ -43,11 +43,14 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
       visibility = new byte[0];
     }
     int secondaryIdLength = Math.max(key.length - primaryId.length - visibility.length - 1,0);
+//    int secondaryIdLength = key.length - primaryId.length - visibility.length - 1;
     if (containsTimestamp) {
-      secondaryIdLength = Math.max(secondaryIdLength - 8,0);
+//      secondaryIdLength = Math.max(secondaryIdLength - 8,0);
+      secondaryIdLength = secondaryIdLength - 8;
     }
     if (visibilityEnabled) {
-      secondaryIdLength = Math.max(secondaryIdLength - 1,0);;
+      secondaryIdLength = Math.max(secondaryIdLength - 1,0);
+//      secondaryIdLength = secondaryIdLength - 1;
     }
     final byte[] secondaryId = new byte[secondaryIdLength];
     buf.get(primaryId);
@@ -60,6 +63,7 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
       }
       catch (IllegalArgumentException e) {
       }
+//      buf.position(buf.position() + 8);
     }
     if (visibilityEnabled) {
       buf.get(visibility);
