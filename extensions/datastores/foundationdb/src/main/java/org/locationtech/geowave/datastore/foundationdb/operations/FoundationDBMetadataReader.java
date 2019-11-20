@@ -31,18 +31,32 @@ public class FoundationDBMetadataReader implements MetadataReader {
   public CloseableIterator<GeoWaveMetadata> query(
       final MetadataQuery query,
       final boolean mergeStats) {
+    LOGGER.warn("IN METADATA READER QUERY");
     CloseableIterator<GeoWaveMetadata> originalResults;
     Iterator<GeoWaveMetadata> resultsIt;
-    if (query.hasPrimaryId() && query.hasSecondaryId()) {
-      originalResults = table.iterator(query.getPrimaryId(), query.getSecondaryId());
-      resultsIt = originalResults;
-    } else if (query.hasPrimaryId()) {
+
+    if (query.hasPrimaryId()) {
+      LOGGER.warn("HAS PRIMARY ID");
       originalResults = table.iterator(query.getPrimaryId());
       resultsIt = originalResults;
     } else {
+      LOGGER.warn("HAS NO IDs");
       originalResults = table.iterator();
       resultsIt = originalResults;
     }
+    // if (query.hasPrimaryId() && query.hasSecondaryId()) {
+    //   LOGGER.warn("has both ids");
+    //   originalResults = table.iterator(query.getPrimaryId(), query.getSecondaryId());
+    //   resultsIt = originalResults;
+    // } else if (query.hasPrimaryId()) {
+    //   LOGGER.warn("has primary id only");
+    //   originalResults = table.iterator(query.getPrimaryId());
+    //   resultsIt = originalResults;
+    // } else {
+    //   LOGGER.warn("has no ids");
+    //   originalResults = table.iterator();
+    //   resultsIt = originalResults;
+    // }
     if (query.hasPrimaryId() || query.hasSecondaryId()) {
       resultsIt = Iterators.filter(resultsIt, new Predicate<GeoWaveMetadata>() {
 
@@ -62,12 +76,13 @@ public class FoundationDBMetadataReader implements MetadataReader {
           return true;
         }
       });
+    } else {
+      LOGGER.warn("no ids");
     }
     final boolean isStats = MetadataType.STATS.equals(metadataType) && mergeStats;
     final CloseableIterator<GeoWaveMetadata> retVal =
         new CloseableIteratorWrapper<>(originalResults, resultsIt);
     return isStats ? new StatisticsRowIterator(retVal, query.getAuthorizations()) : retVal;
-
   }
 
   @Override

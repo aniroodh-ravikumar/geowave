@@ -122,9 +122,12 @@ public class PersistenceUtils {
     final ByteBuffer buf = ByteBuffer.wrap(bytes);
     final short classId = buf.getShort();
 
+    LOGGER.warn("bytes: " + bytes);
+    LOGGER.warn("classId: " + classId);
     final Persistable retVal = PersistableFactory.getInstance().newInstance(classId);
     final byte[] persistableBinary = new byte[bytes.length - 2];
     buf.get(persistableBinary);
+    LOGGER.warn(retVal == null ? "NULL" : "NOT NULL");
     retVal.fromBinary(persistableBinary);
     return retVal;
   }

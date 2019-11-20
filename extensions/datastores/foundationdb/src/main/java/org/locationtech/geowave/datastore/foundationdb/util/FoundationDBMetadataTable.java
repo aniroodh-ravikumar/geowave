@@ -3,6 +3,7 @@ package org.locationtech.geowave.datastore.foundationdb.util;
 import com.apple.foundationdb.*;
 import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
+import com.apple.foundationdb.tuple.Tuple;
 import com.google.common.collect.Iterators;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
@@ -25,50 +26,51 @@ public class FoundationDBMetadataTable implements Closeable {
   private final boolean requiresTimestamp;
   private final boolean visibilityEnabled;
   private long prevTime = Long.MAX_VALUE;
-  private final List<FDBWrite> writes;
 
   public FoundationDBMetadataTable(
-      FDB fdb,
+      Database db,
       final boolean requiresTimestamp,
       final boolean visibilityEnabled) {
     super();
-    this.db = fdb.open();
+    this.db = db;
     this.requiresTimestamp = requiresTimestamp;
     this.visibilityEnabled = visibilityEnabled;
-    this.writes = new LinkedList<>();
   }
 
   public CloseableIterator<GeoWaveMetadata> iterator() {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-//    ReadTransaction txn = this.db.createTransaction();
-    byte[] start =
-        new byte[] {
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00};
-    byte[] end =
-        new byte[] {
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE,
-            Byte.MAX_VALUE};
-//    AsyncIterable<KeyValue> iterable = txn.getRange(start, end);
-//    AsyncIterator<KeyValue> iterator = iterable.iterator();
+    // byte[] start = new byte[0];
+    // byte[] end =
+    //     new byte[] {
+    //         Byte.MAX_VALUE,
+    //         Byte.MAX_VALUE,
+    //         Byte.MAX_VALUE,
+    //         Byte.MAX_VALUE,
+    //         Byte.MAX_VALUE,
+    //         Byte.MAX_VALUE,
+    //         Byte.MAX_VALUE};
+
+    Long version = db.run(tr -> { return tr.getReadVersion().join(); });
+    LOGGER.warn("VERSION: " + version);
+    LOGGER.warn("BEFORE GETTING ITERATOR");
+    AsyncIterator<KeyValue> iterator = db.run(tr -> {
+      final byte[] start = Tuple.from("").pack();
+      final byte[] end = Tuple.from("0xff").pack();
+      LOGGER.warn("IN RUN");
+      AsyncIterable<KeyValue> iterable = tr.getRange(start, end);
+      LOGGER.warn("GOT ITERABLE IN RUN");
+      AsyncIterator<KeyValue> iter = iterable.iterator();
+      LOGGER.warn("GOT ITERATOR IN RUN");
+      LOGGER.warn(iter.toString());
+      return iter;
+    });
+    LOGGER.warn("GOT ITERATOR");
     return new FoundationDBMetadataIterator(
+            iterator,
         this.requiresTimestamp,
-        this.visibilityEnabled,
-            db,
-            start,
-            end);
+        this.visibilityEnabled);
   }
 
   public CloseableIterator<GeoWaveMetadata> iterator(byte[] primaryID) {
@@ -80,29 +82,26 @@ public class FoundationDBMetadataTable implements Closeable {
   }
 
   private CloseableIterator<GeoWaveMetadata> prefixIterator(final byte[] prefix) {
-//    Transaction txn = this.db.createTransaction();
-//    AsyncIterable<KeyValue> iterable = txn.getRange(prefix, ByteArrayUtils.getNextPrefix(prefix));
+    AsyncIterator<KeyValue> iterator = db.run(tr -> {
+      AsyncIterable<KeyValue> iterable = tr.getRange(prefix, ByteArrayUtils.getNextPrefix(prefix));
+      return iterable.iterator();
+    });
     // TODO: can this class be asynchronous?
     return new FoundationDBMetadataIterator(
+            iterator,
         this.requiresTimestamp,
-        this.visibilityEnabled,
-            this.db,
-            prefix,
-            ByteArrayUtils.getNextPrefix(prefix));
+        this.visibilityEnabled);
   }
 
   public void remove(final byte[] key) {
-    try {
-      this.db.run(tr -> {
-        tr.clear(key);
-        return null;
-      });
-    } catch (final FDBException e) {
-      LOGGER.warn("Unable to delete metadata", e);
-    }
+    this.db.run(tr -> {
+      tr.clear(key);
+      return null;
+    });
   }
 
   public void add(final GeoWaveMetadata value) {
+    LOGGER.warn("in add of fdb metadata table");
     byte[] key;
     final byte[] secondaryId =
         value.getSecondaryId() == null ? new byte[0] : value.getSecondaryId();
@@ -132,19 +131,18 @@ public class FoundationDBMetadataTable implements Closeable {
     } else {
       key = Bytes.concat(value.getPrimaryId(), secondaryId, endBytes);
     }
-    write(key, value.getValue());
+    put(key, value.getValue());
   }
 
-  public void write(final byte[] key, final byte[] value) {
-    writes.add(new FDBWrite(key, value));
+  public void put(final byte[] key, final byte[] value) {
+      LOGGER.warn("METADATA TABLE writing to db");
+      db.run(tr -> {
+        tr.set(key, value);
+        return null;
+      });
   }
 
-  public void flush() {
-    db.run(txn -> {
-      this.writes.forEach(write -> write.add(txn));
-      return null;
-    });
-  }
+  public void flush() { }
 
   public void close() {
     db.close();

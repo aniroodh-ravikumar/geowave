@@ -200,7 +200,7 @@ public class FoundationDBClient implements Closeable {
     if (!dir.exists() && !dir.mkdirs()) {
       LOGGER.error("Unable to create directory for foundationdb store '" + key.directory + "'");
     }
-    return new FoundationDBMetadataTable(this.fdb, key.requiresTimestamp, visibilityEnabled);
+    return new FoundationDBMetadataTable(this.fdb.open(), key.requiresTimestamp, visibilityEnabled);
   }
 
   public synchronized FoundationDBIndexTable getIndexTable(

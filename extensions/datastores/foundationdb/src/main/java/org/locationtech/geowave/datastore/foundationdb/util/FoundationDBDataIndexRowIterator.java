@@ -11,12 +11,10 @@ public class FoundationDBDataIndexRowIterator extends AbstractFoundationDBIterat
   private final boolean visibilityEnabled;
 
   public FoundationDBDataIndexRowIterator(
+          final AsyncIterator it,
       final short adapterId,
-      final boolean visiblityEnabled,
-      final Database db,
-      final byte[] startId,
-      final byte[] endId) {
-    super(db,startId,endId);
+      final boolean visiblityEnabled) {
+    super(it);
     this.adapterId = adapterId;
     this.visibilityEnabled = visiblityEnabled;
   }
