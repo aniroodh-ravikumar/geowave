@@ -8,7 +8,6 @@ import com.apple.foundationdb.async.AsyncIterator;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
 import com.apple.foundationdb.tuple.Tuple;
 import org.locationtech.geowave.core.store.CloseableIterator;
 import org.locationtech.geowave.core.store.base.dataidx.DataIndexUtils;
@@ -77,14 +76,14 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
 
     // final byte[] start = startDataId != null ? startDataId : new byte[0];
     // final byte[] end = endDataId != null ? endDataId
-    //                 : new byte[] {
-    //                         Byte.MAX_VALUE,
-    //                 Byte.MAX_VALUE,
-    //                 Byte.MAX_VALUE,
-    //                 Byte.MAX_VALUE,
-    //                 Byte.MAX_VALUE,
-    //                 Byte.MAX_VALUE,
-    //                 Byte.MAX_VALUE};
+    // : new byte[] {
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE};
 
     LOGGER.warn("WAITING FOR ITERATOR");
     AsyncIterator<KeyValue> iterator = db.run(tr -> {

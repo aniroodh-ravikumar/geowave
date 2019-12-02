@@ -95,14 +95,14 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
     }
     // byte[] start = new byte[0];
     // byte[] end =
-    //     new byte[] {
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE};
+    // new byte[] {
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE};
     final byte[] start = Tuple.from("").pack();
     final byte[] end = Tuple.from("0xff").pack();
     return iterator(new ByteArrayRange(start, end));
@@ -118,7 +118,7 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
       return iterable.iterator();
     });
     return new FoundationDBRowIterator(
-            iterator,
+        iterator,
         adapterId,
         partition,
         requiresTimestamp,

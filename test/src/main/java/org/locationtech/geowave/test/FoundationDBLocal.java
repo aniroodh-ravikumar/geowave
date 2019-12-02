@@ -42,8 +42,8 @@ public class FoundationDBLocal {
 
   public void start() {
     // if (db == null) {
-    //   FDB fdb = FDB.selectAPIVersion(610);
-    //   db = fdb.open(); // Opens using `fdb.cluster` file which is in current directory
+    // FDB fdb = FDB.selectAPIVersion(610);
+    // db = fdb.open(); // Opens using `fdb.cluster` file which is in current directory
     // }
   }
 

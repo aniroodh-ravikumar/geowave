@@ -32,11 +32,11 @@ public class FoundationDBWriter implements RowWriter {
 
   private FoundationDBIndexTable getTable(final byte[] partitionKey) {
     return FoundationDBUtils.getIndexTableFromPrefix(
-            client,
-            indexNamePrefix,
-            adapterId,
-            partitionKey,
-            isTimestampRequired);
+        client,
+        indexNamePrefix,
+        adapterId,
+        partitionKey,
+        isTimestampRequired);
   }
 
   @Override
@@ -57,7 +57,7 @@ public class FoundationDBWriter implements RowWriter {
     }
     for (final GeoWaveValue value : row.getFieldValues()) {
 
-//      System.out.println(tableCache.asMap().keySet().toString());
+      // System.out.println(tableCache.asMap().keySet().toString());
 
       tableCache.get(partitionKey).add(
           row.getSortKey(),

@@ -43,16 +43,18 @@ public class FoundationDBMetadataTable implements Closeable {
     }
     // byte[] start = new byte[0];
     // byte[] end =
-    //     new byte[] {
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE,
-    //         Byte.MAX_VALUE};
-
-    Long version = db.run(tr -> { return tr.getReadVersion().join(); });
+    // new byte[] {
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE,
+    // Byte.MAX_VALUE};
+    LOGGER.warn("before get version");
+    Long version = db.run(tr -> {
+      return tr.getReadVersion().join();
+    });
     LOGGER.warn("VERSION: " + version);
     LOGGER.warn("BEFORE GETTING ITERATOR");
     AsyncIterator<KeyValue> iterator = db.run(tr -> {
@@ -68,7 +70,7 @@ public class FoundationDBMetadataTable implements Closeable {
     });
     LOGGER.warn("GOT ITERATOR");
     return new FoundationDBMetadataIterator(
-            iterator,
+        iterator,
         this.requiresTimestamp,
         this.visibilityEnabled);
   }
@@ -88,7 +90,7 @@ public class FoundationDBMetadataTable implements Closeable {
     });
     // TODO: can this class be asynchronous?
     return new FoundationDBMetadataIterator(
-            iterator,
+        iterator,
         this.requiresTimestamp,
         this.visibilityEnabled);
   }
@@ -135,14 +137,14 @@ public class FoundationDBMetadataTable implements Closeable {
   }
 
   public void put(final byte[] key, final byte[] value) {
-      LOGGER.warn("METADATA TABLE writing to db");
-      db.run(tr -> {
-        tr.set(key, value);
-        return null;
-      });
+    LOGGER.warn("METADATA TABLE writing to db");
+    db.run(tr -> {
+      tr.set(key, value);
+      return null;
+    });
   }
 
-  public void flush() { }
+  public void flush() {}
 
   public void close() {
     db.close();

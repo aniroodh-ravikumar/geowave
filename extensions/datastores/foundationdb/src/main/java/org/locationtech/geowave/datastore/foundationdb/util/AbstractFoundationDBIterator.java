@@ -10,37 +10,36 @@ import com.apple.foundationdb.KeyValue;
 import org.locationtech.geowave.core.store.CloseableIterator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletionException;
 
 public abstract class AbstractFoundationDBIterator<T> implements CloseableIterator<T> {
-    protected boolean closed = false;
-    protected Iterator<KeyValue> it;
+  protected boolean closed = false;
+  protected Iterator<KeyValue> it;
 
-    public AbstractFoundationDBIterator(final Iterator<KeyValue> it) {
-        super();
-        this.it = it;
+  public AbstractFoundationDBIterator(final Iterator<KeyValue> it) {
+    super();
+    this.it = it;
+  }
+
+  @Override
+  public boolean hasNext() {
+    return !closed && it.hasNext();
+  }
+
+  @Override
+  public T next() {
+    if (closed) {
+      throw new NoSuchElementException();
     }
+    return readRow(it.next());
+  }
 
-    @Override
-    public boolean hasNext() {
-        return !closed && it.hasNext();
-    }
+  protected abstract T readRow(KeyValue keyValue);
 
-    @Override
-    public T next() {
-        if (closed) {
-            throw new NoSuchElementException();
-        }
-        return readRow(it.next());
-    }
-
-    protected abstract T readRow(KeyValue keyValue);
-
-    @Override
-    public void close() {
-        closed = true;
-    }
+  @Override
+  public void close() {
+    closed = true;
+  }
 }
 

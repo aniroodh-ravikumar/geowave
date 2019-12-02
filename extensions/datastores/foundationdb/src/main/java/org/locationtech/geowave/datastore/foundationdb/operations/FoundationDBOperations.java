@@ -39,6 +39,7 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
     this.visibilityEnabled = options.getStoreOptions().isVisibilityEnabled();
     this.compactOnWrite = options.isCompactOnWrite();
     this.batchWriteSize = options.getBatchWriteSize();
+    LOGGER.warn("visibility enabled: " + visibilityEnabled);
     this.client =
         new FoundationDBClient(directory, visibilityEnabled, compactOnWrite, batchWriteSize);
 

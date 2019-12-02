@@ -44,18 +44,19 @@ public class FoundationDBMetadataReader implements MetadataReader {
       originalResults = table.iterator();
       resultsIt = originalResults;
     }
+    LOGGER.warn("RESULTS IT: " + resultsIt.toString());
     // if (query.hasPrimaryId() && query.hasSecondaryId()) {
-    //   LOGGER.warn("has both ids");
-    //   originalResults = table.iterator(query.getPrimaryId(), query.getSecondaryId());
-    //   resultsIt = originalResults;
+    // LOGGER.warn("has both ids");
+    // originalResults = table.iterator(query.getPrimaryId(), query.getSecondaryId());
+    // resultsIt = originalResults;
     // } else if (query.hasPrimaryId()) {
-    //   LOGGER.warn("has primary id only");
-    //   originalResults = table.iterator(query.getPrimaryId());
-    //   resultsIt = originalResults;
+    // LOGGER.warn("has primary id only");
+    // originalResults = table.iterator(query.getPrimaryId());
+    // resultsIt = originalResults;
     // } else {
-    //   LOGGER.warn("has no ids");
-    //   originalResults = table.iterator();
-    //   resultsIt = originalResults;
+    // LOGGER.warn("has no ids");
+    // originalResults = table.iterator();
+    // resultsIt = originalResults;
     // }
     if (query.hasPrimaryId() || query.hasSecondaryId()) {
       resultsIt = Iterators.filter(resultsIt, new Predicate<GeoWaveMetadata>() {

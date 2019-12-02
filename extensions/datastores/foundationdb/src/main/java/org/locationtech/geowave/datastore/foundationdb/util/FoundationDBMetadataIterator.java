@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
 import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
 import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
@@ -17,7 +16,7 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
   private final boolean visibilityEnabled;
 
   public FoundationDBMetadataIterator(
-          AsyncIterator<KeyValue> it,
+      AsyncIterator<KeyValue> it,
       final boolean containsTimestamp,
       final boolean visibilityEnabled) {
     super(it);

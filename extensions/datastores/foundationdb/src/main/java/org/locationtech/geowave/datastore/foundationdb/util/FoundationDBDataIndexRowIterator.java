@@ -11,7 +11,7 @@ public class FoundationDBDataIndexRowIterator extends AbstractFoundationDBIterat
   private final boolean visibilityEnabled;
 
   public FoundationDBDataIndexRowIterator(
-          final AsyncIterator it,
+      final AsyncIterator it,
       final short adapterId,
       final boolean visiblityEnabled) {
     super(it);
