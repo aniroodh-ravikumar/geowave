@@ -31,54 +31,35 @@ public class FoundationDBMetadataReader implements MetadataReader {
   public CloseableIterator<GeoWaveMetadata> query(
       final MetadataQuery query,
       final boolean mergeStats) {
-    LOGGER.warn("IN METADATA READER QUERY");
     CloseableIterator<GeoWaveMetadata> originalResults;
     Iterator<GeoWaveMetadata> resultsIt;
 
     if (query.hasPrimaryId()) {
-      LOGGER.warn("HAS PRIMARY ID");
       originalResults = table.iterator(query.getPrimaryId());
       resultsIt = originalResults;
     } else {
-      LOGGER.warn("HAS NO IDs");
       originalResults = table.iterator();
       resultsIt = originalResults;
     }
-    LOGGER.warn("RESULTS IT: " + resultsIt.toString());
-    // if (query.hasPrimaryId() && query.hasSecondaryId()) {
-    // LOGGER.warn("has both ids");
-    // originalResults = table.iterator(query.getPrimaryId(), query.getSecondaryId());
-    // resultsIt = originalResults;
-    // } else if (query.hasPrimaryId()) {
-    // LOGGER.warn("has primary id only");
-    // originalResults = table.iterator(query.getPrimaryId());
-    // resultsIt = originalResults;
-    // } else {
-    // LOGGER.warn("has no ids");
-    // originalResults = table.iterator();
-    // resultsIt = originalResults;
-    // }
     if (query.hasPrimaryId() || query.hasSecondaryId()) {
       resultsIt = Iterators.filter(resultsIt, new Predicate<GeoWaveMetadata>() {
 
         @Override
         public boolean apply(final GeoWaveMetadata input) {
           if (query.hasPrimaryId()
-              && !DataStoreUtils.startsWithIfStats(
+                  && !DataStoreUtils.startsWithIfStats(
                   input.getPrimaryId(),
                   query.getPrimaryId(),
                   metadataType)) {
             return false;
           }
           if (query.hasSecondaryId()
-              && !Arrays.equals(input.getSecondaryId(), query.getSecondaryId())) {
+                  && !Arrays.equals(input.getSecondaryId(), query.getSecondaryId())) {
             return false;
           }
           return true;
         }
       });
-    } else {
-      LOGGER.warn("no ids");
     }
     final boolean isStats = MetadataType.STATS.equals(metadataType) && mergeStats;
     final CloseableIterator<GeoWaveMetadata> retVal =

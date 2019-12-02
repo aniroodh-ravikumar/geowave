@@ -1,23 +1,20 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
-import com.apple.foundationdb.NetworkOptions;
 import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
+import com.apple.foundationdb.NetworkOptions;
 import com.apple.foundationdb.subspace.Subspace;
 import com.apple.foundationdb.tuple.Tuple;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import org.locationtech.geowave.core.store.operations.MetadataType;
-import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper;
-import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import javax.xml.crypto.Data;
 import java.io.Closeable;
-import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
+import org.locationtech.geowave.core.store.operations.MetadataType;
+import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FoundationDBClient implements Closeable {
 
@@ -35,7 +32,7 @@ public class FoundationDBClient implements Closeable {
 
   private final boolean visibilityEnabled;
   private final int batchWriteSize;
-  private FDB fdb;
+  private final Database db;
   private Subspace subDirectorySubspace;
 
   public FoundationDBClient(
@@ -45,7 +42,8 @@ public class FoundationDBClient implements Closeable {
     LOGGER.warn("SUBDIR: " + subDirectory);
     this.visibilityEnabled = visibilityEnabled;
     this.batchWriteSize = batchWriteSize;
-    this.fdb = FDB.selectAPIVersion(610);
+    FDB fdb = FDB.selectAPIVersion(610);
+    this.db = fdb.open();
     this.subDirectorySubspace = new Subspace(Tuple.from(subDirectory).pack());
   }
 
@@ -181,7 +179,7 @@ public class FoundationDBClient implements Closeable {
         key.requiresTimestamp,
         visibilityEnabled,
         batchWriteSize,
-        this);
+        db);
   }
 
   private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
@@ -189,11 +187,11 @@ public class FoundationDBClient implements Closeable {
         key.adapterId,
         visibilityEnabled,
         batchWriteSize,
-        this);
+        db);
   }
 
   private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {
-    return new FoundationDBMetadataTable(this.fdb.open(), key.requiresTimestamp, visibilityEnabled);
+    return new FoundationDBMetadataTable(db, key.requiresTimestamp, visibilityEnabled);
   }
 
   public synchronized FoundationDBIndexTable getIndexTable(
@@ -254,10 +252,6 @@ public class FoundationDBClient implements Closeable {
 
   public Subspace getSubDirectorySubspace() {
     return subDirectorySubspace;
-  }
-
-  public FDB getFDB() {
-    return this.fdb;
   }
 
   public void close() {

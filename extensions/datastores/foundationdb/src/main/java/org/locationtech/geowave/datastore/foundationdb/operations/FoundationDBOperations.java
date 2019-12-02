@@ -1,6 +1,8 @@
 package org.locationtech.geowave.datastore.foundationdb.operations;
 
-import com.apple.foundationdb.FDB;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.locationtech.geowave.core.store.adapter.InternalAdapterStore;
 import org.locationtech.geowave.core.store.adapter.InternalDataAdapter;
@@ -13,9 +15,6 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClient;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import org.locationtech.geowave.mapreduce.MapReduceDataStoreOperations;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,6 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
                     : options.getGeoWaveNamespace());
     this.visibilityEnabled = options.getStoreOptions().isVisibilityEnabled();
     this.batchWriteSize = options.getBatchWriteSize();
-    LOGGER.warn("visibility enabled: " + visibilityEnabled);
     this.client =
         new FoundationDBClient(directory, visibilityEnabled, batchWriteSize);
 

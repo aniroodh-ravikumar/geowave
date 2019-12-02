@@ -38,13 +38,13 @@ abstract public class AbstractFoundationDBTable {
       final short adapterId,
       final boolean visibilityEnabled,
       final int batchSize,
-      final FoundationDBClient client) {
+      final Database db) {
     super();
     this.adapterId = adapterId;
     this.visibilityEnabled = visibilityEnabled;
     this.batchSize = batchSize;
     batchWrite = batchSize > 1;
-    this.db = client.getFDB().open();
+    this.db = db;
   }
 
   public void delete(final byte[] key) {

@@ -24,9 +24,8 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
       final short adapterId,
       final boolean visibilityEnabled,
       final int batchSize,
-      final FoundationDBClient client) {
-    super(adapterId, visibilityEnabled, batchSize, client);
-    this.db = client.getFDB().open();
+      final Database db) {
+    super(adapterId, visibilityEnabled, batchSize, db);
   }
 
   public synchronized void add(final byte[] dataId, final GeoWaveValue value) {
