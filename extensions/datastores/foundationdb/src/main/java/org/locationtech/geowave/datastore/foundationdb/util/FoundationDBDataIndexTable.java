@@ -23,10 +23,9 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
   public FoundationDBDataIndexTable(
       final short adapterId,
       final boolean visibilityEnabled,
-      final boolean compactOnWrite,
       final int batchSize,
       final FoundationDBClient client) {
-    super(adapterId, visibilityEnabled, compactOnWrite, batchSize, client);
+    super(adapterId, visibilityEnabled, batchSize, client);
     this.db = client.getFDB().open();
   }
 

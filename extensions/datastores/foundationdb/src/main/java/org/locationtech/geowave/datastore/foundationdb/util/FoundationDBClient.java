@@ -34,7 +34,6 @@ public class FoundationDBClient implements Closeable {
   private final FoundationDBFactoryHelper factoryHelper = new FoundationDBFactoryHelper();
 
   private final boolean visibilityEnabled;
-  private final boolean compactOnWrite;
   private final int batchWriteSize;
   private FDB fdb;
   private Subspace subDirectorySubspace;
@@ -42,11 +41,9 @@ public class FoundationDBClient implements Closeable {
   public FoundationDBClient(
       final String subDirectory,
       final boolean visibilityEnabled,
-      final boolean compactOnWrite,
       final int batchWriteSize) {
     LOGGER.warn("SUBDIR: " + subDirectory);
     this.visibilityEnabled = visibilityEnabled;
-    this.compactOnWrite = compactOnWrite;
     this.batchWriteSize = batchWriteSize;
     this.fdb = FDB.selectAPIVersion(610);
     this.subDirectorySubspace = new Subspace(Tuple.from(subDirectory).pack());
@@ -183,7 +180,6 @@ public class FoundationDBClient implements Closeable {
         key.partition,
         key.requiresTimestamp,
         visibilityEnabled,
-        compactOnWrite,
         batchWriteSize,
         this);
   }
@@ -192,7 +188,6 @@ public class FoundationDBClient implements Closeable {
     return new FoundationDBDataIndexTable(
         key.adapterId,
         visibilityEnabled,
-        compactOnWrite,
         batchWriteSize,
         this);
   }
@@ -252,10 +247,6 @@ public class FoundationDBClient implements Closeable {
   }
 
   protected static NetworkOptions indexWriteOptions = null;
-
-  public boolean isCompactOnWrite() {
-    return compactOnWrite;
-  }
 
   public boolean isVisibilityEnabled() {
     return visibilityEnabled;

@@ -37,13 +37,11 @@ abstract public class AbstractFoundationDBTable {
   public AbstractFoundationDBTable(
       final short adapterId,
       final boolean visibilityEnabled,
-      final boolean compactOnWrite,
       final int batchSize,
       final FoundationDBClient client) {
     super();
     this.adapterId = adapterId;
     this.visibilityEnabled = visibilityEnabled;
-    this.compactOnWrite = compactOnWrite;
     this.batchSize = batchSize;
     batchWrite = batchSize > 1;
     this.db = client.getFDB().open();

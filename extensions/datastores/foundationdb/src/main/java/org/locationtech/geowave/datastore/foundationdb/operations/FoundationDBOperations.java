@@ -25,7 +25,6 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
   private final FoundationDBClient client;
   private final String directory;
   private final boolean visibilityEnabled;
-  private final boolean compactOnWrite;
   private final int batchWriteSize;
 
   public FoundationDBOperations(final FoundationDBRequiredOptions options) {
@@ -37,11 +36,10 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
                 || "null".equalsIgnoreCase(options.getGeoWaveNamespace()) ? "default"
                     : options.getGeoWaveNamespace());
     this.visibilityEnabled = options.getStoreOptions().isVisibilityEnabled();
-    this.compactOnWrite = options.isCompactOnWrite();
     this.batchWriteSize = options.getBatchWriteSize();
     LOGGER.warn("visibility enabled: " + visibilityEnabled);
     this.client =
-        new FoundationDBClient(directory, visibilityEnabled, compactOnWrite, batchWriteSize);
+        new FoundationDBClient(directory, visibilityEnabled, batchWriteSize);
 
     // this does not open the database
     // open the database with fdb.open()

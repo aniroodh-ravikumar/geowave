@@ -15,5 +15,5 @@ generated
 .metadata
 **/.factorypath
 *.cluster
-fdb/
+fdb/*
 trace.*
