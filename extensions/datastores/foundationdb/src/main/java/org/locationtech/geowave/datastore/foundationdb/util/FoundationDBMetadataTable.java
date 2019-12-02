@@ -41,34 +41,13 @@ public class FoundationDBMetadataTable implements Closeable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    // byte[] start = new byte[0];
-    // byte[] end =
-    // new byte[] {
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE};
-    LOGGER.warn("before get version");
-    Long version = db.run(tr -> {
-      return tr.getReadVersion().join();
-    });
-    LOGGER.warn("VERSION: " + version);
-    LOGGER.warn("BEFORE GETTING ITERATOR");
     AsyncIterator<KeyValue> iterator = db.run(tr -> {
       final byte[] start = Tuple.from("").pack();
       final byte[] end = Tuple.from("0xff").pack();
-      LOGGER.warn("IN RUN");
       AsyncIterable<KeyValue> iterable = tr.getRange(start, end);
-      LOGGER.warn("GOT ITERABLE IN RUN");
       AsyncIterator<KeyValue> iter = iterable.iterator();
-      LOGGER.warn("GOT ITERATOR IN RUN");
-      LOGGER.warn(iter.toString());
       return iter;
     });
-    LOGGER.warn("GOT ITERATOR");
     return new FoundationDBMetadataIterator(
         iterator,
         this.requiresTimestamp,

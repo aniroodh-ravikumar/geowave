@@ -92,16 +92,6 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    // byte[] start = new byte[0];
-    // byte[] end =
-    // new byte[] {
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE};
     final byte[] start = Tuple.from("").pack();
     final byte[] end = Tuple.from("0xff").pack();
     return iterator(new ByteArrayRange(start, end));

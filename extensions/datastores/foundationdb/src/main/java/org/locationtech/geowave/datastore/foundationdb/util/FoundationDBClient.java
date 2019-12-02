@@ -42,7 +42,7 @@ public class FoundationDBClient implements Closeable {
     LOGGER.warn("SUBDIR: " + subDirectory);
     this.visibilityEnabled = visibilityEnabled;
     this.batchWriteSize = batchWriteSize;
-    FDB fdb = FDB.selectAPIVersion(610);
+    final FDB fdb = FDB.selectAPIVersion(610);
     this.db = fdb.open();
     this.subDirectorySubspace = new Subspace(Tuple.from(subDirectory).pack());
   }
@@ -183,11 +183,7 @@ public class FoundationDBClient implements Closeable {
   }
 
   private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
-    return new FoundationDBDataIndexTable(
-        key.adapterId,
-        visibilityEnabled,
-        batchWriteSize,
-        db);
+    return new FoundationDBDataIndexTable(key.adapterId, visibilityEnabled, batchWriteSize, db);
   }
 
   private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {

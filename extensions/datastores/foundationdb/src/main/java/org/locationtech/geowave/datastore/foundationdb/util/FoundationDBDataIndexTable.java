@@ -72,25 +72,12 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
       return new CloseableIterator.Empty<>();
     }
 
-    // final byte[] start = startDataId != null ? startDataId : new byte[0];
-    // final byte[] end = endDataId != null ? endDataId
-    // : new byte[] {
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE,
-    // Byte.MAX_VALUE};
-
-    LOGGER.warn("WAITING FOR ITERATOR");
     AsyncIterator<KeyValue> iterator = db.run(tr -> {
       final byte[] start = Tuple.from("").pack();
       final byte[] end = Tuple.from("0xff").pack();
       AsyncIterable<KeyValue> iterable = tr.getRange(start, end);
       return iterable.iterator();
     });
-    LOGGER.warn("FINISHED GETTING ITERATOR");
     return new FoundationDBDataIndexRowIterator(iterator, adapterId, visibilityEnabled);
   }
 }

@@ -47,14 +47,14 @@ public class FoundationDBMetadataReader implements MetadataReader {
         @Override
         public boolean apply(final GeoWaveMetadata input) {
           if (query.hasPrimaryId()
-                  && !DataStoreUtils.startsWithIfStats(
+              && !DataStoreUtils.startsWithIfStats(
                   input.getPrimaryId(),
                   query.getPrimaryId(),
                   metadataType)) {
             return false;
           }
           if (query.hasSecondaryId()
-                  && !Arrays.equals(input.getSecondaryId(), query.getSecondaryId())) {
+              && !Arrays.equals(input.getSecondaryId(), query.getSecondaryId())) {
             return false;
           }
           return true;

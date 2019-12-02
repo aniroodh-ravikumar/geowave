@@ -36,8 +36,7 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
                     : options.getGeoWaveNamespace());
     this.visibilityEnabled = options.getStoreOptions().isVisibilityEnabled();
     this.batchWriteSize = options.getBatchWriteSize();
-    this.client =
-        new FoundationDBClient(directory, visibilityEnabled, batchWriteSize);
+    this.client = new FoundationDBClient(directory, visibilityEnabled, batchWriteSize);
 
     // this does not open the database
     // open the database with fdb.open()
