@@ -1,6 +1,8 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.Database;
+import com.apple.foundationdb.tuple.Tuple;
+import com.apple.foundationdb.KeyValue;
 import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
 import com.google.common.primitives.Bytes;
@@ -24,9 +26,9 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
       final byte[] partition,
       final boolean requiresTimestamp,
       final boolean visibilityEnabled,
-      final boolean compactOnWrite,
-      final int batchSize) {
-    super(adapterId, visibilityEnabled, compactOnWrite, batchSize);
+      final int batchSize,
+      final Database db) {
+    super(adapterId, visibilityEnabled, batchSize, db);
     this.partition = partition;
     this.requiresTimestamp = requiresTimestamp;
   }
@@ -90,16 +92,8 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    byte[] start = new byte[0];
-    byte[] end =
-        new byte[] {
-            (byte) 0xFF,
-            (byte) 0xFF,
-            (byte) 0xFF,
-            (byte) 0xFF,
-            (byte) 0xFF,
-            (byte) 0xFF,
-            (byte) 0xFF};
+    final byte[] start = Tuple.from("").pack();
+    final byte[] end = Tuple.from("0xff").pack();
     return iterator(new ByteArrayRange(start, end));
   }
 
@@ -108,10 +102,10 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    AsyncIterable iterable = db.run(tr -> {
-      return tr.getRange(range.getStart(), range.getEnd());
+    AsyncIterator<KeyValue> iterator = db.run(tr -> {
+      AsyncIterable<KeyValue> iterable = tr.getRange(range.getStart(), range.getEnd());
+      return iterable.iterator();
     });
-    AsyncIterator iterator = iterable.iterator();
     return new FoundationDBRowIterator(
         iterator,
         adapterId,

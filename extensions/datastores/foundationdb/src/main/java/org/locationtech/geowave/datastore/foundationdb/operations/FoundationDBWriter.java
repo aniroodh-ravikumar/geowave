@@ -1,7 +1,5 @@
 package org.locationtech.geowave.datastore.foundationdb.operations;
 
-import com.apple.foundationdb.Database;
-import com.apple.foundationdb.tuple.Tuple;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.locationtech.geowave.core.index.ByteArray;
@@ -18,10 +16,9 @@ public class FoundationDBWriter implements RowWriter {
   private final LoadingCache<ByteArray, FoundationDBIndexTable> tableCache =
       Caffeine.newBuilder().build(partitionKey -> getTable(partitionKey.getBytes()));
   private final boolean isTimestampRequired;
-  private Database db;
+  private final String indexNamePrefix;
 
   public FoundationDBWriter(
-      final FoundationDBOperations fDBOperations,
       final FoundationDBClient client,
       final short adapterId,
       final String typeName,
@@ -30,11 +27,16 @@ public class FoundationDBWriter implements RowWriter {
     this.client = client;
     this.adapterId = adapterId;
     this.isTimestampRequired = isTimestampRequired;
-    this.db = fDBOperations.fdb.open();
+    this.indexNamePrefix = FoundationDBUtils.getTablePrefix(typeName, indexName);
   }
 
   private FoundationDBIndexTable getTable(final byte[] partitionKey) {
-    return null;
+    return FoundationDBUtils.getIndexTableFromPrefix(
+        client,
+        indexNamePrefix,
+        adapterId,
+        partitionKey,
+        isTimestampRequired);
   }
 
   @Override
@@ -53,15 +55,15 @@ public class FoundationDBWriter implements RowWriter {
     } else {
       partitionKey = new ByteArray(row.getPartitionKey());
     }
-    final ByteArray partKey = partitionKey;
     for (final GeoWaveValue value : row.getFieldValues()) {
-      Tuple tuple = Tuple.fromBytes(value.getValue());
 
-      // Run an operation on the database
-      this.db.run(tr -> {
-        tr.set(Tuple.from(partKey).pack(), Tuple.from(tuple).pack());
-        return null;
-      });
+      // System.out.println(tableCache.asMap().keySet().toString());
+
+      tableCache.get(partitionKey).add(
+          row.getSortKey(),
+          row.getDataId(),
+          (short) row.getNumberOfDuplicates(),
+          value);
     }
   }
 
@@ -74,6 +76,5 @@ public class FoundationDBWriter implements RowWriter {
   public void close() {
     flush();
     tableCache.invalidateAll();
-    this.db.close();
   }
 }
