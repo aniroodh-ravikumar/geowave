@@ -23,6 +23,7 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBDataInde
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import org.locationtech.geowave.mapreduce.splits.GeoWaveRowRange;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
+import com.apple.foundationdb.subspace.Subspace;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
@@ -30,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FoundationDBReader implements RowReader<GeoWaveRow> {
+public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
   private final CloseableIterator<GeoWaveRow> iterator;
 
   public FoundationDBReader(
@@ -71,42 +72,41 @@ public class FoundationDBReader implements RowReader<GeoWaveRow> {
           authorizations,
           async);
     } else {
-      CloseableIterator<GeoWaveRow> iterator = new CloseableIterator<GeoWaveRow>() {
-        {
-          // TODO: initialization code goes here
-
-        }
-
-        @Override
-        public void close() {
-          // TODO: undo whatever happens in the init section
-        }
-
-        @Override
-        public boolean hasNext() {
-          // TODO: check if we've reached the end of our range
-          return false;
-        }
-
-        @Override
-        public GeoWaveRow next() {
-          // TODO: check if we've reached the end of our range, and if not, then
-          // make another transaction to read more data, and call the row
-          // transformer on the returned result
-          return null;
-        }
-      };
-
+      final List<CloseableIterator<GeoWaveRow>> iterators = new ArrayList<>();
+      for (final short adapterId : readerParams.getAdapterIds()) {
+        final Pair<Boolean, Boolean> groupByRowAndSortByTime =
+            FoundationDBUtils.isGroupByRowAndIsSortByTime(readerParams, adapterId);
+        final String indexNamePrefix =
+            FoundationDBUtils.getTablePrefix(
+                readerParams.getInternalAdapterStore().getTypeName(adapterId),
+                readerParams.getIndex().getName());
+        final Stream<CloseableIterator<GeoWaveRow>> streamIt =
+            FoundationDBUtils.getPartitions(
+                client.getSubDirectorySubspace(),
+                indexNamePrefix).stream().map(
+                    p -> FoundationDBUtils.getIndexTableFromPrefix(
+                        client,
+                        indexNamePrefix,
+                        adapterId,
+                        p.getBytes(),
+                        groupByRowAndSortByTime.getRight()).iterator());
+        iterators.addAll(streamIt.collect(Collectors.toList()));
+      }
       return wrapResults(new Closeable() {
         AtomicBoolean closed = new AtomicBoolean(false);
 
         @Override
-        public void close() {
+        public void close() throws IOException {
           if (!closed.getAndSet(true)) {
-            iterator.close();
+            iterators.forEach(it -> it.close());
           }
         }
-      }, iterator, readerParams, rowTransformer, authorizations, client.isVisibilityEnabled());
+      },
+          Iterators.concat(iterators.iterator()),
+          readerParams,
+          rowTransformer,
+          authorizations,
+          client.isVisibilityEnabled());
     }
   }
 

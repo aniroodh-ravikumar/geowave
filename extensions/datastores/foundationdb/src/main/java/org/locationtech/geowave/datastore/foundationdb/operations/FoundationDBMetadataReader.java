@@ -13,8 +13,11 @@ import org.locationtech.geowave.core.store.util.StatisticsRowIterator;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBMetadataTable;
 import java.util.Arrays;
 import java.util.Iterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FoundationDBMetadataReader implements MetadataReader {
+  private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBMetadataReader.class);
   private final FoundationDBMetadataTable table;
   private final MetadataType metadataType;
 
@@ -28,17 +31,13 @@ public class FoundationDBMetadataReader implements MetadataReader {
   public CloseableIterator<GeoWaveMetadata> query(
       final MetadataQuery query,
       final boolean mergeStats) {
-
     CloseableIterator<GeoWaveMetadata> originalResults;
     Iterator<GeoWaveMetadata> resultsIt;
+
     if (query.hasPrimaryId()) {
       originalResults = table.iterator(query.getPrimaryId());
       resultsIt = originalResults;
-    } else if (query.hasPrimaryId() && query.hasSecondaryId()) {
-      originalResults = table.iterator(query.getPrimaryId(), query.getSecondaryId());
-      resultsIt = originalResults;
     } else {
-      // TODO figure out the length of a typical primaryID array
       originalResults = table.iterator();
       resultsIt = originalResults;
     }
@@ -66,7 +65,6 @@ public class FoundationDBMetadataReader implements MetadataReader {
     final CloseableIterator<GeoWaveMetadata> retVal =
         new CloseableIteratorWrapper<>(originalResults, resultsIt);
     return isStats ? new StatisticsRowIterator(retVal, query.getAuthorizations()) : retVal;
-
   }
 
   @Override

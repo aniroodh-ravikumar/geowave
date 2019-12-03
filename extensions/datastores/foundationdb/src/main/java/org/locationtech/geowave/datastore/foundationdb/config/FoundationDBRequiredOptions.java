@@ -16,6 +16,14 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 
 public class FoundationDBRequiredOptions extends StoreFactoryOptions {
+  @Parameter(
+      names = "--dir",
+      description = "The directory to read/write to.  Defaults to \"foundationdb\" in the working directory.")
+  private String dir = "foundationdb";
+  @Parameter(
+      names = "--batchWriteSize",
+      description = "The size (in records) for each batched write. Anything <= 1 will use synchronous single record writes without batching. Defaults to 1000.")
+  private int batchWriteSize = 1000;
 
   @ParametersDelegate
   private FoundationDBOptions additionalOptions = new FoundationDBOptions();
@@ -39,4 +47,19 @@ public class FoundationDBRequiredOptions extends StoreFactoryOptions {
     return additionalOptions;
   }
 
+  public int getBatchWriteSize() {
+    return batchWriteSize;
+  }
+
+  public void setBatchWriteSize(final int batchWriteSize) {
+    this.batchWriteSize = batchWriteSize;
+  }
+
+  public void setDirectory(final String dir) {
+    this.dir = dir;
+  }
+
+  public String getDirectory() {
+    return dir;
+  }
 }

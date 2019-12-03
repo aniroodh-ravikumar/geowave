@@ -1,11 +1,18 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
+import com.apple.foundationdb.Database;
+import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.NetworkOptions;
+import com.apple.foundationdb.subspace.Subspace;
+import com.apple.foundationdb.tuple.Tuple;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import java.io.Closeable;
 import java.util.Arrays;
+import java.util.Objects;
+import org.locationtech.geowave.core.store.operations.MetadataType;
+import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,37 +20,38 @@ public class FoundationDBClient implements Closeable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBClient.class);
 
-  private final Cache<String, CacheKey> keyCache = Caffeine.newBuilder().build();
+  private final Cache<Subspace, CacheKey> keyCache = Caffeine.newBuilder().build();
   private final LoadingCache<IndexCacheKey, FoundationDBIndexTable> indexTableCache =
-      Caffeine.newBuilder().build(key -> loadIndexTable(key));
+      Caffeine.newBuilder().build(this::loadIndexTable);
 
   private final LoadingCache<DataIndexCacheKey, FoundationDBDataIndexTable> dataIndexTableCache =
-      Caffeine.newBuilder().build(key -> loadDataIndexTable(key));
+      Caffeine.newBuilder().build(this::loadDataIndexTable);
   private final LoadingCache<CacheKey, FoundationDBMetadataTable> metadataTableCache =
-      Caffeine.newBuilder().build(key -> loadMetadataTable(key));
+      Caffeine.newBuilder().build(this::loadMetadataTable);
+  private final FoundationDBFactoryHelper factoryHelper = new FoundationDBFactoryHelper();
 
-  private final String subDirectory;
   private final boolean visibilityEnabled;
-  private final boolean compactOnWrite;
   private final int batchWriteSize;
+  private final FDB fdb;
+  private Subspace subDirectorySubspace;
 
   public FoundationDBClient(
       final String subDirectory,
       final boolean visibilityEnabled,
-      final boolean compactOnWrite,
       final int batchWriteSize) {
-    this.subDirectory = subDirectory;
+    LOGGER.warn("SUBDIR: " + subDirectory);
     this.visibilityEnabled = visibilityEnabled;
-    this.compactOnWrite = compactOnWrite;
     this.batchWriteSize = batchWriteSize;
+    this.fdb = FDB.selectAPIVersion(610);
+    this.subDirectorySubspace = new Subspace(Tuple.from(subDirectory).pack());
   }
 
   private static class CacheKey {
-    protected final String directory;
+    protected final Subspace directorySubspace;
     protected final boolean requiresTimestamp;
 
-    public CacheKey(final String directory, final boolean requiresTimestamp) {
-      this.directory = directory;
+    public CacheKey(final Subspace directorySubspace, final boolean requiresTimestamp) {
+      this.directorySubspace = directorySubspace;
       this.requiresTimestamp = requiresTimestamp;
     }
 
@@ -51,7 +59,7 @@ public class FoundationDBClient implements Closeable {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = (prime * result) + ((directory == null) ? 0 : directory.hashCode());
+      result = (prime * result) + ((directorySubspace == null) ? 0 : directorySubspace.hashCode());
       return result;
     }
 
@@ -67,11 +75,11 @@ public class FoundationDBClient implements Closeable {
         return false;
       }
       final CacheKey other = (CacheKey) obj;
-      if (directory == null) {
-        if (other.directory != null) {
+      if (directorySubspace == null) {
+        if (other.directorySubspace != null) {
           return false;
         }
-      } else if (!directory.equals(other.directory)) {
+      } else if (!directorySubspace.equals(other.directorySubspace)) {
         return false;
       }
       return true;
@@ -82,11 +90,11 @@ public class FoundationDBClient implements Closeable {
     protected final byte[] partition;
 
     public IndexCacheKey(
-        final String directory,
+        final Subspace directorySubspace,
         final short adapterId,
         final byte[] partition,
         final boolean requiresTimestamp) {
-      super(directory, requiresTimestamp, adapterId);
+      super(directorySubspace, requiresTimestamp, adapterId);
       this.partition = partition;
     }
 
@@ -123,16 +131,16 @@ public class FoundationDBClient implements Closeable {
   private static class DataIndexCacheKey extends CacheKey {
     protected final short adapterId;
 
-    public DataIndexCacheKey(final String directory, final short adapterId) {
-      super(directory, false);
+    public DataIndexCacheKey(final Subspace directorySubspace, final short adapterId) {
+      super(directorySubspace, false);
       this.adapterId = adapterId;
     }
 
     private DataIndexCacheKey(
-        final String directory,
+        final Subspace directorySubspace,
         final boolean requiresTimestamp,
         final short adapterId) {
-      super(directory, requiresTimestamp);
+      super(directorySubspace, requiresTimestamp);
       this.adapterId = adapterId;
     }
 
@@ -169,66 +177,86 @@ public class FoundationDBClient implements Closeable {
         key.partition,
         key.requiresTimestamp,
         visibilityEnabled,
-        compactOnWrite,
-        batchWriteSize);
+        batchWriteSize,
+        this.fdb.open());
   }
 
-  // TODO: Implement this
   private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
-    return null;
+    return new FoundationDBDataIndexTable(key.adapterId, visibilityEnabled, batchWriteSize, this.fdb.open());
   }
 
-  // TODO: Implement this
   private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {
-    return null;
+    return new FoundationDBMetadataTable(this.fdb.open(), key.requiresTimestamp, visibilityEnabled);
   }
 
-  // TODO: Implement this function
   public synchronized FoundationDBIndexTable getIndexTable(
       final String tableName,
       final short adapterId,
       final byte[] partition,
       final boolean requiresTimestamp) {
-    final String directory = subDirectory + "/" + tableName;
+    final Subspace directorySubspace = subDirectorySubspace.get(Tuple.from(tableName).pack());
     return indexTableCache.get(
-        (IndexCacheKey) keyCache.get(
-            directory,
-            d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp)));
+        (IndexCacheKey) Objects.requireNonNull(
+            keyCache.get(
+                directorySubspace,
+                d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp))));
   }
 
-  // TODO: Implement this function too.
+  public boolean indexTableExists(final String indexName) {
+    // then look for prefixes of this index directory in which case there is
+    // a partition key
+    for (final Subspace key : keyCache.asMap().keySet()) {
+      if (key.contains(Tuple.from(indexName).pack())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  public synchronized FoundationDBMetadataTable getMetadataTable(final MetadataType type) {
+    final Subspace directorySubspace = subDirectorySubspace.get(Tuple.from(type.name()).pack());
+    return metadataTableCache.get(
+        Objects.requireNonNull(
+            keyCache.get(
+                directorySubspace,
+                d -> new CacheKey(d, type.equals(MetadataType.STATS)))));
+  }
+
+  public boolean metadataTableExists(final MetadataType type) {
+    // this could have been created by a different process so check the
+    // directory listing
+    final Subspace directorySubspace = subDirectorySubspace.get(Tuple.from(type.name()).pack());
+    return keyCache.getIfPresent(directorySubspace) != null;
+  }
+
   public synchronized FoundationDBDataIndexTable getDataIndexTable(
       final String tableName,
       final short adapterId) {
-    // if (indexWriteOptions == null) {
-    // FDB.loadLibrary();
-    // final int cores = Runtime.getRuntime().availableProcessors();
-    // indexWriteOptions =
-    // new Options().setCreateIfMissing(true).prepareForBulkLoad().setIncreaseParallelism(cores);
-    // indexReadOptions = new Options().setIncreaseParallelism(cores);
-    // batchWriteOptions =
-    // new WriteOptions().setDisableWAL(false).setNoSlowdown(false).setSync(false);
-    // }
-    // final String directory = subDirectory + "/" + tableName;
-    // return dataIndexTableCache.get(
-    // (DataIndexCacheKey) keyCache.get(directory, d -> new DataIndexCacheKey(d, adapterId)));
-    return null;
+    final Subspace directorySubspace = subDirectorySubspace.get(Tuple.from(tableName).pack());
+    return dataIndexTableCache.get(
+        (DataIndexCacheKey) Objects.requireNonNull(
+            keyCache.get(directorySubspace, d -> new DataIndexCacheKey(d, adapterId))));
   }
 
   protected static NetworkOptions indexWriteOptions = null;
-
-  public boolean isCompactOnWrite() {
-    return compactOnWrite;
-  }
 
   public boolean isVisibilityEnabled() {
     return visibilityEnabled;
   }
 
-  public String getSubDirectory() {
-    return subDirectory;
+  public Subspace getSubDirectorySubspace() {
+    return subDirectorySubspace;
   }
 
-  public void close() {}
+  public void close() {
+    keyCache.invalidateAll();
+    indexTableCache.asMap().values().forEach(db -> db.close());
+    indexTableCache.invalidateAll();
+    dataIndexTableCache.asMap().values().forEach(db -> db.close());
+    dataIndexTableCache.invalidateAll();
+    metadataTableCache.asMap().values().forEach(db -> db.close());
+    metadataTableCache.invalidateAll();
+  }
 
 }

@@ -13,7 +13,7 @@ import org.locationtech.geowave.core.store.GenericStoreFactory;
 import org.locationtech.geowave.core.store.api.DataStore;
 
 public class FoundationDBStoreFactoryFamily extends BaseDataStoreFamily {
-  private static final String TYPE = "foundationdb";
+  public static final String TYPE = "foundationdb";
   private static final String DESCRIPTION = "A GeoWave store backed by data in FoundationDB";
 
   public FoundationDBStoreFactoryFamily() {
