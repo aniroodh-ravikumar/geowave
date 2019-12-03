@@ -33,21 +33,18 @@ abstract public class AbstractFoundationDBTable {
   protected boolean compactOnWrite;
   private final boolean batchWrite;
   protected boolean readerDirty = false;
-  private FoundationDBClient client;
 
   public AbstractFoundationDBTable(
       final short adapterId,
       final boolean visibilityEnabled,
-      final boolean compactOnWrite,
       final int batchSize,
-      final FoundationDBClient client) {
+      final Database db) {
     super();
     this.adapterId = adapterId;
     this.visibilityEnabled = visibilityEnabled;
-    this.compactOnWrite = compactOnWrite;
     this.batchSize = batchSize;
     batchWrite = batchSize > 1;
-    this.client = client;
+    this.db = db;
   }
 
   public void delete(final byte[] key) {
@@ -159,7 +156,7 @@ abstract public class AbstractFoundationDBTable {
   }
 
   protected Database getDb() {
-    return this.client.getDb();
+    return this.db;
   }
 
   private static class BatchWriter implements Runnable {

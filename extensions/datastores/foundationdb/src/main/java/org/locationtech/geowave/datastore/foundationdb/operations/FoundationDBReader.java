@@ -23,6 +23,7 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBDataInde
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import org.locationtech.geowave.mapreduce.splits.GeoWaveRowRange;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
+import com.apple.foundationdb.subspace.Subspace;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
@@ -80,13 +81,15 @@ public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
                 readerParams.getInternalAdapterStore().getTypeName(adapterId),
                 readerParams.getIndex().getName());
         final Stream<CloseableIterator<GeoWaveRow>> streamIt =
-            FoundationDBUtils.getPartitions(client.getSubDirectory(), indexNamePrefix).stream().map(
-                p -> FoundationDBUtils.getIndexTableFromPrefix(
-                    client,
-                    indexNamePrefix,
-                    adapterId,
-                    p.getBytes(),
-                    groupByRowAndSortByTime.getRight()).iterator());
+            FoundationDBUtils.getPartitions(
+                client.getSubDirectorySubspace(),
+                indexNamePrefix).stream().map(
+                    p -> FoundationDBUtils.getIndexTableFromPrefix(
+                        client,
+                        indexNamePrefix,
+                        adapterId,
+                        p.getBytes(),
+                        groupByRowAndSortByTime.getRight()).iterator());
         iterators.addAll(streamIt.collect(Collectors.toList()));
       }
       return wrapResults(new Closeable() {

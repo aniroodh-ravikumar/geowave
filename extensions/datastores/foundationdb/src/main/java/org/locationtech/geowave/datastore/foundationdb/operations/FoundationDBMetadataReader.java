@@ -33,10 +33,8 @@ public class FoundationDBMetadataReader implements MetadataReader {
       final boolean mergeStats) {
     CloseableIterator<GeoWaveMetadata> originalResults;
     Iterator<GeoWaveMetadata> resultsIt;
-    if (query.hasPrimaryId() && query.hasSecondaryId()) {
-      originalResults = table.iterator(query.getPrimaryId(), query.getSecondaryId());
-      resultsIt = originalResults;
-    } else if (query.hasPrimaryId()) {
+
+    if (query.hasPrimaryId()) {
       originalResults = table.iterator(query.getPrimaryId());
       resultsIt = originalResults;
     } else {
@@ -67,7 +65,6 @@ public class FoundationDBMetadataReader implements MetadataReader {
     final CloseableIterator<GeoWaveMetadata> retVal =
         new CloseableIteratorWrapper<>(originalResults, resultsIt);
     return isStats ? new StatisticsRowIterator(retVal, query.getAuthorizations()) : retVal;
-
   }
 
   @Override

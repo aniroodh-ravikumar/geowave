@@ -8,7 +8,11 @@
  */
 package org.locationtech.geowave.datastore.foundationdb.util;
 
+import com.apple.foundationdb.tuple.Tuple;
+import com.apple.foundationdb.Range;
+import java.util.*;
 import com.google.common.collect.Streams;
+import com.apple.foundationdb.subspace.Subspace;
 import com.google.common.primitives.UnsignedBytes;
 import org.apache.commons.lang3.tuple.Pair;
 import org.locationtech.geowave.core.index.ByteArray;
@@ -23,10 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FoundationDBUtils {
@@ -99,13 +99,20 @@ public class FoundationDBUtils {
     return client.getIndexTable(tableName, adapterId, partitionKey, requiresTimestamp);
   }
 
-  public static Set<ByteArray> getPartitions(final String directory, final String tableNamePrefix) {
-    return Arrays.stream(
-        new File(directory).list((dir, name) -> name.startsWith(tableNamePrefix))).map(
-            str -> str.length() > (tableNamePrefix.length() + 1)
-                ? new ByteArray(
-                    ByteArrayUtils.byteArrayFromString(str.substring(tableNamePrefix.length() + 1)))
-                : new ByteArray()).collect(Collectors.toSet());
+  public static Set<ByteArray> getPartitions(
+      final Subspace directorySubspace,
+      final String tableNamePrefix) {
+    final Subspace tableSubspace = directorySubspace.get(Tuple.from(tableNamePrefix).pack());
+    final Range range = tableSubspace.range();
+    final byte[] start = range.begin;
+    final byte[] end = range.end;
+    byte[] current = start;
+    final HashSet<ByteArray> ret = new HashSet<>();
+    while (ByteArrayUtils.compare(current, end) < 1) {
+      ret.add(new ByteArray(current));
+      current = ByteArrayUtils.getNextPrefix(current);
+    }
+    return ret;
   }
 
   public static boolean isSortByTime(final InternalDataAdapter<?> adapter) {
