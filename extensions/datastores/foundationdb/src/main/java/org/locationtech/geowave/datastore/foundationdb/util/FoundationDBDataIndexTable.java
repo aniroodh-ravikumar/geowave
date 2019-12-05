@@ -78,6 +78,7 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
       AsyncIterable<KeyValue> iterable = tr.getRange(start, end);
       return iterable.iterator();
     });
+
     return new FoundationDBDataIndexRowIterator(iterator, adapterId, visibilityEnabled);
   }
 }

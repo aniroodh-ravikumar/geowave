@@ -5,6 +5,7 @@ import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.NetworkOptions;
 import com.apple.foundationdb.subspace.Subspace;
 import com.apple.foundationdb.tuple.Tuple;
+import com.apple.foundationdb.subspace.Subspace;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -15,6 +16,13 @@ import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.io.Closeable;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Objects;
+import org.locationtech.geowave.core.store.operations.MetadataType;
+import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper;
+import java.util.Objects;
 
 public class FoundationDBClient implements Closeable {
 
@@ -32,7 +40,7 @@ public class FoundationDBClient implements Closeable {
 
   private final boolean visibilityEnabled;
   private final int batchWriteSize;
-  private final Database db;
+  private final FDB fdb;
   private Subspace subDirectorySubspace;
 
   public FoundationDBClient(
@@ -42,8 +50,7 @@ public class FoundationDBClient implements Closeable {
     LOGGER.warn("SUBDIR: " + subDirectory);
     this.visibilityEnabled = visibilityEnabled;
     this.batchWriteSize = batchWriteSize;
-    final FDB fdb = FDB.selectAPIVersion(610);
-    this.db = fdb.open();
+    this.fdb = FDB.selectAPIVersion(610);
     this.subDirectorySubspace = new Subspace(Tuple.from(subDirectory).pack());
   }
 
@@ -179,15 +186,15 @@ public class FoundationDBClient implements Closeable {
         key.requiresTimestamp,
         visibilityEnabled,
         batchWriteSize,
-        db);
+        this.fdb.open());
   }
 
   private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
-    return new FoundationDBDataIndexTable(key.adapterId, visibilityEnabled, batchWriteSize, db);
+    return new FoundationDBDataIndexTable(key.adapterId, visibilityEnabled, batchWriteSize, this.fdb.open());
   }
 
   private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {
-    return new FoundationDBMetadataTable(db, key.requiresTimestamp, visibilityEnabled);
+    return new FoundationDBMetadataTable(this.fdb.open(), key.requiresTimestamp, visibilityEnabled);
   }
 
   public synchronized FoundationDBIndexTable getIndexTable(
