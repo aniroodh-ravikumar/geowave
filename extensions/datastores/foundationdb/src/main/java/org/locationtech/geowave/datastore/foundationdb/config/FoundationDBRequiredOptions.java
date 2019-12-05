@@ -21,11 +21,6 @@ public class FoundationDBRequiredOptions extends StoreFactoryOptions {
       description = "The directory to read/write to.  Defaults to \"foundationdb\" in the working directory.")
   private String dir = "foundationdb";
   @Parameter(
-      names = "--compactOnWrite",
-      description = "Whether to compact on every write, if false it will only compact on merge. Defaults to true",
-      arity = 1)
-  private boolean compactOnWrite = true;
-  @Parameter(
       names = "--batchWriteSize",
       description = "The size (in records) for each batched write. Anything <= 1 will use synchronous single record writes without batching. Defaults to 1000.")
   private int batchWriteSize = 1000;
@@ -50,14 +45,6 @@ public class FoundationDBRequiredOptions extends StoreFactoryOptions {
   @Override
   public DataStoreOptions getStoreOptions() {
     return additionalOptions;
-  }
-
-  public boolean isCompactOnWrite() {
-    return compactOnWrite;
-  }
-
-  public void setCompactOnWrite(final boolean compactOnWrite) {
-    this.compactOnWrite = compactOnWrite;
   }
 
   public int getBatchWriteSize() {

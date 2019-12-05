@@ -3,6 +3,7 @@ package org.locationtech.geowave.datastore.foundationdb.util;
 import com.apple.foundationdb.*;
 import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
+import com.apple.foundationdb.tuple.Tuple;
 import com.google.common.collect.Iterators;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
@@ -25,7 +26,6 @@ public class FoundationDBMetadataTable implements Closeable {
   private final boolean requiresTimestamp;
   private final boolean visibilityEnabled;
   private long prevTime = Long.MAX_VALUE;
-  private final List<FDBWrite> writes;
 
   public FoundationDBMetadataTable(
       Database db,
@@ -35,33 +35,19 @@ public class FoundationDBMetadataTable implements Closeable {
     this.db = db;
     this.requiresTimestamp = requiresTimestamp;
     this.visibilityEnabled = visibilityEnabled;
-    this.writes = new LinkedList<>();
   }
 
   public CloseableIterator<GeoWaveMetadata> iterator() {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    Transaction txn = this.db.createTransaction();
-    byte[] start = new byte[] {
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00,
-            (byte) 0x00};
-    byte[] end =
-            new byte[] {
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE,
-                    Byte.MAX_VALUE};
-    AsyncIterable<KeyValue> iterable = txn.getRange(start, end);
-    AsyncIterator<KeyValue> iterator = iterable.iterator();
+    AsyncIterator<KeyValue> iterator = db.run(tr -> {
+      final byte[] start = Tuple.from("").pack();
+      final byte[] end = Tuple.from("0xff").pack();
+      AsyncIterable<KeyValue> iterable = tr.getRange(start, end);
+      AsyncIterator<KeyValue> iter = iterable.iterator();
+      return iter;
+    });
     return new FoundationDBMetadataIterator(
         iterator,
         this.requiresTimestamp,
@@ -77,27 +63,26 @@ public class FoundationDBMetadataTable implements Closeable {
   }
 
   private CloseableIterator<GeoWaveMetadata> prefixIterator(final byte[] prefix) {
-    Transaction txn = this.db.createTransaction();
-    AsyncIterable<KeyValue> iterable = txn.getRange(prefix, ByteArrayUtils.getNextPrefix(prefix));
+    AsyncIterator<KeyValue> iterator = db.run(tr -> {
+      AsyncIterable<KeyValue> iterable = tr.getRange(prefix, ByteArrayUtils.getNextPrefix(prefix));
+      return iterable.iterator();
+    });
     // TODO: can this class be asynchronous?
     return new FoundationDBMetadataIterator(
-        iterable.iterator(),
+        iterator,
         this.requiresTimestamp,
         this.visibilityEnabled);
   }
 
   public void remove(final byte[] key) {
-    try {
-      this.db.run(tr -> {
-        tr.clear(key);
-        return null;
-      });
-    } catch (final FDBException e) {
-      LOGGER.warn("Unable to delete metadata", e);
-    }
+    this.db.run(tr -> {
+      tr.clear(key);
+      return null;
+    });
   }
 
   public void add(final GeoWaveMetadata value) {
+    LOGGER.warn("in add of fdb metadata table");
     byte[] key;
     final byte[] secondaryId =
         value.getSecondaryId() == null ? new byte[0] : value.getSecondaryId();
@@ -127,26 +112,18 @@ public class FoundationDBMetadataTable implements Closeable {
     } else {
       key = Bytes.concat(value.getPrimaryId(), secondaryId, endBytes);
     }
-    write(key, value.getValue());
+    put(key, value.getValue());
   }
 
-  public void write(final byte[] key, final byte[] value) {
-    writes.add(new FDBWrite(key, value));
-  }
-
-  /**
-   * @TODO figure out arguments (maybe byte[] key?)
-   *       https://apple.github.io/foundationdb/javadoc/com/apple/foundationdb/ReadTransaction.html#get-byte:A-
-   *       use .get() or .getRange() When this method is done, we can work on MetadataReader
-   * @return
-   */
-
-  public void flush() {
-    db.run(txn -> {
-      this.writes.forEach(write -> write.add(txn));
+  public void put(final byte[] key, final byte[] value) {
+    LOGGER.warn("METADATA TABLE writing to db");
+    db.run(tr -> {
+      tr.set(key, value);
       return null;
     });
   }
+
+  public void flush() {}
 
   public void close() {
     db.close();

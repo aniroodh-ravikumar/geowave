@@ -1,6 +1,8 @@
 package org.locationtech.geowave.datastore.foundationdb.operations;
 
-import com.apple.foundationdb.FDB;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.locationtech.geowave.core.store.adapter.InternalAdapterStore;
 import org.locationtech.geowave.core.store.adapter.InternalDataAdapter;
@@ -13,26 +15,18 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClient;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import org.locationtech.geowave.mapreduce.MapReduceDataStoreOperations;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-// TODO: implement this
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBOperations.class);
-  public final FDB fdb;
   private static final boolean READER_ASYNC = true;
   private final FoundationDBClient client;
   private final String directory;
   private final boolean visibilityEnabled;
-  private final boolean compactOnWrite;
   private final int batchWriteSize;
 
   public FoundationDBOperations(final FoundationDBRequiredOptions options) {
-    this.fdb = FDB.selectAPIVersion(610);
     this.directory =
         options.getDirectory()
             + File.separator
@@ -41,10 +35,8 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
                 || "null".equalsIgnoreCase(options.getGeoWaveNamespace()) ? "default"
                     : options.getGeoWaveNamespace());
     this.visibilityEnabled = options.getStoreOptions().isVisibilityEnabled();
-    this.compactOnWrite = options.isCompactOnWrite();
     this.batchWriteSize = options.getBatchWriteSize();
-    this.client =
-        new FoundationDBClient(directory, visibilityEnabled, compactOnWrite, batchWriteSize);
+    this.client = new FoundationDBClient(directory, visibilityEnabled, batchWriteSize);
 
     // this does not open the database
     // open the database with fdb.open()
