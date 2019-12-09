@@ -11,7 +11,7 @@ package org.locationtech.geowave.core.store.operations;
 import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
 
 /**
- * This class provides an abstraction for persisting metadata.
+ * Provides an interface for persisting metadata.
  *
  * Writes may only be performed as long as the instance is not closed.
  */
