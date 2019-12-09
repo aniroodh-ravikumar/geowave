@@ -39,7 +39,7 @@ public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
       final ReaderParams<GeoWaveRow> readerParams,
       final boolean async) {
     this.iterator =
-        createIteratorForReader(client, readerParams, readerParams.getRowTransformer(), false);
+        createIteratorForReader(client, readerParams, readerParams.getRowTransformer(), async);
   }
 
   public FoundationDBReader(
