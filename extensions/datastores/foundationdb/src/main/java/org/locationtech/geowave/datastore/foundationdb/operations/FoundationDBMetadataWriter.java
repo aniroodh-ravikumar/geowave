@@ -4,6 +4,9 @@ import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
 import org.locationtech.geowave.core.store.operations.MetadataWriter;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBMetadataTable;
 
+/**
+ * This class provides an abstraction for persisting metadata.
+ */
 public class FoundationDBMetadataWriter implements MetadataWriter {
   private final FoundationDBMetadataTable table;
   private boolean closed = false;
