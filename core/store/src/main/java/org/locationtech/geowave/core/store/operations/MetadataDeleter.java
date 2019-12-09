@@ -21,6 +21,7 @@ public interface MetadataDeleter extends AutoCloseable {
    * <ul> <li>The deleter is not closed</li> </ul>
    *
    * @param query The query that specifies the metadata to be deleted.
+   * @return {@code true} if an object matching the query was found and successfully deleted, {@code false} otherwise.
    */
   boolean delete(MetadataQuery query);
 
