@@ -20,8 +20,7 @@ public class FoundationDBMetadataDeleter implements MetadataDeleter {
   /**
    * Create a deleter for a given metadata type using a FDB Metadata table.
    *
-   * Preconditions:
-   * <ul> <li>The table is not closed</li> </ul>
+   * Preconditions: <ul> <li>The table is not closed</li> </ul>
    *
    * @param table The table.
    * @param metadataType The type of the metadata to read.
@@ -36,8 +35,7 @@ public class FoundationDBMetadataDeleter implements MetadataDeleter {
   /**
    * Delete metadata from the DB.
    *
-   * Preconditions:
-   * <ul> <li>The deleter is not closed</li> </ul>
+   * Preconditions: <ul> <li>The deleter is not closed</li> </ul>
    *
    * @param query The query that specifies the metadata to be deleted.
    */
