@@ -27,8 +27,7 @@ public class FoundationDBMetadataReader implements MetadataReader {
   /**
    * Create a reader for a given metadata type using a FDB Metadata table.
    *
-   * Preconditions:
-   *  - The table is not closed
+   * Preconditions: - The table is not closed
    *
    * @param table The table.
    * @param metadataType The type of the metadata to read.

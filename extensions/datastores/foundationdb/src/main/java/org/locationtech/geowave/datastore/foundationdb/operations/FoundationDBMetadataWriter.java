@@ -14,8 +14,7 @@ public class FoundationDBMetadataWriter implements MetadataWriter {
   /**
    * Create a writer using a FDB Metadata table.
    *
-   * Preconditions:
-   *  - The table is not closed
+   * Preconditions: - The table is not closed
    *
    * @param table The table.
    */
@@ -26,8 +25,7 @@ public class FoundationDBMetadataWriter implements MetadataWriter {
   /**
    * Write metadata to the table.
    *
-   * Preconditions:
-   *  - The writer is not closed
+   * Preconditions: - The writer is not closed
    *
    * @param metadata The metadata.
    */
@@ -39,12 +37,10 @@ public class FoundationDBMetadataWriter implements MetadataWriter {
   }
 
   /**
-   * Flush the writer, committing all pending writes. Note that the writes may
-   * already be committed - this method just establishes that they *must* be
-   * committed after the method returns.
+   * Flush the writer, committing all pending writes. Note that the writes may already be committed
+   * - this method just establishes that they *must* be committed after the method returns.
    *
-   * Preconditions:
-   *  - The writer is not closed
+   * Preconditions: - The writer is not closed
    */
   @Override
   public void flush() {
@@ -54,9 +50,8 @@ public class FoundationDBMetadataWriter implements MetadataWriter {
   }
 
   /**
-   * Close the writer, preventing any further writes. After calling this method,
-   * flush and write may no longer be called. After the writer is closed, there
-   * is no way to re-open it.
+   * Close the writer, preventing any further writes. After calling this method, flush and write may
+   * no longer be called. After the writer is closed, there is no way to re-open it.
    */
   @Override
   public void close() {
