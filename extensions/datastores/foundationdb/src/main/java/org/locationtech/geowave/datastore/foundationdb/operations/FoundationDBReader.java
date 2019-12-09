@@ -112,22 +112,19 @@ public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
 
   /**
    * Creates a closeable iterator of GeowaveRow objects.
-   * @param client - The foundationDBClient associated with the FoundationDBReader
-   * object.
-   * @param readerParams - A RangeReaderParams object that is used to find the
-   * adapterIds associated with the iterator to be created.
-   * @param rowTransformer - A GeoWaveRowIteratorTransformer object that allows
-   * for GeoWaveRow objects in the iterator to be transformed into a different
-   * datatype.
-   * @param ranges - The SinglePartitionQueryRanges that the iterator is to
-   * have elements over.
-   * @param authorizations - A string of authorizations that is used to create
-   * a ClientVisibilityFilter associated with the iterator.
-   * @param async - A boolean that represents whether or not the iterator is meant
-   * to be asynchronous.
-   * @return - A new iterator over the ranges specified for the client associated
-   * with the given reader, given the readerParams, and filtered by the authorizations.
-   * The result is wrapped in a CloseableIteratorWrapper.
+   * 
+   * @param client The foundationDBClient associated with the FoundationDBReader object.
+   * @param readerParams A RangeReaderParams object that is used to find the adapterIds associated
+   *        with the iterator to be created.
+   * @param rowTransformer A GeoWaveRowIteratorTransformer object that allows for GeoWaveRow objects
+   *        in the iterator to be transformed into a different datatype.
+   * @param ranges The SinglePartitionQueryRanges that the iterator is to have elements over.
+   * @param authorizations A string of authorizations that is used to create a
+   *        ClientVisibilityFilter associated with the iterator.
+   * @param async A boolean that represents whether or not the iterator is meant to be asynchronous.
+   * @return A new iterator over the ranges specified for the client associated with the given
+   *         reader, given the readerParams, and filtered by the authorizations. The result is
+   *         wrapped in a CloseableIteratorWrapper.
    */
   private CloseableIterator<GeoWaveRow> createIterator(
       final FoundationDBClient client,
@@ -167,16 +164,14 @@ public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
   }
 
   /**
-   * Creates an iterator for a record Reader of GeowaveRow objects. Calls the
-   * createIterator method with the required parameters.
-   * @param client - The foundationDBClient associated with the FoundationDBReader
-   * object.
-   * @param recordReaderParams - The parameters to be associated with the iterator
-   * for the record reader, that provides the range and authorizations for the
-   * iterator.
-   * @return - A new iterator for the client associated with the given reader
-   * given the recordReaderParams. The iterator is wrapped around a
-   * CloseableIteratorWrapper.
+   * Creates an iterator for a record Reader of GeowaveRow objects. Calls the createIterator method
+   * with the required parameters.
+   * 
+   * @param client The foundationDBClient associated with the FoundationDBReader object.
+   * @param recordReaderParams The parameters to be associated with the iterator for the record
+   *        reader, that provides the range and authorizations for the iterator.
+   * @return A new iterator for the client associated with the given reader given the
+   *         recordReaderParams. The iterator is wrapped around a CloseableIteratorWrapper.
    */
   private CloseableIterator<GeoWaveRow> createIteratorForRecordReader(
       final FoundationDBClient client,
@@ -203,13 +198,13 @@ public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
 
   /**
    * Creates an iterator for a data index Reader of GeowaveRow objects.
-   * @param client - The foundationDBClient associated with the FoundationDBReader
-   * object.
-   * @param dataIndexReaderParams - The parameters to be associated with the iterator
-   * for the data index reader, that provides the adapterIds, dataIds and
-   * additional authorizations for the iterator.
-   * @return - A new iterator for the client associated with the given reader
-   * given the dataIndexReaderParams.
+   * 
+   * @param client The foundationDBClient associated with the FoundationDBReader object.
+   * @param dataIndexReaderParams The parameters to be associated with the iterator for the data
+   *        index reader, that provides the adapterIds, dataIds and additional authorizations for
+   *        the iterator.
+   * @return A new iterator for the client associated with the given reader given the
+   *         dataIndexReaderParams.
    */
   private Iterator<GeoWaveRow> createIteratorForDataIndexReader(
       final FoundationDBClient client,
@@ -241,21 +236,19 @@ public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
 
   /**
    * Wraps the given results in a CloseableIteratorWrapper.
-   * @param closeable - The closeable object to be wrapped.
-   * @param results - An iterator of GeoWaveRow objects that is used to create
-   * the iterator to be wrapped.
-   * @param params - The parameters to be associated with the iterator to be
-   * wrapped.
-   * @param rowTransformer - A GeoWaveRowIteratorTransformer object that allows
-   * for GeoWaveRow objects in the iterator to be transformed into a different
-   * datatype.
-   * @param authorizations - A string of authorizations that is used to create
-   * a ClientVisibilityFilter associated with the iterator.
-   * @param visibilityEnabled - A boolean that if true, causes the stream (from
-   * which the iterator is created) to be wrapped in a ClientVisibilityFilter
-   * with the authorization parameter.
-   * @return - A CloseableIteratorWrapper of the results given a Closeable object,
-   * RangeReaderParams and authorizations.
+   * 
+   * @param closeable The closeable object to be wrapped.
+   * @param results An iterator of GeoWaveRow objects that is used to create the iterator to be
+   *        wrapped.
+   * @param params The parameters to be associated with the iterator to be wrapped.
+   * @param rowTransformer A GeoWaveRowIteratorTransformer object that allows for GeoWaveRow objects
+   *        in the iterator to be transformed into a different datatype.
+   * @param authorizations A string of authorizations that is used to create a
+   *        ClientVisibilityFilter associated with the iterator.
+   * @param visibilityEnabled A boolean that if true, causes the stream (from which the iterator is
+   *        created) to be wrapped in a ClientVisibilityFilter with the authorization parameter.
+   * @return A CloseableIteratorWrapper of the results given a Closeable object, RangeReaderParams
+   *         and authorizations.
    */
   @SuppressWarnings("unchecked")
   private CloseableIterator<GeoWaveRow> wrapResults(
@@ -282,13 +275,13 @@ public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
   }
 
   /**
-   * Sorts the elements of an iterator by a sortKey if isSortByKeysRequird is true
-   * for the given params. Calls the sortBySortKey method in FoundationDBUtils to
-   * do this.
-   * @param params - A RangeReaderParams object that is used to determine whether
-   * the given iterator needs to be sorted by sortKeys.
-   * @param it - The iterator of GeoWaveRow objects to be sorted if necessary.
-   * @return - The input iterator, sorted if necessary (as specified above).
+   * Sorts the elements of an iterator by a sortKey if isSortByKeysRequird is true for the given
+   * params. Calls the sortBySortKey method in FoundationDBUtils to do this.
+   * 
+   * @param params A RangeReaderParams object that is used to determine whether the given iterator
+   *        needs to be sorted by sortKeys.
+   * @param it The iterator of GeoWaveRow objects to be sorted if necessary.
+   * @return The input iterator, sorted if necessary (as specified above).
    */
   private static Iterator<GeoWaveRow> sortBySortKeyIfRequired(
       final RangeReaderParams<?> params,
@@ -310,7 +303,7 @@ public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
   }
 
   /**
-   * Calls the close method associated with the iterator field of the class
+   * Calls the close method associated with the iterator field of the class.
    */
   @Override
   public void close() {
