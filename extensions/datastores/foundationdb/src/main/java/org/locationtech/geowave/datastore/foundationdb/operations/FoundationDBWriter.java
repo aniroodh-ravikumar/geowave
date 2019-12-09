@@ -11,7 +11,7 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBIndexTab
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 
 /**
- * This class is used to write key, value pairs to the database
+ * This class provides an interface for persisting GeoWave data rows.
  */
 public class FoundationDBWriter implements RowWriter {
 
@@ -25,9 +25,9 @@ public class FoundationDBWriter implements RowWriter {
   private final String indexNamePrefix;
 
   /**
-   * This class is used to write key, value pairs to the database
+   * Construct an instance using a FDB Client.
    * 
-   * @param client This is the client associated with this writer
+   * @param client The client.
    * @param adapterId TODO
    * @param typeName TODO
    * @param indexName TODO
@@ -46,10 +46,10 @@ public class FoundationDBWriter implements RowWriter {
   }
 
   /**
-   * This method is used to access the relevant table from client's indexCacheTable using a key
+   * This method is used to access the relevant table from client's indexCacheTable using a key.
    * 
-   * @param partitionKey this is the key to be used to get the relevant table
-   * @return the table that was mapped to partitionKey
+   * @param partitionKey The key to be used to get the relevant table.
+   * @return The table that was mapped to partitionKey.
    */
   private FoundationDBIndexTable getTable(final byte[] partitionKey) {
     return FoundationDBUtils.getIndexTableFromPrefix(
@@ -61,9 +61,11 @@ public class FoundationDBWriter implements RowWriter {
   }
 
   /**
-   * This method is used to write an array of geowave rows to tableCache
-   * 
-   * @param rows this is the array of geowave rows to be written to tableCache
+   * Write multiple GeoWave rows to the DB.
+   *
+   * Preconditions: <ul> <li>The writer is not closed</li> </ul>
+   *
+   * @param rows The array of rows to be written.
    */
   @Override
   public void write(final GeoWaveRow[] rows) {
@@ -73,12 +75,15 @@ public class FoundationDBWriter implements RowWriter {
   }
 
   /**
-   * <ul> <li> This method is used to write a row to tableCache </li> <li> First, we create a
-   * partition key based on whether the row contains one. If it does not, we create an empty
-   * partition key </li> <li> Next, for each value in the row, the partition key is used to create a
-   * mapping from the key (sortKey) to the value in tableCache </li> </ul>
-   * 
-   * @param row this is the geowave row to be written to tableCache
+   * Write a GeoWave row to the DB.
+   *
+   * <ul> <li> First, we create a partition key based on whether the row contains one. If it does
+   * not, we create an empty partition key </li> <li> Next, for each value in the row, the partition
+   * key is used to create a mapping from the key (sortKey) to the value in tableCache </li> </ul>
+   *
+   * Preconditions: <ul> <li>The writer is not closed</li> </ul>
+   *
+   * @param row The row to be written.
    */
   @Override
   public void write(final GeoWaveRow row) {
@@ -98,6 +103,12 @@ public class FoundationDBWriter implements RowWriter {
     }
   }
 
+  /**
+   * Flush the writer, committing all pending writes. Note that the writes may already be committed
+   * - this method just establishes that they *must* be committed after the method returns.
+   *
+   * Preconditions: <ul> <li>The writer is not closed</li> </ul>
+   */
   @Override
   public void flush() {
     tableCache.asMap().forEach((k, v) -> v.flush());
@@ -105,7 +116,8 @@ public class FoundationDBWriter implements RowWriter {
 
 
   /**
-   * This method is used to flush the table and then invalidate everything in the table
+   * Close the writer, preventing any further writes. After calling this method, flush and write may
+   * no longer be called. After the writer is closed, there is no way to re-open it.
    */
   @Override
   public void close() {

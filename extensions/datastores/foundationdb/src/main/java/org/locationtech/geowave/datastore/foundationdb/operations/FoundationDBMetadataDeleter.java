@@ -9,7 +9,7 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBGeoWaveM
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBMetadataTable;
 
 /**
- * This class provides an abstraction for deleting metadata.
+ * This class provides an interface for deleting metadata.
  */
 public class FoundationDBMetadataDeleter implements MetadataDeleter {
 

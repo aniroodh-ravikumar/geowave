@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class provides an abstraction for reading metadata.
+ * This class provides an interface for reading metadata.
  */
 public class FoundationDBMetadataReader implements MetadataReader {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBMetadataReader.class);
