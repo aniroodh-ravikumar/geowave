@@ -123,8 +123,7 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
   /**
    * Creates an iterator of GeoWaveRow objects over the given range.
    *
-   * @param range A ByteArrayRange object that stores the information about the start and end
-   *        index
+   * @param range A ByteArrayRange object that stores the information about the start and end index
    *        of the iterator created.
    * @return The FoundationDBIterator object created. The iterator is empty if the db object
    *         obtained using the getDb method is null.
