@@ -73,8 +73,10 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
     }
 
     AsyncIterator<KeyValue> iterator = db.run(tr -> {
-      final byte[] start = Tuple.from("").pack();
-      final byte[] end = Tuple.from("0xff").pack();
+      final byte[] start = Tuple.from("").pack(); // begin key inclusive
+      final byte[] end = Tuple.from("0xff").pack(); // end key exclusive
+      // We want to return all KeyValue from the db
+      // Some values might have empty byte array as keys hence the empty array as `start`
       AsyncIterable<KeyValue> iterable = tr.getRange(start, end);
       return iterable.iterator();
     });

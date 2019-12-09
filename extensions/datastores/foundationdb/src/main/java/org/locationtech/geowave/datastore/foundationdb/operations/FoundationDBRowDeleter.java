@@ -97,6 +97,13 @@ public class FoundationDBRowDeleter implements RowDeleter {
     tableCache.invalidateAll();
   }
 
+  /**
+   * Returns the indexTable from the indexTableCache field of the FoundationDBClient
+   *
+   * Precondition: cacheKey is not null
+   * @param cacheKey
+   * @return FoundationDBIndexTable
+   */
   private FoundationDBIndexTable getIndexTable(final CacheKey cacheKey) {
     return FoundationDBUtils.getIndexTable(
         client,

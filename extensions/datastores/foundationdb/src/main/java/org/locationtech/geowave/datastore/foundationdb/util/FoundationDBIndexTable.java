@@ -115,8 +115,10 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
-    final byte[] start = Tuple.from("").pack();
-    final byte[] end = Tuple.from("0xff").pack();
+    final byte[] start = Tuple.from("").pack(); // begin key inclusive
+    final byte[] end = Tuple.from("0xff").pack(); // end key exclusive
+    // We want to return all KeyValue from the db
+    // Some values might have empty byte array as keys hence the empty array as `start`
     return iterator(new ByteArrayRange(start, end));
   }
 

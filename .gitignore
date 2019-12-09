@@ -17,3 +17,4 @@ generated
 *.cluster
 fdb/*
 trace.*
+*.sqlite

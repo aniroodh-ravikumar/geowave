@@ -56,11 +56,12 @@ public class FoundationDBMetadataTable implements Closeable {
       return new CloseableIterator.Empty<>();
     }
     AsyncIterator<KeyValue> iterator = db.run(tr -> {
-      final byte[] start = Tuple.from("").pack();
-      final byte[] end = Tuple.from("0xff").pack();
+      final byte[] start = Tuple.from("").pack(); // begin key inclusive
+      final byte[] end = Tuple.from("0xff").pack(); // end key exclusive
+      // We want to return all KeyValue from the db
+      // Some values might have empty byte array as keys hence the empty array as `start`
       AsyncIterable<KeyValue> iterable = tr.getRange(start, end);
-      AsyncIterator<KeyValue> iter = iterable.iterator();
-      return iter;
+      return iterable.iterator();
     });
     return new FoundationDBMetadataIterator(
         iterator,
