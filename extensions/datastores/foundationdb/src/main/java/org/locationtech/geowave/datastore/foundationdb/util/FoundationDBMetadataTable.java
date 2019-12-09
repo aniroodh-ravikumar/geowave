@@ -4,21 +4,14 @@ import com.apple.foundationdb.*;
 import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
 import com.apple.foundationdb.tuple.Tuple;
-import com.google.common.collect.Iterators;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import org.locationtech.geowave.core.index.ByteArrayUtils;
 import org.locationtech.geowave.core.store.CloseableIterator;
 import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
-import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.xml.crypto.Data;
 import java.io.Closeable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class provides an interface for interacting with FoundationDB, both within the context of
