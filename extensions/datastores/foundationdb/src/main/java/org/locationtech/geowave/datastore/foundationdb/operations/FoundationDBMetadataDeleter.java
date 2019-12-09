@@ -18,9 +18,9 @@ public class FoundationDBMetadataDeleter implements MetadataDeleter {
   private boolean closed = false;
 
   /**
-   * Create a reader for a given metadata type using a FDB Metadata table.
+   * Create a deleter for a given metadata type using a FDB Metadata table.
    *
-   * Preconditions: - The table is not closed
+   * <ul> <li>The table is not closed</li> </ul>
    *
    * @param table The table.
    * @param metadataType The type of the metadata to read.
@@ -32,6 +32,13 @@ public class FoundationDBMetadataDeleter implements MetadataDeleter {
     this.metadataType = metadataType;
   }
 
+  /**
+   * Delete metadata from the table.
+   *
+   * <ul> <li>The deleter is not closed</li> </ul>
+   *
+   * @param query The query that specifies the metadata to be deleted.
+   */
   @Override
   public boolean delete(final MetadataQuery query) {
     boolean atLeastOneDeletion = false;
@@ -51,7 +58,7 @@ public class FoundationDBMetadataDeleter implements MetadataDeleter {
    * committed - this method just establishes that they *must* be committed after the method
    * returns.
    *
-   * Preconditions: - The deleter is not closed
+   * Preconditions: <ul> <li>The deleter is not closed</li> </ul>
    */
   @Override
   public void flush() {

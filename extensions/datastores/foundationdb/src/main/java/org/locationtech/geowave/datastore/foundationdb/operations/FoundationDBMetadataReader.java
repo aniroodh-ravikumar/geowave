@@ -27,7 +27,7 @@ public class FoundationDBMetadataReader implements MetadataReader {
   /**
    * Create a reader for a given metadata type using a FDB Metadata table.
    *
-   * Preconditions: - The table is not closed
+   * <ul> <li>The table is not closed</li> </ul>
    *
    * @param table The table.
    * @param metadataType The type of the metadata to read.
@@ -42,7 +42,7 @@ public class FoundationDBMetadataReader implements MetadataReader {
   /**
    * Read metadata, as specified by the query.
    *
-   * @param query The query.
+   * @param query The query that specifies the metadata to be read.
    * @param mergeStats TODO what does this do?
    * @return An iterator that lazily loads the metadata as they are requested.
    */
@@ -88,7 +88,7 @@ public class FoundationDBMetadataReader implements MetadataReader {
   /**
    * Read metadata, as specified by the query.
    *
-   * @param query The query.
+   * @param query The query that specifies the metadata to be read.
    * @return An iterator that lazily loads the metadata as they are requested.
    */
   @Override
