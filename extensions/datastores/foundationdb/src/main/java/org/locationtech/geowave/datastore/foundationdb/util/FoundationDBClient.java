@@ -1,27 +1,18 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
-import com.apple.foundationdb.Database;
 import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.NetworkOptions;
 import com.apple.foundationdb.subspace.Subspace;
 import com.apple.foundationdb.tuple.Tuple;
-import com.apple.foundationdb.subspace.Subspace;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import java.io.Closeable;
-import java.util.Arrays;
-import java.util.Objects;
 import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.Closeable;
-import java.io.File;
 import java.util.Arrays;
-import java.util.Objects;
-import org.locationtech.geowave.core.store.operations.MetadataType;
-import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper;
 import java.util.Objects;
 
 public class FoundationDBClient implements Closeable {
@@ -136,6 +127,7 @@ public class FoundationDBClient implements Closeable {
       return true;
     }
   }
+
   private static class DataIndexCacheKey extends CacheKey {
     protected final short adapterId;
 
@@ -179,6 +171,12 @@ public class FoundationDBClient implements Closeable {
     }
   }
 
+  /**
+   * loads the indexTable associated with the foundationDBClient object.
+   * 
+   * @param key The IndexCacheKey object that is used to create a new FoundationDBIndexTable object.
+   * @return A new FoundationDBIndexTable with the parameters associated with the key.
+   */
   private FoundationDBIndexTable loadIndexTable(final IndexCacheKey key) {
     return new FoundationDBIndexTable(
         key.adapterId,
@@ -189,6 +187,13 @@ public class FoundationDBClient implements Closeable {
         this.fdb.open());
   }
 
+  /**
+   * loads the dataIndexTable associated with the foundationDBClient object.
+   * 
+   * @param key The dataIndexCacheKey object that is used to create a new FoundationDBDataIndexTable
+   *        object.
+   * @return A new FoundationDBDataIndexTable with the parameters associated with the key.
+   */
   private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
     return new FoundationDBDataIndexTable(
         key.adapterId,
@@ -197,10 +202,26 @@ public class FoundationDBClient implements Closeable {
         this.fdb.open());
   }
 
+  /**
+   * loads the metadataTable associated with the foundationDBClient object.
+   * 
+   * @param key The CacheKey object that is used to create a new FoundationDBMetadataTable object.
+   * @return A new FoundationDBMetadataTable with the parameters associated with the key.
+   */
   private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {
     return new FoundationDBMetadataTable(this.fdb.open(), key.requiresTimestamp, visibilityEnabled);
   }
 
+  /**
+   * gets the indexTable from the indexTableCache field of the foundationDBClient.
+   * 
+   * @param tableName The name of the indexTable to be obtained.
+   * @param adapterId The adapterId used to create the indexCacheKey to obtain the indexTable.
+   * @param partition The partition used to create the indexCacheKey to obtain * the indexTable.
+   * @param requiresTimestamp A boolean that represents whether or not a timestamp is to be included
+   *        to create the indexCacheKey to obtain the indexTable.
+   * @return An indexTable object with the given parameters.
+   */
   public synchronized FoundationDBIndexTable getIndexTable(
       final String tableName,
       final short adapterId,
@@ -214,6 +235,12 @@ public class FoundationDBClient implements Closeable {
                 d -> new IndexCacheKey(d, adapterId, partition, requiresTimestamp))));
   }
 
+  /**
+   * Checks if the indexTable of the given name exists in the cache.
+   * 
+   * @param indexName The name of the indexTable to check in the keyCache.
+   * @return True if a key in the keyCache contains a tuple with a prefix of indexName.
+   */
   public boolean indexTableExists(final String indexName) {
     // then look for prefixes of this index directory in which case there is
     // a partition key
@@ -225,7 +252,12 @@ public class FoundationDBClient implements Closeable {
     return false;
   }
 
-
+  /**
+   * Gets the metadataTable from the cache for the given metaDataType.
+   * 
+   * @param type The type of the FoundationDBMetaDataTable object to be obtained.
+   * @return the required FoundationDBMetaDataTable object.
+   */
   public synchronized FoundationDBMetadataTable getMetadataTable(final MetadataType type) {
     final Subspace directorySubspace = subDirectorySubspace.get(Tuple.from(type.name()).pack());
     return metadataTableCache.get(
@@ -235,6 +267,12 @@ public class FoundationDBClient implements Closeable {
                 d -> new CacheKey(d, type.equals(MetadataType.STATS)))));
   }
 
+  /**
+   * Checks if the metaddataTable of the given type exists in the cache.
+   * 
+   * @param type The type of the metadataTable to check in the keyCache.
+   * @return True if the keyCache contains the subspace given by the prefix type.
+   */
   public boolean metadataTableExists(final MetadataType type) {
     // this could have been created by a different process so check the
     // directory listing
@@ -242,6 +280,13 @@ public class FoundationDBClient implements Closeable {
     return keyCache.getIfPresent(directorySubspace) != null;
   }
 
+  /**
+   * Gets the dataIndexTable from the cache.
+   * 
+   * @param tableName The name of the dataIndexTable to be obtained.
+   * @param adapterId The adaptedId associated with the cacheKey for the dataIndexTableCache
+   * @return The required FoundationDBDataIndexTable object.
+   */
   public synchronized FoundationDBDataIndexTable getDataIndexTable(
       final String tableName,
       final short adapterId) {
@@ -261,6 +306,10 @@ public class FoundationDBClient implements Closeable {
     return subDirectorySubspace;
   }
 
+  /**
+   * Calls the invalidateAll method for all of the cache fields of the FoundationDBClient object,
+   * and also closes all of the databases that are values in each of the caches.
+   */
   public void close() {
     keyCache.invalidateAll();
     indexTableCache.asMap().values().forEach(db -> db.close());

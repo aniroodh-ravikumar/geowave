@@ -19,7 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class provides an interface for creating instances of classes used to execute FoundationDB operations.
+ * This class provides an interface for creating instances of classes used to execute FoundationDB
+ * operations.
  */
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBOperations.class);
@@ -46,7 +47,7 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
   /**
    * Calls the client's close method.
    *
-   * Postconditions: <ul> <li>  The database is cleared and then closed </li> </ul>
+   * Postconditions: <ul> <li> The database is cleared and then closed </li> </ul>
    */
   @Override
   public void close() throws IOException {
@@ -126,6 +127,7 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
 
   /**
    * Create an instance of a reader.
+   * 
    * @param readerParams parameters of type ReaderParams<T> used to instantiate the reader
    */
   @Override
@@ -135,6 +137,7 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
 
   /**
    * Create an instance of a reader.
+   * 
    * @param readerParams parameters of type RecordReaderParams<T> used to instantiate the reader
    */
   @Override
@@ -144,6 +147,7 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
 
   /**
    * Create an instance of a reader.
+   * 
    * @param readerParams parameters of type DataIndexReaderParams used to instantiate the reader
    */
   @Override
