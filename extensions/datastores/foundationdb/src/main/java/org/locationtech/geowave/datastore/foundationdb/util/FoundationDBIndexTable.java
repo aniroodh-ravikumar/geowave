@@ -34,10 +34,10 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
   }
 
   /**
-   * Deletes the entries in the database associated with
-   * the given sortKey and dataId.
-   * @param sortKey - The sortKey for the entries to be deleted.
-   * @param dataId - The dataId for the entries to be deleted.
+   * Deletes the entries in the database associated with the given sortKey and dataId.
+   * 
+   * @param sortKey The sortKey for the entries to be deleted.
+   * @param dataId The dataId for the entries to be deleted.
    */
   public void delete(final byte[] sortKey, final byte[] dataId) {
     final Database db = getDb();
@@ -54,15 +54,14 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
   }
 
   /**
-   * Adds an entry to the database given the parameters associated with it. The
-   * key of the entry contains the sortKey, dataId, time (if the timeRequired
-   * field is true), the fieldMask field of the value and endBytes.
-   * @param sortKey - The sortKey to be associated with the key of the entry
-   * to be created.
-   * @param dataId - The dataId to be associated with the key of the entry to
-   * be created.
-   * @param numDuplicates - The number of duplicates of the entry to be created.
-   * @param value - The value to be associated with the entry to be created.
+   * Adds an entry to the database given the parameters associated with it. The key of the entry
+   * contains the sortKey, dataId, time (if the timeRequired field is true), the fieldMask field of
+   * the value and endBytes.
+   * 
+   * @param sortKey The sortKey to be associated with the key of the entry to be created.
+   * @param dataId The dataId to be associated with the key of the entry to be created.
+   * @param numDuplicates The number of duplicates of the entry to be created.
+   * @param value The value to be associated with the entry to be created.
    */
   public synchronized void add(
       final byte[] sortKey,
@@ -105,11 +104,11 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
   }
 
   /**
-   * Creates an iterator of GeoWaveRow objects throughout the entire range of
-   * the database. The start index is the empty string, and the end index is
-   * "0xff".
-   * @return - The CloseableIterator object created. The iterator is empty if
-   * the db object obtained using the getDb method is null.
+   * Creates an iterator of GeoWaveRow objects throughout the entire range of the database. The
+   * start index is the empty string, and the end index is "0xff".
+   * 
+   * @return The CloseableIterator object created. The iterator is empty if the db object obtained
+   *         using the getDb method is null.
    */
   public CloseableIterator<GeoWaveRow> iterator() {
     Database db = getDb();
@@ -123,10 +122,11 @@ public class FoundationDBIndexTable extends AbstractFoundationDBTable {
 
   /**
    * Creates an iterator of GeoWaveRow objects over the given range.
-   * @param range - A ByteArrayRange object that stores the information
-   * about the start and end index of the iterator created.
-   * @return - The FoundationDBIterator object created. The iterator is empty if
-   * the db object obtained using the getDb method is null.
+   * 
+   * @param range A ByteArrayRange object that stores the information about the start and end index
+   *        of the iterator created.
+   * @return The FoundationDBIterator object created. The iterator is empty if the db object
+   *         obtained using the getDb method is null.
    */
   public CloseableIterator<GeoWaveRow> iterator(final ByteArrayRange range) {
     Database db = getDb();

@@ -8,13 +8,13 @@ import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
 public class FoundationDBGeoWaveMetadata extends GeoWaveMetadata {
   private final byte[] originalKey;
 
-    /**
-     * @param primaryId The primary Id of the key.
-     * @param secondaryId The secondary Id of the key.
-     * @param visibility  TODO
-     * @param value The value that the key should map to
-     * @param originalKey TODO
-     */
+  /**
+   * @param primaryId The primary Id of the key.
+   * @param secondaryId The secondary Id of the key.
+   * @param visibility TODO
+   * @param value The value that the key should map to
+   * @param originalKey TODO
+   */
   public FoundationDBGeoWaveMetadata(
       final byte[] primaryId,
       final byte[] secondaryId,
@@ -46,7 +46,8 @@ public class FoundationDBGeoWaveMetadata extends GeoWaveMetadata {
   }
 
   /**
-   * This method is used to check whether an object is equal to this instance of FoundationDB metadata
+   * This method is used to check whether an object is equal to this instance of FoundationDB
+   * metadata
    *
    * @return true if equal, false otherwise
    */

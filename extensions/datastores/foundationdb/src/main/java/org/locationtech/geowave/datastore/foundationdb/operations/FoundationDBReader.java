@@ -54,6 +54,18 @@ public class FoundationDBReader<T> implements RowReader<GeoWaveRow> {
     this.iterator = new Wrapper<>(createIteratorForDataIndexReader(client, dataIndexReaderParams));
   }
 
+  /**
+   * Creates an iterator of GeoWaveRow objects for a FoundationDBReader.
+   * 
+   * @param client The FoundationDBClient associated with the FoundationDBReader object.
+   * @param readerParams A RangeReaderParams object that is used to find the queryRanges, associated
+   *        and adapterIds with the iterator to be created.
+   * @param rowTransformer A GeoWaveRowIteratorTransformer object that allows for GeoWaveRow objects
+   *        in the iterator to be transformed into a different datatype.
+   * @param async A boolean that represents whether or not the iterator is meant to be asynchronous.
+   * @return A new iterator specified for the client associated with the given reader and given the
+   *         readerParams. The result is wrapped in a CloseableIteratorWrapper.
+   */
   private CloseableIterator<GeoWaveRow> createIteratorForReader(
       final FoundationDBClient client,
       final ReaderParams<GeoWaveRow> readerParams,
