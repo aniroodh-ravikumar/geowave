@@ -190,7 +190,11 @@ public class FoundationDBClient implements Closeable {
   }
 
   private FoundationDBDataIndexTable loadDataIndexTable(final DataIndexCacheKey key) {
-    return new FoundationDBDataIndexTable(key.adapterId, visibilityEnabled, batchWriteSize, this.fdb.open());
+    return new FoundationDBDataIndexTable(
+        key.adapterId,
+        visibilityEnabled,
+        batchWriteSize,
+        this.fdb.open());
   }
 
   private FoundationDBMetadataTable loadMetadataTable(final CacheKey key) {
