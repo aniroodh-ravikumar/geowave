@@ -3,6 +3,7 @@ package org.locationtech.geowave.datastore.foundationdb.operations;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
 import org.locationtech.geowave.core.store.adapter.InternalAdapterStore;
 import org.locationtech.geowave.core.store.adapter.InternalDataAdapter;
@@ -38,8 +39,6 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
     this.batchWriteSize = options.getBatchWriteSize();
     this.client = new FoundationDBClient(directory, visibilityEnabled, batchWriteSize);
 
-    // this does not open the database
-    // open the database with fdb.open()
   }
 
   @Override
@@ -57,6 +56,9 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
     return client.metadataTableExists(type);
   }
 
+  /**
+   * Closes the client and deletes the /foundationdb directory
+   */
   @Override
   public void deleteAll() throws Exception {
     close();
@@ -69,12 +71,22 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
       String typeName,
       Short adapterId,
       String... additionalAuthorizations) {
-    return false;
+    final String prefix = FoundationDBUtils.getTablePrefix(typeName, indexName);
+    client.close(indexName, typeName);
+    Arrays.stream(new File(directory).listFiles((dir, name) -> name.startsWith(prefix))).forEach(
+        f -> {
+          try {
+            FileUtils.deleteDirectory(f);
+          } catch (final IOException e) {
+            LOGGER.warn("Unable to delete directory '" + f.getAbsolutePath() + "'", e);
+          }
+        });
+    return true;
   }
 
   @Override
   public boolean ensureAuthorizations(String clientUser, String... authorizations) {
-    return false;
+    return true;
   }
 
   @Override
