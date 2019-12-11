@@ -70,7 +70,7 @@ public class FoundationDBMetadataDeleter implements MetadataDeleter {
    * may no longer be called. After the deleter is closed, there is no way to re-open it.
    */
   @Override
-  public void close() throws Exception {
+  public void close() {
     // guard against repeated calls to close
     if (!closed) {
       flush();

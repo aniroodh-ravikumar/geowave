@@ -2,8 +2,6 @@ package org.locationtech.geowave.datastore.foundationdb.operations;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 import org.apache.commons.io.FileUtils;
 import org.locationtech.geowave.core.store.adapter.InternalAdapterStore;
 import org.locationtech.geowave.core.store.adapter.InternalDataAdapter;
@@ -16,15 +14,12 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBClient;
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import org.locationtech.geowave.mapreduce.MapReduceDataStoreOperations;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class provides an interface for creating instances of classes used to execute FoundationDB
  * operations.
  */
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
-  private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBOperations.class);
   private static final boolean READER_ASYNC = true;
   private final FoundationDBClient client;
   private final String directory;
@@ -43,6 +38,8 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
     this.batchWriteSize = options.getBatchWriteSize();
     this.client = new FoundationDBClient(directory, visibilityEnabled, batchWriteSize);
 
+    // this does not open the database
+    // open the database with fdb.open()
   }
 
   /**
@@ -51,23 +48,20 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
    * Postconditions: <ul> <li> The database is cleared and then closed </li> </ul>
    */
   @Override
-  public void close() throws IOException {
+  public void close() {
     client.close();
   }
 
   @Override
-  public boolean indexExists(String indexName) throws IOException {
+  public boolean indexExists(String indexName) {
     return client.indexTableExists(indexName);
   }
 
   @Override
-  public boolean metadataExists(MetadataType type) throws IOException {
+  public boolean metadataExists(MetadataType type) {
     return client.metadataTableExists(type);
   }
 
-  /**
-   * Closes the client and deletes the /foundationdb directory
-   */
   @Override
   public void deleteAll() throws Exception {
     close();
@@ -80,22 +74,12 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
       String typeName,
       Short adapterId,
       String... additionalAuthorizations) {
-    final String prefix = FoundationDBUtils.getTablePrefix(typeName, indexName);
-    client.close(indexName, typeName);
-    Arrays.stream(new File(directory).listFiles((dir, name) -> name.startsWith(prefix))).forEach(
-        f -> {
-          try {
-            FileUtils.deleteDirectory(f);
-          } catch (final IOException e) {
-            LOGGER.warn("Unable to delete directory '" + f.getAbsolutePath() + "'", e);
-          }
-        });
-    return true;
+    return false;
   }
 
   @Override
   public boolean ensureAuthorizations(String clientUser, String... authorizations) {
-    return true;
+    return false;
   }
 
   /**

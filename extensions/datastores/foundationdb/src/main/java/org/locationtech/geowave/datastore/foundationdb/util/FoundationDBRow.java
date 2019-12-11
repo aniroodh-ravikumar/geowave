@@ -12,7 +12,7 @@ import org.locationtech.geowave.core.store.entities.MergeableGeoWaveRow;
 import com.google.common.collect.Lists;
 
 public class FoundationDBRow extends MergeableGeoWaveRow implements GeoWaveRow {
-  List<byte[]> mergedKeys;
+  private List<byte[]> mergedKeys;
   private final byte[] key;
   private final short adapterId;
   private final byte[] partition;

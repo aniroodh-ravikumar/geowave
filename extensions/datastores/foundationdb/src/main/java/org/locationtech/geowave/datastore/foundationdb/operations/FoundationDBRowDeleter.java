@@ -140,6 +140,7 @@ public class FoundationDBRowDeleter implements RowDeleter {
       LOGGER.info(
           "Unable to convert scanned row into FoundationDBRow for deletion. Row is of type "
               + row.getClass());
+      assert table != null;
       table.delete(row.getSortKey(), row.getDataId());
     }
   }

@@ -14,10 +14,7 @@ import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.locationtech.geowave.datastore.foundationdb.FoundationDBFactoryHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.Closeable;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 
 public class FoundationDBClient implements Closeable {
 
