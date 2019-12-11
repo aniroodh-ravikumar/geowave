@@ -20,7 +20,8 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
   /**
    * Check if there are more elements in the iterator.
    *
-   * @return Return true if closed is set to false and there exists another key-value pair in the iterator, and false otherwise.
+   * @return Return true if closed is set to false and there exists another key-value pair in the
+   *         iterator, and false otherwise.
    *
    */
   @Override
@@ -33,9 +34,7 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
    *
    * Preconditions:
    *
-   * <ul>
-   * <li> hasNext must have returned true before calling this method.</li>
-   * </ul>
+   * <ul> <li> hasNext must have returned true before calling this method.</li> </ul>
    *
    * @return Return the key-value pair in the iterator.
    *
@@ -50,16 +49,14 @@ public abstract class AbstractFoundationDBIterator<T> implements CloseableIterat
 
   protected abstract T readRow(KeyValue keyValue);
 
-    /**
-     * Close this iterator.
-     *
-     * Post-conditions:
-     *
-     * <ul>
-     * <li> hasNext will return false once this method is called.</li>
-     * </ul>
-     *
-     */
+  /**
+   * Close this iterator.
+   *
+   * Post-conditions:
+   *
+   * <ul> <li> hasNext will return false once this method is called.</li> </ul>
+   *
+   */
   @Override
   public void close() {
     closed = true;

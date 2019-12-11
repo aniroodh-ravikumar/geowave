@@ -121,6 +121,7 @@ public class FoundationDBQueryExecution<T> {
 
   /**
    * Traverse through all the SinglePartitionQueryRanges and return the executed query result
+   * 
    * @return CloseableIterator<T>
    */
   public CloseableIterator<T> results() {
@@ -134,8 +135,9 @@ public class FoundationDBQueryExecution<T> {
   }
 
   /**
-   * Execute the given query and return the results. It steps through the list and get the LoadingCache for each
-   * partitionKey
+   * Execute the given query and return the results. It steps through the list and get the
+   * LoadingCache for each partitionKey
+   * 
    * @param reads
    * @return CloseableIterator<T>
    */
@@ -162,8 +164,9 @@ public class FoundationDBQueryExecution<T> {
   }
 
   /**
-   * Transform and filter from a closeable iterator of GeoWaveRow to a generic closeable iterator. The filter and other
-   * conditions are defined in the constructor.
+   * Transform and filter from a closeable iterator of GeoWaveRow to a generic closeable iterator.
+   * The filter and other conditions are defined in the constructor.
+   * 
    * @param result
    * @return CloseableIterator<T>
    */
@@ -179,6 +182,7 @@ public class FoundationDBQueryExecution<T> {
 
   /**
    * Return a sorted-by-key iterator if isRequired is true
+   * 
    * @param isRequired
    * @param it
    * @return Iterator<GeoWaveRow>

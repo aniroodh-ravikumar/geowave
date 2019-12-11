@@ -11,7 +11,6 @@ package org.locationtech.geowave.core.store.base.dataidx;
 import org.locationtech.geowave.core.store.base.dataidx.DefaultDataIndexRowWriterWrapper.GeoWaveRowWrapper;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import org.locationtech.geowave.core.store.operations.RowDeleter;
-
 import java.io.IOException;
 
 public class DefaultDataIndexRowDeleterWrapper implements RowDeleter {

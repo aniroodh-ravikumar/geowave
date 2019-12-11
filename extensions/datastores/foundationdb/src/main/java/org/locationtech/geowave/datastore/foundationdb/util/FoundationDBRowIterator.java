@@ -25,8 +25,9 @@ public class FoundationDBRowIterator extends AbstractFoundationDBIterator<GeoWav
   }
 
   /**
-   * Creates a new FoundationDBRow given a KeyValue object, using the adapterId,
-   * partition, containsTimeStamp and visibilityEnabled fields of the RowIterator.
+   * Creates a new FoundationDBRow given a KeyValue object, using the adapterId, partition,
+   * containsTimeStamp and visibilityEnabled fields of the RowIterator.
+   * 
    * @param keyValue The key-value pair to be added to the new row.
    * @return The new FoundationDBRow created using the fields mentioned above.
    */
