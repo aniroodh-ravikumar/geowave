@@ -101,6 +101,7 @@ public class FoundationDBRowDeleter implements RowDeleter {
    * Returns the indexTable from the indexTableCache field of the FoundationDBClient
    *
    * Precondition: cacheKey is not null
+   * 
    * @param cacheKey
    * @return FoundationDBIndexTable
    */
