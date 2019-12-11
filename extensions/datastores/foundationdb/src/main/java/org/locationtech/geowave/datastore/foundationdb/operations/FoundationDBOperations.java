@@ -19,6 +19,10 @@ import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class provides an interface for creating instances of classes used to execute FoundationDB
+ * operations.
+ */
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBOperations.class);
   private static final boolean READER_ASYNC = true;
@@ -41,6 +45,11 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
 
   }
 
+  /**
+   * Calls the client's close method.
+   *
+   * Postconditions: <ul> <li> The database is cleared and then closed </li> </ul>
+   */
   @Override
   public void close() throws IOException {
     client.close();
@@ -89,6 +98,9 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
     return true;
   }
 
+  /**
+   * Create an instance of a writer.
+   */
   @Override
   public RowWriter createWriter(Index index, InternalDataAdapter<?> adapter) {
     return new FoundationDBWriter(
@@ -99,11 +111,17 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
         true);
   }
 
+  /**
+   * Create an instance of a metadata writer.
+   */
   @Override
   public MetadataWriter createMetadataWriter(MetadataType metadataType) {
     return new FoundationDBMetadataWriter(FoundationDBUtils.getMetadataTable(client, metadataType));
   }
 
+  /**
+   * Create an instance of a metadata reader.
+   */
   @Override
   public MetadataReader createMetadataReader(MetadataType metadataType) {
     return new FoundationDBMetadataReader(
@@ -111,6 +129,9 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
         metadataType);
   }
 
+  /**
+   * Create an instance of a metadata deleter.
+   */
   @Override
   public MetadataDeleter createMetadataDeleter(MetadataType metadataType) {
     return new FoundationDBMetadataDeleter(
@@ -118,21 +139,39 @@ public class FoundationDBOperations implements MapReduceDataStoreOperations, Clo
         metadataType);
   }
 
+  /**
+   * Create an instance of a reader.
+   * 
+   * @param readerParams parameters of type ReaderParams<T> used to instantiate the reader
+   */
   @Override
   public <T> RowReader<T> createReader(final ReaderParams<T> readerParams) {
     return new FoundationDBReader(client, readerParams, READER_ASYNC);
   }
 
+  /**
+   * Create an instance of a reader.
+   * 
+   * @param readerParams parameters of type RecordReaderParams<T> used to instantiate the reader
+   */
   @Override
   public RowReader<GeoWaveRow> createReader(final RecordReaderParams readerParams) {
     return new FoundationDBReader<>(client, readerParams);
   }
 
+  /**
+   * Create an instance of a reader.
+   * 
+   * @param readerParams parameters of type DataIndexReaderParams used to instantiate the reader
+   */
   @Override
   public RowReader<GeoWaveRow> createReader(final DataIndexReaderParams readerParams) {
     return new FoundationDBReader<>(client, readerParams);
   }
 
+  /**
+   * Create an instance of a row deleter.
+   */
   @Override
   public RowDeleter createRowDeleter(
       String indexName,

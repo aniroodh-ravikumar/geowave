@@ -4,22 +4,19 @@ import com.apple.foundationdb.*;
 import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
 import com.apple.foundationdb.tuple.Tuple;
-import com.google.common.collect.Iterators;
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Longs;
 import org.locationtech.geowave.core.index.ByteArrayUtils;
 import org.locationtech.geowave.core.store.CloseableIterator;
 import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
-import org.locationtech.geowave.datastore.foundationdb.operations.FoundationDBOperations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.xml.crypto.Data;
 import java.io.Closeable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This class provides an interface for interacting with FoundationDB, both within the context of
+ * GeoWave metadata, and by directly reading and writing FDB keys and values.
+ */
 public class FoundationDBMetadataTable implements Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBMetadataTable.class);
   private final Database db;
@@ -27,6 +24,16 @@ public class FoundationDBMetadataTable implements Closeable {
   private final boolean visibilityEnabled;
   private long prevTime = Long.MAX_VALUE;
 
+  /**
+   * Create a FDB metadata table using a FDB instance.
+   *
+   * Preconditions: <ul> <li>The FDB instance is not closed</li> <li>The FDB instance is not
+   * null</li> </ul>
+   *
+   * @param db The FDB instance.
+   * @param requiresTimestamp TODO
+   * @param visibilityEnabled TODO
+   */
   public FoundationDBMetadataTable(
       Database db,
       final boolean requiresTimestamp,
@@ -37,16 +44,24 @@ public class FoundationDBMetadataTable implements Closeable {
     this.visibilityEnabled = visibilityEnabled;
   }
 
+  /**
+   * Get an iterator to read the entire table. Values are loaded lazily as they are needed.
+   *
+   * * Preconditions: * <ul> * <li>The table is not closed</li> * </ul>
+   *
+   * @return The iterator.
+   */
   public CloseableIterator<GeoWaveMetadata> iterator() {
     if (db == null) {
       return new CloseableIterator.Empty<>();
     }
     AsyncIterator<KeyValue> iterator = db.run(tr -> {
-      final byte[] start = Tuple.from("").pack();
-      final byte[] end = Tuple.from("0xff").pack();
+      final byte[] start = Tuple.from("").pack(); // begin key inclusive
+      final byte[] end = Tuple.from("0xff").pack(); // end key exclusive
+      // We want to return all KeyValue from the db
+      // Some values might have empty byte array as keys hence the empty array as `start`
       AsyncIterable<KeyValue> iterable = tr.getRange(start, end);
-      AsyncIterator<KeyValue> iter = iterable.iterator();
-      return iter;
+      return iterable.iterator();
     });
     return new FoundationDBMetadataIterator(
         iterator,
@@ -62,6 +77,15 @@ public class FoundationDBMetadataTable implements Closeable {
     return prefixIterator(Bytes.concat(primaryID, secondaryID));
   }
 
+  /**
+   * Get an iterator to read metadata values with a given key prefix. Values are loaded lazily as
+   * they are needed.
+   *
+   * Preconditions: <ul> <li>The table is not closed</li> </ul>
+   *
+   * @param prefix The metadata prefix.
+   * @return The iterator.
+   */
   private CloseableIterator<GeoWaveMetadata> prefixIterator(final byte[] prefix) {
     AsyncIterator<KeyValue> iterator = db.run(tr -> {
       AsyncIterable<KeyValue> iterable = tr.getRange(prefix, ByteArrayUtils.getNextPrefix(prefix));
@@ -74,6 +98,13 @@ public class FoundationDBMetadataTable implements Closeable {
         this.visibilityEnabled);
   }
 
+  /**
+   * Delete a metadata value by key.
+   *
+   * Preconditions: <ul> <li>The table is not closed</li> </ul>
+   *
+   * @param key The key of the metadata value.
+   */
   public void remove(final byte[] key) {
     this.db.run(tr -> {
       tr.clear(key);
@@ -81,6 +112,16 @@ public class FoundationDBMetadataTable implements Closeable {
     });
   }
 
+  /**
+   * Persist a metadata value in the DB. The key is constructed as a combination of the primary and
+   * secondary ids, and the timestamp (if the timestamp flag was set in the constructor).
+   *
+   * Preconditions: <ul> <li>The table is not closed</li> </ul>
+   *
+   * TODO: extract the key constructor into a static method
+   *
+   * @param value The metadata to persist.
+   */
   public void add(final GeoWaveMetadata value) {
     LOGGER.warn("in add of fdb metadata table");
     byte[] key;
@@ -115,6 +156,14 @@ public class FoundationDBMetadataTable implements Closeable {
     put(key, value.getValue());
   }
 
+  /**
+   * Directly persist a key-value pair in the DB.
+   *
+   * Preconditions: <ul> <li>The table is not closed</li> </ul>
+   *
+   * @param key The key.
+   * @param value The value.
+   */
   public void put(final byte[] key, final byte[] value) {
     LOGGER.warn("METADATA TABLE writing to db");
     db.run(tr -> {
@@ -123,8 +172,18 @@ public class FoundationDBMetadataTable implements Closeable {
     });
   }
 
+  /**
+   * After calling this method, all pending changes are committed. Note that in the current
+   * implementation, changes are committed immediately.
+   *
+   * Preconditions: <ul> <li>The table is not closed</li> </ul>
+   */
   public void flush() {}
 
+  /**
+   * Close the table, preventing any further changes or reads. Closing is idempotent, may not be
+   * undone.
+   */
   public void close() {
     db.close();
   }

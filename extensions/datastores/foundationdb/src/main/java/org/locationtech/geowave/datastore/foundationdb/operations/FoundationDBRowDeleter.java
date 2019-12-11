@@ -25,7 +25,9 @@ import org.slf4j.LoggerFactory;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
-
+/**
+ * This class provides an interface for deleting GeoWave data rows.
+ */
 public class FoundationDBRowDeleter implements RowDeleter {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBRowDeleter.class);
 
@@ -95,6 +97,14 @@ public class FoundationDBRowDeleter implements RowDeleter {
     tableCache.invalidateAll();
   }
 
+  /**
+   * Returns the indexTable from the indexTableCache field of the FoundationDBClient
+   *
+   * Precondition: cacheKey is not null
+   * 
+   * @param cacheKey
+   * @return FoundationDBIndexTable
+   */
   private FoundationDBIndexTable getIndexTable(final CacheKey cacheKey) {
     return FoundationDBUtils.getIndexTable(
         client,

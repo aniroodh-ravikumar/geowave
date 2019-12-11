@@ -1,15 +1,13 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
-import com.apple.foundationdb.Database;
 import com.apple.foundationdb.KeyValue;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
 import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
 
+/**
+ * Provides an interface for dealing with a FoundationDB metadata iterator.
+ */
 public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<GeoWaveMetadata> {
 
   private final boolean containsTimestamp;
@@ -24,6 +22,12 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
     this.visibilityEnabled = visibilityEnabled;
   }
 
+  /**
+   * Read a row of metadata.
+   *
+   * @return Return an instance of FoundationDBGeoWaveMetadata.
+   *
+   */
   @Override
   protected GeoWaveMetadata readRow(final KeyValue keyValue) {
     final byte[] key = keyValue.getKey();
@@ -39,9 +43,11 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
     }
     int secondaryIdLength = key.length - primaryId.length - visibility.length - 1;
     if (containsTimestamp) {
+      // because the length of the timestamp is 8
       secondaryIdLength -= 8;
     }
     if (visibilityEnabled) {
+      // boolean has a length of 1
       secondaryIdLength--;
     }
     final byte[] secondaryId = new byte[secondaryIdLength];
