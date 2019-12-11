@@ -5,6 +5,9 @@ import java.nio.ByteBuffer;
 import com.apple.foundationdb.async.AsyncIterator;
 import org.locationtech.geowave.core.store.entities.GeoWaveMetadata;
 
+/**
+ * Provides an interface for dealing with a FoundationDB metadata iterator.
+ */
 public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<GeoWaveMetadata> {
 
   private final boolean containsTimestamp;
@@ -19,6 +22,12 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
     this.visibilityEnabled = visibilityEnabled;
   }
 
+  /**
+   * Read a row of metadata.
+   *
+   * @return Return an instance of FoundationDBGeoWaveMetadata.
+   *
+   */
   @Override
   protected GeoWaveMetadata readRow(final KeyValue keyValue) {
     final byte[] key = keyValue.getKey();
