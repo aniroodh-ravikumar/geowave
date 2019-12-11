@@ -1,14 +1,12 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.Database;
-import com.apple.foundationdb.KeySelector;
 import com.apple.foundationdb.KeyValue;
 import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import com.apple.foundationdb.tuple.Tuple;
 import org.locationtech.geowave.core.store.CloseableIterator;
 import org.locationtech.geowave.core.store.base.dataidx.DataIndexUtils;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBDataIndexTable.class);
-  private Database db;
 
   public FoundationDBDataIndexTable(
       final short adapterId,
@@ -73,9 +70,9 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
     }
 
     AsyncIterator<KeyValue> iterator = db.run(tr -> {
-      final byte[] start = Tuple.from("").pack();
-      final byte[] end = Tuple.from("0xff").pack();
-      AsyncIterable<KeyValue> iterable = tr.getRange(start, end);
+//      final byte[] start = Tuple.from("").pack();
+//      final byte[] end = Tuple.from("0xff").pack();
+      AsyncIterable<KeyValue> iterable = tr.getRange(startDataId, endDataId);
       return iterable.iterator();
     });
 

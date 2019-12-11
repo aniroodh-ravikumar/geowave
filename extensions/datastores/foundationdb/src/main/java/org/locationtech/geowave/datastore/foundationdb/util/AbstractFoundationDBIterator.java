@@ -1,30 +1,21 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
-import com.apple.foundationdb.Database;
 import com.apple.foundationdb.KeyValue;
-import com.apple.foundationdb.Transaction;
-import com.apple.foundationdb.async.AsyncIterator;
-import org.locationtech.geowave.core.index.ByteArrayUtils;
 import org.locationtech.geowave.core.store.CloseableIterator;
-import com.apple.foundationdb.KeyValue;
-import com.apple.foundationdb.async.AsyncIterator;
-import org.locationtech.geowave.core.store.CloseableIterator;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.NoSuchElementException;
-import java.util.concurrent.CompletionException;
 
 public abstract class AbstractFoundationDBIterator<T> implements CloseableIterator<T> {
   protected boolean closed = false;
-  protected AsyncIterator<KeyValue> it;
+  protected Iterator<KeyValue> it;
 
-  public AbstractFoundationDBIterator(final AsyncIterator<KeyValue> it) {
+  public AbstractFoundationDBIterator(final Iterator<KeyValue> it) {
     super();
     this.it = it;
   }
 
   @Override
   public boolean hasNext() {
-    System.out.println(it.hasNext());
     return !closed && it.hasNext();
   }
 

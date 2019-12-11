@@ -1,7 +1,6 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.Database;
-import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.FDBException;
 import com.apple.foundationdb.KeyValue;
 import com.google.common.util.concurrent.MoreExecutors;

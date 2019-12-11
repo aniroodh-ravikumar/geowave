@@ -23,7 +23,6 @@ import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBDataInde
 import org.locationtech.geowave.datastore.foundationdb.util.FoundationDBUtils;
 import org.locationtech.geowave.mapreduce.splits.GeoWaveRowRange;
 import org.locationtech.geowave.mapreduce.splits.RecordReaderParams;
-import com.apple.foundationdb.subspace.Subspace;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
