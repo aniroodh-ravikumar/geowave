@@ -12,6 +12,8 @@ import org.locationtech.geowave.core.store.base.dataidx.DefaultDataIndexRowWrite
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
 import org.locationtech.geowave.core.store.operations.RowDeleter;
 
+import java.io.IOException;
+
 public class DefaultDataIndexRowDeleterWrapper implements RowDeleter {
   private final RowDeleter delegateDeleter;
 
@@ -30,7 +32,7 @@ public class DefaultDataIndexRowDeleterWrapper implements RowDeleter {
   }
 
   @Override
-  public void close() {
+  public void close() throws IOException {
     delegateDeleter.close();
   }
 }

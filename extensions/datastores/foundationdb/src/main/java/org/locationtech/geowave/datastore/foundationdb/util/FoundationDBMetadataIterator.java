@@ -34,9 +34,11 @@ public class FoundationDBMetadataIterator extends AbstractFoundationDBIterator<G
     }
     int secondaryIdLength = key.length - primaryId.length - visibility.length - 1;
     if (containsTimestamp) {
+      // because the length of the timestamp is 8
       secondaryIdLength -= 8;
     }
     if (visibilityEnabled) {
+      // boolean has a length of 1
       secondaryIdLength--;
     }
     final byte[] secondaryId = new byte[secondaryIdLength];

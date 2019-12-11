@@ -19,8 +19,7 @@ public interface MetadataWriter extends AutoCloseable {
   /**
    * Write metadata to the table.
    *
-   * Preconditions:
-   * <ul> <li>The writer is not closed</li> </ul>
+   * Preconditions: <ul> <li>The writer is not closed</li> </ul>
    *
    * @param metadata The metadata.
    */
@@ -30,8 +29,7 @@ public interface MetadataWriter extends AutoCloseable {
    * Flush the writer, committing all pending writes. Note that the writes may already be committed
    * - this method just establishes that they *must* be committed after the method returns.
    *
-   * Preconditions:
-   * <ul> <li>The writer is not closed</li> </ul>
+   * Preconditions: <ul> <li>The writer is not closed</li> </ul>
    */
   void flush();
 }
