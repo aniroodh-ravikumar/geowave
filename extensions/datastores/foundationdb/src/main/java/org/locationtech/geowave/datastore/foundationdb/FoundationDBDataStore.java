@@ -17,7 +17,6 @@ import java.io.Closeable;
 import java.io.IOException;
 
 public class FoundationDBDataStore extends BaseMapReduceDataStore implements Closeable {
-  // TODO: implement FoundationDBOperations
   public FoundationDBDataStore(
       final MapReduceDataStoreOperations operations,
       final DataStoreOptions options) {

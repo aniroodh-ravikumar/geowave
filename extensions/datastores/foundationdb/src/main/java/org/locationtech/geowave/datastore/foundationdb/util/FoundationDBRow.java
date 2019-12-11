@@ -20,6 +20,18 @@ public class FoundationDBRow extends MergeableGeoWaveRow implements GeoWaveRow {
   private final byte[] dataId;
   private final short duplicates;
 
+  /**
+   * Represents a row of entries in a FoundationDB database.
+   * 
+   * @param adapterId The adapterID corresponding to the row.
+   * @param partition The index of the partition in this row.
+   * @param key The key in the FDB corresponding to this row.
+   * @param value The value stored in the FDB for this row.
+   * @param containsTimestamp A Boolean that represents whether or not this row contains a
+   *        timestamp. If so, otherBytes is increased by 8 to store this information.
+   * @param visibilityEnabled A Boolean that represents whether or not visibility is enabled for
+   *        this row, which is filtered accordingly.
+   */
   public FoundationDBRow(
       final short adapterId,
       final byte[] partition,
@@ -98,6 +110,13 @@ public class FoundationDBRow extends MergeableGeoWaveRow implements GeoWaveRow {
     }
   }
 
+  /**
+   * Merges an additional FoundationDBRow into the mergedKeys field of the FoundationDBRow object,
+   * if the row param is an instance of FoundationDBRow
+   * 
+   * @param row The row to be merged. Needs to be an instance of FoundationDBRow if it is to be
+   *        merged.
+   */
   @Override
   public void mergeRow(final MergeableGeoWaveRow row) {
     super.mergeRow(row);
