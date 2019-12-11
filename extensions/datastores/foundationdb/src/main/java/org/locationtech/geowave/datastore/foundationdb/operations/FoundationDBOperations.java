@@ -19,8 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class provides an interface for creating instances of classes used to execute FoundationDB
- * operations.
+ * This class provides an interface for creating instances of classes used to execute FoundationDB operations.
  */
 public class FoundationDBOperations implements MapReduceDataStoreOperations, Closeable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBOperations.class);
