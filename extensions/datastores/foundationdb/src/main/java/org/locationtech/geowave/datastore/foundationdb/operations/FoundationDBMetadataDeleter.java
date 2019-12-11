@@ -41,7 +41,7 @@ public class FoundationDBMetadataDeleter implements MetadataDeleter {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() {
     // guard against repeated calls to close
     if (!closed) {
       flush();

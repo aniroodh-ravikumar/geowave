@@ -42,23 +42,19 @@ public class FoundationDBMetadataReader implements MetadataReader {
       resultsIt = originalResults;
     }
     if (query.hasPrimaryId() || query.hasSecondaryId()) {
-      resultsIt = Iterators.filter(resultsIt, new Predicate<GeoWaveMetadata>() {
-
-        @Override
-        public boolean apply(final GeoWaveMetadata input) {
-          if (query.hasPrimaryId()
-              && !DataStoreUtils.startsWithIfStats(
-                  input.getPrimaryId(),
-                  query.getPrimaryId(),
-                  metadataType)) {
-            return false;
-          }
-          if (query.hasSecondaryId()
-              && !Arrays.equals(input.getSecondaryId(), query.getSecondaryId())) {
-            return false;
-          }
-          return true;
+      resultsIt = Iterators.filter(resultsIt, input -> {
+        if (query.hasPrimaryId()
+            && !DataStoreUtils.startsWithIfStats(
+                input.getPrimaryId(),
+                query.getPrimaryId(),
+                metadataType)) {
+          return false;
         }
+        if (query.hasSecondaryId()
+            && !Arrays.equals(input.getSecondaryId(), query.getSecondaryId())) {
+          return false;
+        }
+        return true;
       });
     }
     final boolean isStats = MetadataType.STATS.equals(metadataType) && mergeStats;
