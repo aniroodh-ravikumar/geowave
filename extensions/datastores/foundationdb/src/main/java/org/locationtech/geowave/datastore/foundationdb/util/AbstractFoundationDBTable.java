@@ -12,8 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides an interface for dealing with a FoundationDB table. Any code that needs to perform table operations should
- * use an instance of this class, rather than calling FDB operations directly. This class is thread-safe.
+ * Provides an interface for dealing with a FoundationDB table. Any code that needs to perform table
+ * operations should use an instance of this class, rather than calling FDB operations directly.
+ * This class is thread-safe.
  */
 abstract public class AbstractFoundationDBTable {
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFoundationDBTable.class);
@@ -43,15 +44,13 @@ abstract public class AbstractFoundationDBTable {
    *
    * Preconditions:
    *
-   * <ul>
-   *     <li>The FDB instance must not be closed.</li>
-   * </ul>
+   * <ul> <li>The FDB instance must not be closed.</li> </ul>
    *
    * @param adapterId TODO
    * @param visibilityEnabled TODO
-   * @param batchSize The number of rows to write at a time. If this is greater than 1, the table is created with
-   *                  batch-write mode enabled. Otherwise, every write will immediately be persisted to the DB. This
-   *                  field may not be less than 1.
+   * @param batchSize The number of rows to write at a time. If this is greater than 1, the table is
+   *        created with batch-write mode enabled. Otherwise, every write will immediately be
+   *        persisted to the DB. This field may not be less than 1.
    * @param db The FDB instance.
    */
   public AbstractFoundationDBTable(
@@ -72,9 +71,7 @@ abstract public class AbstractFoundationDBTable {
    *
    * Preconditions:
    *
-   * <ul>
-   *     <li>The table must not be closed.</li>
-   * </ul>
+   * <ul> <li>The table must not be closed.</li> </ul>
    *
    * @param key The key.
    */
@@ -88,16 +85,14 @@ abstract public class AbstractFoundationDBTable {
   }
 
   /**
-   * Write a key-value pair to the table. If the table is in batch-write mode, the write may not be persisted
-   * immediately - that will happen when the write queue is flushed, which occurs when its size reaches the batch write
-   * size. If the table is not in batch-write mode (equivalent to the batch write size being 1), the write is
-   * persisted immediately.
+   * Write a key-value pair to the table. If the table is in batch-write mode, the write may not be
+   * persisted immediately - that will happen when the write queue is flushed, which occurs when its
+   * size reaches the batch write size. If the table is not in batch-write mode (equivalent to the
+   * batch write size being 1), the write is persisted immediately.
    *
    * Preconditions:
    *
-   * <ul>
-   *     <li>The table must not be closed.</li>
-   * </ul>
+   * <ul> <li>The table must not be closed.</li> </ul>
    *
    * @param key The key.
    * @param value The value.
@@ -156,7 +151,8 @@ abstract public class AbstractFoundationDBTable {
   }
 
   /**
-   * Flush any pending writes, and close the database if reads are dirty (i.e. if any writes or deletes have occurred).
+   * Flush any pending writes, and close the database if reads are dirty (i.e. if any writes or
+   * deletes have occurred).
    */
   @SuppressFBWarnings(
       justification = "The null check outside of the synchronized block is intentional to minimize the need for synchronization.")
