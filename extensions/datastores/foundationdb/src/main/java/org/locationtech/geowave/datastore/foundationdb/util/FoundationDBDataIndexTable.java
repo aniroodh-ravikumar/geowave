@@ -30,6 +30,7 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
 
   /**
    * Adds a new entry to the DataIndexTable.
+   * 
    * @param dataId The dataId of the entry to be added.
    * @param value The value of the entry to be added.
    */
@@ -38,8 +39,9 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
   }
 
   /**
-   * Creates a new dataIndexIterator given an array of rows of entries, or a
-   * 2D array of dataIds. The result is wrapped into a CloseableIterator.
+   * Creates a new dataIndexIterator given an array of rows of entries, or a 2D array of dataIds.
+   * The result is wrapped into a CloseableIterator.
+   * 
    * @param dataIds The rows to bee added to the iterator.
    * @return The new CloseableIterator object created.
    */
@@ -76,8 +78,9 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
   }
 
   /**
-   * Creates a new dataIndexIterator give a start and end Id. The result is
-   * wrapped into a CloseableIterator.
+   * Creates a new dataIndexIterator give a start and end Id. The result is wrapped into a
+   * CloseableIterator.
+   * 
    * @param startDataId The startId of the iterator to be created.
    * @param endDataId The endId of the iterator to be created.
    * @return The new CloseableIterator object created.
