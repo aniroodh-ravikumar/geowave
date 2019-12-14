@@ -67,7 +67,6 @@ public class FoundationDBLocal {
   private Database db;
 
   public FoundationDBLocal(final String host, final int port, final String localDir) {
-    LOGGER.warn("In init of FDBLocal");
     this.host = host;
     this.port = port;
     if (TestUtils.isSet(localDir)) {
@@ -137,9 +136,7 @@ public class FoundationDBLocal {
   }
 
   private void startFDBServer() throws InterruptedException {
-    LOGGER.warn("isInstalled: " + isInstalled());
     if (!isInstalled()) {
-      LOGGER.warn("NOT INSTALLED; EXITING");
       return;
     }
     if (!foundationDBDir.exists() && !foundationDBDir.mkdirs()) {
@@ -169,12 +166,9 @@ public class FoundationDBLocal {
     executeCommand(status, false);
 
     Thread.sleep(STARTUP_DELAY_MS);
-
-    LOGGER.warn("FINISHED STARTUP!");
   }
 
   private void executeCommand(final CommandLine command, final boolean shouldExecuteAsync) {
-    LOGGER.warn("Running command: {}", String.join(" ", command.toStrings()));
     try {
       final ExecuteWatchdog watchdog = new ExecuteWatchdog(ExecuteWatchdog.INFINITE_TIMEOUT);
       final DefaultExecutor executor = new DefaultExecutor();
@@ -214,8 +208,6 @@ public class FoundationDBLocal {
 
   private void installPackageFromURL(final String repoURL, final String packageName)
       throws IOException {
-    LOGGER.info("Installing {}", packageName);
-    LOGGER.warn("Downloading package {}", packageName);
     final File packageFile = new File(foundationLocalDir, packageName);
     if (!packageFile.exists()) {
       HttpURLConnection.setFollowRedirects(true);
@@ -248,7 +240,6 @@ public class FoundationDBLocal {
       }
     }
 
-    LOGGER.warn("Extracting FDB debian package data contents");
     final TarGZipUnArchiver unarchiver = new TarGZipUnArchiver();
     unarchiver.enableLogging(new ConsoleLogger(Logger.WARN, "FDB Local Unarchive " + debPackage));
     unarchiver.setSourceFile(debDataTarGz);
@@ -264,10 +255,7 @@ public class FoundationDBLocal {
 
   private boolean install() throws IOException, ArchiveException {
     String osName = System.getProperty("os.name").toLowerCase();
-    LOGGER.warn("Running on OS: " + osName);
-    LOGGER.warn("Installing");
     if (osName.indexOf("mac") >= 0) { // Running macOS
-      LOGGER.warn("INSTALLING MACOS");
       try {
         LOGGER.warn("Downloading FDB client and server package");
         installPackageFromURL(FDB_MACOS_REPO_URL, FDB_MACOS_PACKAGE);
