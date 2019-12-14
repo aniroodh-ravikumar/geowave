@@ -119,6 +119,11 @@ public class FoundationDBQueryExecution<T> {
         groupByRowAndSortByTimePair.getRight());
   }
 
+  /**
+   * Traverse through all the SinglePartitionQueryRanges and return the executed query result
+   * 
+   * @return CloseableIterator<T>
+   */
   public CloseableIterator<T> results() {
     final List<RangeReadInfo> reads = new ArrayList<>();
     for (final SinglePartitionQueryRanges r : ranges) {
@@ -129,6 +134,13 @@ public class FoundationDBQueryExecution<T> {
     return executeQuery(reads);
   }
 
+  /**
+   * Execute the given query and return the results. It steps through the list and get the
+   * LoadingCache for each partitionKey
+   * 
+   * @param reads
+   * @return CloseableIterator<T>
+   */
   public CloseableIterator<T> executeQuery(final List<RangeReadInfo> reads) {
     if (isSortFinalResultsBySortKey) {
       // order the reads by sort keys
@@ -151,6 +163,13 @@ public class FoundationDBQueryExecution<T> {
     }, Iterators.concat(iterators.iterator())));
   }
 
+  /**
+   * Transform and filter from a closeable iterator of GeoWaveRow to a generic closeable iterator.
+   * The filter and other conditions are defined in the constructor.
+   * 
+   * @param result
+   * @return CloseableIterator<T>
+   */
   private CloseableIterator<T> transformAndFilter(final CloseableIterator<GeoWaveRow> result) {
     final Iterator<GeoWaveRow> iterator = Streams.stream(result).filter(filter).iterator();
     return new CloseableIteratorWrapper<>(
@@ -161,6 +180,13 @@ public class FoundationDBQueryExecution<T> {
                 rowMerging ? new GeoWaveRowMergingIterator(iterator) : iterator)));
   }
 
+  /**
+   * Return a sorted-by-key iterator if isRequired is true
+   * 
+   * @param isRequired
+   * @param it
+   * @return Iterator<GeoWaveRow>
+   */
   private static Iterator<GeoWaveRow> sortByKeyIfRequired(
       final boolean isRequired,
       final Iterator<GeoWaveRow> it) {

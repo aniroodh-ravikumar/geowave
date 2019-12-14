@@ -1,7 +1,6 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.Database;
-import com.apple.foundationdb.FDB;
 import com.apple.foundationdb.FDBException;
 import com.apple.foundationdb.KeyValue;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -11,6 +10,11 @@ import java.util.concurrent.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Provides an interface for dealing with a FoundationDB table. Any code that needs to perform table
+ * operations should use an instance of this class, rather than calling FDB operations directly.
+ * This class is thread-safe.
+ */
 abstract public class AbstractFoundationDBTable {
   private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFoundationDBTable.class);
   private static final int BATCH_WRITE_THREAD_SIZE = 16;
@@ -34,6 +38,20 @@ abstract public class AbstractFoundationDBTable {
   private final boolean batchWrite;
   protected boolean readerDirty = false;
 
+  /**
+   * Create a FDB table using a given FDB instance. Batch-writes can be enabled if needed.
+   *
+   * Preconditions:
+   *
+   * <ul> <li>The FDB instance must not be closed.</li> </ul>
+   *
+   * @param adapterId TODO
+   * @param visibilityEnabled TODO
+   * @param batchSize The number of rows to write at a time. If this is greater than 1, the table is
+   *        created with batch-write mode enabled. Otherwise, every write will immediately be
+   *        persisted to the DB. This field may not be less than 1.
+   * @param db The FDB instance.
+   */
   public AbstractFoundationDBTable(
       final short adapterId,
       final boolean visibilityEnabled,
@@ -47,6 +65,15 @@ abstract public class AbstractFoundationDBTable {
     this.db = db;
   }
 
+  /**
+   * Delete an entry from the table, identified by the key. The deletion is flushed immediately.
+   *
+   * Preconditions:
+   *
+   * <ul> <li>The table must not be closed.</li> </ul>
+   *
+   * @param key The key.
+   */
   public void delete(final byte[] key) {
     Database db = getDb();
     readerDirty = true;
@@ -56,6 +83,19 @@ abstract public class AbstractFoundationDBTable {
     });
   }
 
+  /**
+   * Write a key-value pair to the table. If the table is in batch-write mode, the write may not be
+   * persisted immediately - that will happen when the write queue is flushed, which occurs when its
+   * size reaches the batch write size. If the table is not in batch-write mode (equivalent to the
+   * batch write size being 1), the write is persisted immediately.
+   *
+   * Preconditions:
+   *
+   * <ul> <li>The table must not be closed.</li> </ul>
+   *
+   * @param key The key.
+   * @param value The value.
+   */
   @SuppressFBWarnings(
       justification = "The null check outside of the synchronized block is intentional to minimize the need for synchronization.")
   protected void put(final byte[] key, final byte[] value) {
@@ -92,6 +132,9 @@ abstract public class AbstractFoundationDBTable {
     }
   }
 
+  /**
+   * Flush the write queue, persisting all pending writes.
+   */
   private void flushWriteQueue() {
     try {
       writeSemaphore.acquire();
@@ -106,6 +149,10 @@ abstract public class AbstractFoundationDBTable {
     currentBatch = null;
   }
 
+  /**
+   * Flush any pending writes, and close the database if reads are dirty (i.e. if any writes or
+   * deletes have occurred).
+   */
   @SuppressFBWarnings(
       justification = "The null check outside of the synchronized block is intentional to minimize the need for synchronization.")
   public void flush() {
@@ -155,6 +202,11 @@ abstract public class AbstractFoundationDBTable {
     }
   }
 
+  /**
+   * Get the associated {@link Database} instance.
+   *
+   * @return The current FDB instance.
+   */
   protected Database getDb() {
     return this.db;
   }

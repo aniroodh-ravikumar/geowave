@@ -25,9 +25,7 @@ import org.locationtech.geowave.core.store.operations.MetadataType;
 import org.locationtech.geowave.core.store.operations.RangeReaderParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.File;
 import java.io.Serializable;
-import java.util.stream.Collectors;
 
 public class FoundationDBUtils {
 

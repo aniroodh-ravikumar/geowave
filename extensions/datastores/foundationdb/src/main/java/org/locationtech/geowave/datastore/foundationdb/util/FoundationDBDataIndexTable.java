@@ -1,14 +1,12 @@
 package org.locationtech.geowave.datastore.foundationdb.util;
 
 import com.apple.foundationdb.Database;
-import com.apple.foundationdb.KeySelector;
 import com.apple.foundationdb.KeyValue;
 import com.apple.foundationdb.async.AsyncIterable;
 import com.apple.foundationdb.async.AsyncIterator;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import com.apple.foundationdb.tuple.Tuple;
 import org.locationtech.geowave.core.store.CloseableIterator;
 import org.locationtech.geowave.core.store.base.dataidx.DataIndexUtils;
 import org.locationtech.geowave.core.store.entities.GeoWaveRow;
@@ -18,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
   private static final Logger LOGGER = LoggerFactory.getLogger(FoundationDBDataIndexTable.class);
-  private Database db;
 
   public FoundationDBDataIndexTable(
       final short adapterId,
@@ -28,10 +25,23 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
     super(adapterId, visibilityEnabled, batchSize, db);
   }
 
+  /**
+   * Adds a new entry to the DataIndexTable.
+   * 
+   * @param dataId The dataId of the entry to be added.
+   * @param value The value of the entry to be added.
+   */
   public synchronized void add(final byte[] dataId, final GeoWaveValue value) {
     put(dataId, DataIndexUtils.serializeDataIndexValue(value, visibilityEnabled));
   }
 
+  /**
+   * Creates a new dataIndexIterator given an array of rows of entries, or a 2D array of dataIds.
+   * The result is wrapped into a CloseableIterator.
+   * 
+   * @param dataIds The rows to bee added to the iterator.
+   * @return The new CloseableIterator object created.
+   */
   public CloseableIterator<GeoWaveRow> dataIndexIterator(final byte[][] dataIds) {
     Database db = getDb();
     if (db == null) {
@@ -64,6 +74,14 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
     return null;
   }
 
+  /**
+   * Creates a new dataIndexIterator give a start and end Id. The result is wrapped into a
+   * CloseableIterator.
+   * 
+   * @param startDataId The startId of the iterator to be created.
+   * @param endDataId The endId of the iterator to be created.
+   * @return The new CloseableIterator object created.
+   */
   public CloseableIterator<GeoWaveRow> dataIndexIterator(
       final byte[] startDataId,
       final byte[] endDataId) {
@@ -73,11 +91,12 @@ public class FoundationDBDataIndexTable extends AbstractFoundationDBTable {
     }
 
     AsyncIterator<KeyValue> iterator = db.run(tr -> {
-      final byte[] start = Tuple.from("").pack();
-      final byte[] end = Tuple.from("0xff").pack();
-      AsyncIterable<KeyValue> iterable = tr.getRange(start, end);
+      // final byte[] start = Tuple.from("").pack();
+      // final byte[] end = Tuple.from("0xff").pack();
+      AsyncIterable<KeyValue> iterable = tr.getRange(startDataId, endDataId);
       return iterable.iterator();
     });
+
     return new FoundationDBDataIndexRowIterator(iterator, adapterId, visibilityEnabled);
   }
 }
