@@ -37,8 +37,10 @@ public class FoundationDBStoreTestEnvironment extends StoreTestEnvironment {
 
   @Override
   public void setup() throws Exception {
+    LOGGER.warn("IN SETUP");
     if (fdbLocal == null) {
-      fdbLocal = new FoundationDBLocal(DEFAULT_HOST, DEFAULT_PORT);
+      LOGGER.warn("IN SETUP: MAKING NEW LOCAL");
+      fdbLocal = new FoundationDBLocal(DEFAULT_HOST, DEFAULT_PORT, null);
     }
 
     // Make sure we clean up any old processes first
